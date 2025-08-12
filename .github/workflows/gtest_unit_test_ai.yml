@@ -105,18 +105,47 @@ jobs:
             for modified_file in "${modified_files[@]}"; do
               base_name=$(basename "$modified_file" | sed 's/\.[^.]*$//')
               
-              # Look for test files that might test this file
+              # Method 1: Direct name matching (e.g., Calculator.cpp -> CalculatorTest.cpp)
               matching_tests=$(grep -i "${base_name}" found_test_files.txt 2>/dev/null || true)
               
-              # Look for includes of the modified file in test files
+              # Method 2: Look for includes of the modified file in test files
               include_tests=""
               if [ -f "$modified_file" ]; then
                 include_name=$(basename "$modified_file")
                 include_tests=$(find src/app/tests -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -exec grep -l "#include.*${include_name}" {} \; 2>/dev/null || true)
               fi
               
-              # Combine results
-              all_tests=$(echo -e "$matching_tests\n$include_tests" | sort -u | grep -v '^$' || true)
+              # Method 3: Look for partial name matches and common patterns
+              # e.g., ClosureManager.cpp -> TestClosureControlConformance.cpp
+              partial_tests=""
+              if [ ${#base_name} -gt 3 ]; then
+                # Extract key parts of the filename (remove common suffixes/prefixes)
+                clean_name=$(echo "$base_name" | sed -e 's/Manager$//' -e 's/Handler$//' -e 's/Controller$//' -e 's/Service$//')
+                
+                # Look for test files containing key parts of the name
+                if [ ${#clean_name} -gt 3 ]; then
+                  partial_tests=$(grep -i "${clean_name}" found_test_files.txt 2>/dev/null || true)
+                fi
+              fi
+              
+              # Method 4: Content-based matching - look for class/function names from modified file in test files
+              content_tests=""
+              if [ -f "$modified_file" ] && [[ "$modified_file" == *.cpp || "$modified_file" == *.cc || "$modified_file" == *.cxx ]]; then
+                # Extract class names from the modified file
+                class_names=$(grep -E "^class\s+\w+|^struct\s+\w+" "$modified_file" 2>/dev/null | sed -E 's/^(class|struct)\s+([A-Za-z_][A-Za-z0-9_]*).*/\2/' || true)
+                
+                if [ -n "$class_names" ]; then
+                  while IFS= read -r class_name; do
+                    if [ -n "$class_name" ] && [ ${#class_name} -gt 2 ]; then
+                      class_tests=$(find src/app/tests -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -exec grep -l "$class_name" {} \; 2>/dev/null || true)
+                      content_tests=$(echo -e "$content_tests\n$class_tests" | sort -u | grep -v '^$' || true)
+                    fi
+                  done <<< "$class_names"
+                fi
+              fi
+              
+              # Combine and deduplicate all results
+              all_tests=$(echo -e "$matching_tests\n$include_tests\n$partial_tests\n$content_tests" | sort -u | grep -v '^$' || true)
               
               if [ -n "$all_tests" ]; then
                 files_with_tests=$((files_with_tests + 1))
