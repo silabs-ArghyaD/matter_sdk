@@ -110,13 +110,13 @@ sl_net_wifi_lwip_context_t wifi_client_context;
 #endif // SLI_SI91X_LWIP_HOSTED_NETWORK_STACK
 sl_wifi_security_t security = SL_WIFI_SECURITY_UNKNOWN;
 
-// TODO : Temporary work-around for wifi-init failure in 917NCP ACX module board(BRD4357A). Can be removed after
-// Wiseconnect fixes region code for all ACX module boards.
-#ifdef ACX_MODULE_BOARD
-#define REGION_CODE IGNORE_REGION
-#else
+// The REGION_CODE macro defines the regulatory region for the Wi-Fi device.
+// The default value is 'US'. Users can override this macro to specify a different region code.
+// The region code must match one of the values defined in the 'sl_wifi_region_code_t' enum,
+// which is located in 'wifi-sdk/inc/sl_wifi_constants.h'. Example values include US, EU, JP, etc.
+#ifndef REGION_CODE
 #define REGION_CODE US
-#endif // ACX_MODULE_BOARD
+#endif // !def REGION_CODE
 
 const sl_wifi_device_configuration_t config = {
     .boot_option = LOAD_NWP_FW,
@@ -449,9 +449,9 @@ sl_status_t JoinCallback(sl_wifi_event_t event, char * result, uint32_t resultLe
     ChipLogDetail(DeviceLayer, "JoinCallback: success");
     memset(&temp_reset, 0, sizeof(temp_reset));
 
-    WifiEvent wifievent = WifiEvent::kStationConnect;
-    sl_matter_wifi_post_event(wifievent);
     wfx_rsi.join_retries = 0;
+    WifiEvent wifievent  = WifiEvent::kStationConnect;
+    sl_matter_wifi_post_event(wifievent);
     return status;
 }
 sl_status_t JoinWifiNetwork(void)
@@ -477,8 +477,8 @@ sl_status_t JoinWifiNetwork(void)
         // Remove High performance request that might have been added during the connect/retry process
         chip::DeviceLayer::Silabs::WifiSleepManager::GetInstance().RemoveHighPerformanceRequest();
 #endif // CHIP_CONFIG_ENABLE_ICD_SERVER
-
-        WifiEvent event = WifiEvent::kStationConnect;
+        wfx_rsi.join_retries = 0;
+        WifiEvent event      = WifiEvent::kStationConnect;
         sl_matter_wifi_post_event(event);
         return status;
     }
