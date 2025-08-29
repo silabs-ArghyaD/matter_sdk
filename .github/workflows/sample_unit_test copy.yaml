@@ -260,8 +260,10 @@ jobs:
 
       - name: "Build & Generate Coverage (GN/Ninja)"
         run: |
-#          set -euo pipefail
+          set -euo pipefail
+          set +u
           source scripts/activate.sh
+          set -u
           gn gen out/coverage --args='use_coverage=true'
           ninja -C out/coverage check -k 0
 
