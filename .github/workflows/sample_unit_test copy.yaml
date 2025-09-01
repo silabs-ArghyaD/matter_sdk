@@ -23,6 +23,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: "Install jq"
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -120,6 +123,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: "Set up Python"
         uses: actions/setup-python@v4
@@ -197,50 +203,49 @@ jobs:
             echo "test-files=" >> $GITHUB_OUTPUT
           fi
 
-#      - name: "Validate Existing GTest Unit Tests"
-#        if: steps.mapping.outputs.has-mappings == 'true'
-#        env:
-#          LITELLM_TOKEN: ${{ secrets.LITELLM_TOKEN }}
-#          TEST_FILES: ${{ steps.mapping.outputs.test-files }}
-#        run: |
-#          set -euo pipefail
-#          echo "=== Validating Existing GTest Unit Tests ==="
-#
-#          if [ -z "$TEST_FILES" ]; then
-#            echo "No test files to validate"
-#            exit 0
-#          fi
-#
-#          # Convert comma-separated test files to array
-#          IFS=',' read -ra test_files <<< "$TEST_FILES"
-#
-#          # Initialize validation results file
-#          echo "=== Unit Test Validation Results ===" > validation_results.txt
-#          echo "" >> validation_results.txt
-#
-#          # Validate each test file
-#          for test_file in "${test_files[@]}"; do
-#            [ -z "$test_file" ] && continue
-#            
-#            echo "Validating: $test_file"
-#            
-#            # Run validation and capture result
-#            if python3 internal/silabs/ai_unit_test/validate_with_litellm.py "$test_file" >> validation_results.txt 2>&1; then
-#              echo "✅ Validation completed for: $test_file"
-#            else
-#              echo "⚠️ Validation had issues for: $test_file"
-#            fi
-#            
-#            echo "" >> validation_results.txt
-#            echo "---" >> validation_results.txt
-#            echo "" >> validation_results.txt
-#          done
-#
-#          # Display all validation results
-#          echo ""
-#          echo "=== COMPLETE VALIDATION RESULTS ==="
-#          cat validation_results.txt
-
+  #      - name: "Validate Existing GTest Unit Tests"
+  #        if: steps.mapping.outputs.has-mappings == 'true'
+  #        env:
+  #          LITELLM_TOKEN: ${{ secrets.LITELLM_TOKEN }}
+  #          TEST_FILES: ${{ steps.mapping.outputs.test-files }}
+  #        run: |
+  #          set -euo pipefail
+  #          echo "=== Validating Existing GTest Unit Tests ==="
+  #
+  #          if [ -z "$TEST_FILES" ]; then
+  #            echo "No test files to validate"
+  #            exit 0
+  #          fi
+  #
+  #          # Convert comma-separated test files to array
+  #          IFS=',' read -ra test_files <<< "$TEST_FILES"
+  #
+  #          # Initialize validation results file
+  #          echo "=== Unit Test Validation Results ===" > validation_results.txt
+  #          echo "" >> validation_results.txt
+  #
+  #          # Validate each test file
+  #          for test_file in "${test_files[@]}"; do
+  #            [ -z "$test_file" ] && continue
+  #
+  #            echo "Validating: $test_file"
+  #
+  #            # Run validation and capture result
+  #            if python3 internal/silabs/ai_unit_test/validate_with_litellm.py "$test_file" >> validation_results.txt 2>&1; then
+  #              echo "✅ Validation completed for: $test_file"
+  #            else
+  #              echo "⚠️ Validation had issues for: $test_file"
+  #            fi
+  #
+  #            echo "" >> validation_results.txt
+  #            echo "---" >> validation_results.txt
+  #            echo "" >> validation_results.txt
+  #          done
+  #
+  #          # Display all validation results
+  #          echo ""
+  #          echo "=== COMPLETE VALIDATION RESULTS ==="
+  #          cat validation_results.txt
 
   code-coverage-analysis:
     name: "Code Coverage Analysis"
@@ -251,6 +256,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: "Install lcov"
         run: |
@@ -262,7 +270,7 @@ jobs:
         run: |
           set -euo pipefail
           set +u
-          source scripts/activate.sh
+          source scripts/bootstrap.sh
           set -u
           gn gen out/coverage --args='use_coverage=true'
           ninja -C out/coverage check -k 0
@@ -335,7 +343,6 @@ jobs:
             echo "::error::Code coverage (${PCT}%) is below required threshold (${REQUIRED_COVERAGE:-0}%)"
             exit 1
           fi
-
 
 # - name: "Post Code Coverage Comment on PR"
 #   if: always()
