@@ -251,10 +251,9 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
 
-      - name: "Initialize Pigweed submodule"
+      - name: "Initialize required submodules"
         run: |
-          git submodule update --init third_party/pigweed
-          git submodule update --init third_party/openthread
+          ./scripts/checkout_submodules.py --shallow --platform linux
 
       - name: "Install lcov"
         run: |
