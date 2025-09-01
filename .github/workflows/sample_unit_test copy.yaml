@@ -260,6 +260,7 @@ jobs:
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y lcov
+          sudo apt-get install -y libglib2.0-dev-bin
 
       - name: "Build & Generate Coverage (GN/Ninja)"
         env:
