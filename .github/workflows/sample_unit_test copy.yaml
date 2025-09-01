@@ -23,9 +23,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-#          fetch-depth: 0
 
       - name: "Install jq"
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -123,9 +120,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
- #         fetch-depth: 0
 
       - name: "Set up Python"
         uses: actions/setup-python@v4
@@ -256,9 +250,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-  #        fetch-depth: 0
+
+      - name: "Initialize Pigweed submodule"
+        run: git submodule update --init third_party/pigweed
 
       - name: "Install lcov"
         run: |
