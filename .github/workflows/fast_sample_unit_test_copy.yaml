@@ -201,89 +201,88 @@ jobs:
       - name: "Filter & Report Coverage"
         if: env.HAS_TEST_MAPPINGS == 'true'
         run: |
-            set -euo pipefail
-            echo "=== Coverage Analysis ==="
-            echo "Required Coverage: ${REQUIRED_COVERAGE:-}%"
-            echo "Test Files: ${TEST_FILES:-}"
-            echo "CPP Files: ${CPP_FILES:-}"
+          set -euo pipefail
+          echo "=== Coverage Analysis ==="
+          echo "Required Coverage: ${REQUIRED_COVERAGE:-}%"
+          echo "Test Files: ${TEST_FILES:-}"
+          echo "CPP Files: ${CPP_FILES:-}"
 
-            mkdir -p out/coverage/coverage
+          mkdir -p out/coverage/coverage
 
-            trace_in="out/coverage/coverage/lcov_final.info"
-            trace_filtered="out/coverage/coverage/lcov_filtered.info"
-            html_dir="out/coverage/coverage/html_filtered"
-            html_full="out/coverage/coverage/html"
+          trace_in="out/coverage/coverage/lcov_final.info"
+          trace_filtered="out/coverage/coverage/lcov_filtered.info"
+          html_dir="out/coverage/coverage/html_filtered"
+          html_full="out/coverage/coverage/html"
 
-            if [[ ! -s "$trace_in" ]]; then
-               echo "::error::Missing or empty tracefile: $trace_in"
-               exit 1
-            fi
+          if [[ ! -s "$trace_in" ]]; then
+             echo "::error::Missing or empty tracefile: $trace_in"
+             exit 1
+          fi
 
-            # Prepare patterns from changed files
-            echo "${CPP_FILES:-}" | tr ',' '\n' | sed '/^\s*$/d' > changed_files.txt || true
-            echo "=== Changed files (for filtering) ==="
-            cat changed_files.txt || true
+          # Prepare patterns from changed files
+          echo "${CPP_FILES:-}" | tr ',' '\n' | sed '/^\s*$/d' > changed_files.txt || true
+          echo "=== Changed files (for filtering) ==="
+          cat changed_files.txt || true
 
-            # Build lcov extract patterns (match by suffix path)
-            mapfile -t patterns < <(awk '{print "*/"$0}' changed_files.txt 2>/dev/null || true)
+          # Build lcov extract patterns (match by suffix path)
+          mapfile -t patterns < <(awk '{print "*/"$0}' changed_files.txt 2>/dev/null || true)
 
-            # Preflight: do any of the changed basenames appear in the trace?
-            should_filter=false
-            if [[ -s changed_files.txt && ${#patterns[@]} -gt 0 ]]; then
-               while IFS= read -r f; do
-                  b="$(basename "$f")"
-                  if grep -Fq "/$b" "$trace_in"; then
-                     should_filter=true
-                     break
-                  fi
-               done < changed_files.txt
-            fi
+          # Preflight: do any of the changed basenames appear in the trace?
+          should_filter=false
+          if [[ -s changed_files.txt && ${#patterns[@]} -gt 0 ]]; then
+             while IFS= read -r f; do
+                b="$(basename "$f")"
+                if grep -Fq "/$b" "$trace_in"; then
+                   should_filter=true
+                   break
+                fi
+             done < changed_files.txt
+          fi
 
-            if $should_filter; then
-               echo "Filtering coverage to changed files..."
-               # Allow empty results without hard failing; fall back to full trace if empty.
-               if lcov --extract "$trace_in" "${patterns[@]}" -o "$trace_filtered" --ignore-errors empty; then
-                  if [[ ! -s "$trace_filtered" ]] || ! grep -q '^SF:' "$trace_filtered"; then
-                     echo "No matching records after filter; falling back to full trace."
-                     cp "$trace_in" "$trace_filtered"
-                  fi
-               else
-                  echo "lcov --extract failed; falling back to full trace."
-                  cp "$trace_in" "$trace_filtered"
-               fi
+          if $should_filter; then
+             echo "Filtering coverage to changed files..."
+             # Allow empty results without hard failing; fall back to full trace if empty.
+             if lcov --extract "$trace_in" "${patterns[@]}" -o "$trace_filtered" --ignore-errors empty; then
+                if [[ ! -s "$trace_filtered" ]] || ! grep -q '^SF:' "$trace_filtered"; then
+                   echo "No matching records after filter; falling back to full trace."
+                   cp "$trace_in" "$trace_filtered"
+                fi
+             else
+                echo "lcov --extract failed; falling back to full trace."
+                cp "$trace_in" "$trace_filtered"
+             fi
 
-               genhtml "$trace_filtered" -o "$html_dir" || true
-               summary_src="$trace_filtered"
-            else
-               if [[ -s changed_files.txt ]]; then
-                  echo "None of the changed files appear in the trace; generating full coverage HTML..."
-               else
-                  echo "No changed files provided; generating full coverage HTML..."
-               fi
-               genhtml "$trace_in" -o "$html_full" || true
-               summary_src="$trace_in"
-            fi
+             genhtml "$trace_filtered" -o "$html_dir" || true
+             summary_src="$trace_filtered"
+          else
+             if [[ -s changed_files.txt ]]; then
+                echo "None of the changed files appear in the trace; generating full coverage HTML..."
+             else
+                echo "No changed files provided; generating full coverage HTML..."
+             fi
+             genhtml "$trace_in" -o "$html_full" || true
+             summary_src="$trace_in"
+          fi
 
-            echo "=== COVERAGE SUMMARY ===" | tee coverage_summary.txt
-            lcov --summary "$summary_src" | tee -a coverage_summary.txt || true
+          echo "=== COVERAGE SUMMARY ===" | tee coverage_summary.txt
+          lcov --summary "$summary_src" | tee -a coverage_summary.txt || true
 
-            # Extract overall line coverage percentage
-            PCT=$(lcov --summary "$summary_src" 2>/dev/null | awk '/lines/ {gsub("%","",$2); print $2; exit}')
-            PCT=${PCT:-0}
-            echo "Extracted Coverage: ${PCT}%"
+          # Extract overall line coverage percentage
+          PCT=$(lcov --summary "$summary_src" 2>/dev/null | awk '/lines/ {gsub("%","",$2); print $2; exit}')
+          PCT=${PCT:-0}
+          echo "Extracted Coverage: ${PCT}%"
 
-            # Store for potential PR comment
-            echo "ACTUAL_COVERAGE=$PCT" >> "$GITHUB_ENV"
+          # Store for potential PR comment
+          echo "ACTUAL_COVERAGE=$PCT" >> "$GITHUB_ENV"
 
-            # Enforce required coverage threshold
-            if awk -v p="$PCT" -v r="${REQUIRED_COVERAGE:-0}" 'BEGIN {exit (p+0<r+0)}'; then
-               echo "✅ Coverage requirement MET (${PCT}% >= ${REQUIRED_COVERAGE:-0}%)"
-            else
-               echo "❌ Coverage requirement NOT MET (${PCT}% < ${REQUIRED_COVERAGE:-0}%)"
-               echo "::error::Code coverage (${PCT}%) is below required threshold (${REQUIRED_COVERAGE:-0}%)"
-               exit 1
-            fi
-
+          # Enforce required coverage threshold
+          if awk -v p="$PCT" -v r="${REQUIRED_COVERAGE:-0}" 'BEGIN {exit (p+0<r+0)}'; then
+             echo "✅ Coverage requirement MET (${PCT}% >= ${REQUIRED_COVERAGE:-0}%)"
+          else
+             echo "❌ Coverage requirement NOT MET (${PCT}% < ${REQUIRED_COVERAGE:-0}%)"
+             echo "::error::Code coverage (${PCT}%) is below required threshold (${REQUIRED_COVERAGE:-0}%)"
+             exit 1
+          fi
 
       - name: "Summary Report"
         if: always() && env.HAS_CPP_FILES == 'true'
@@ -295,3 +294,100 @@ jobs:
           echo "Actual coverage: ${ACTUAL_COVERAGE:-0}%"
           echo "Files with tests: ${FILES_WITH_TESTS:-0}"
           echo "Test files found: $(echo "${TEST_FILES:-}" | tr ',' '\n' | sed '/^$/d' | wc -l)"
+
+      - name: "Post Summary Comment on PR"
+        if: always() && env.HAS_CPP_FILES == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const botUserId = 'github-actions[bot]';
+
+            // Delete previous bot comments
+            try {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+              });
+              
+              const botComments = comments.filter(comment => 
+                comment.user.login === botUserId && 
+                comment.body.includes('Unit Test Validator Summary')
+              );
+              
+              for (const comment of botComments) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: comment.id,
+                });
+                console.log(`Deleted previous bot comment: ${comment.id}`);
+              }
+            } catch (error) {
+              console.log('Error deleting previous comments:', error.message);
+            }
+
+            // Prepare summary data
+            const totalFiles = process.env.CPP_FILES ? process.env.CPP_FILES.split(',').filter(f => f.trim()).length : 0;
+            const totalChanges = process.env.TOTAL_CHANGES || '0';
+            const requiredCoverage = process.env.REQUIRED_COVERAGE || '0';
+            const actualCoverage = process.env.ACTUAL_COVERAGE || '0';
+            const filesWithTests = process.env.FILES_WITH_TESTS || '0';
+            const testFiles = process.env.TEST_FILES ? process.env.TEST_FILES.split(',').filter(f => f.trim()).length : 0;
+
+            // Determine status
+            const coverageMet = parseFloat(actualCoverage) >= parseFloat(requiredCoverage);
+            const statusIcon = coverageMet ? '✅' : '❌';
+            const statusText = coverageMet ? 'PASSED' : 'FAILED';
+
+            // Create comment body
+            const commentBody = `## Unit Test Validator Summary
+
+            **Status:** ${statusIcon} **${statusText}**
+
+            ### Coverage Analysis
+            | Metric | Value |
+            |--------|-------|
+            | **Required Coverage** | ${requiredCoverage}% |
+            | **Actual Coverage** | ${actualCoverage}% |
+            | **Coverage Status** | ${coverageMet ? '✅ Met requirement' : '❌ Below threshold'} |
+
+            ### File Analysis
+            | Metric | Count |
+            |--------|-------|
+            | **C/C++ Files Changed** | ${totalFiles} |
+            | **Lines Added** | ${totalChanges} |
+            | **Files with Tests** | ${filesWithTests} |
+            | **Test Files Found** | ${testFiles} |
+
+            ### Coverage Policy
+            ${parseInt(totalChanges) <= 10 ? 
+              'Minimal changes (≤10 lines) → Requires **100% coverage** for changed lines' : 
+              'Significant changes (>10 lines) → Requires **≥90% coverage** for changed lines'
+            }
+
+            ${!coverageMet ? `
+            ### Action Required
+            Code coverage is below the required threshold. Please:
+            1. Add unit tests for the modified code
+            2. Ensure existing tests cover the changes
+            3. Verify test quality and edge case coverage
+            ` : `
+            ### Great Work!
+            Code coverage meets the required standards. Your changes are well-tested!
+            `}
+
+            ---
+            *Generated by [FAST] Unit Test Validator • ${new Date().toISOString()}*`;
+
+            // Post new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody
+            });
+
+            console.log('Posted summary comment to PR');
