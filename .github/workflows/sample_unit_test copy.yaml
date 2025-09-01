@@ -277,7 +277,7 @@ jobs:
           find out/coverage/obj/src -name '*.gcda' | head || true
 
           # collect coverage
-          ./scripts/build_coverage.sh -o=out/coverage --code=all
+          ./scripts/build_coverage.sh -o=out/coverage --code=cluster
 
       - name: "Filter & Report Coverage (changed files only)"
         id: coverage
