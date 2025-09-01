@@ -3,7 +3,7 @@ name: "[FROM DEMO] Sample Unit Test Validator"
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, reopened]
 
 permissions:
   contents: read
