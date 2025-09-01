@@ -201,57 +201,89 @@ jobs:
       - name: "Filter & Report Coverage"
         if: env.HAS_TEST_MAPPINGS == 'true'
         run: |
-          set -euo pipefail
-          echo "=== Coverage Analysis ==="
-          echo "Required Coverage: ${REQUIRED_COVERAGE:-}%"
-          echo "Test Files: ${TEST_FILES:-}"
-          echo "CPP Files: ${CPP_FILES:-}"
+            set -euo pipefail
+            echo "=== Coverage Analysis ==="
+            echo "Required Coverage: ${REQUIRED_COVERAGE:-}%"
+            echo "Test Files: ${TEST_FILES:-}"
+            echo "CPP Files: ${CPP_FILES:-}"
 
-          mkdir -p out/coverage/coverage
+            mkdir -p out/coverage/coverage
 
-          trace_in="out/coverage/coverage/lcov_final.info"
-          trace_filtered="out/coverage/coverage/lcov_filtered.info"
-          html_dir="out/coverage/coverage/html_filtered"
-          html_full="out/coverage/coverage/html"
+            trace_in="out/coverage/coverage/lcov_final.info"
+            trace_filtered="out/coverage/coverage/lcov_filtered.info"
+            html_dir="out/coverage/coverage/html_filtered"
+            html_full="out/coverage/coverage/html"
 
-          # Prepare patterns from changed files
-          echo "${CPP_FILES:-}" | tr ',' '\n' | sed '/^\s*$/d' > changed_files.txt || true
-          echo "=== Changed files (for filtering) ==="
-          cat changed_files.txt || true
+            if [[ ! -s "$trace_in" ]]; then
+               echo "::error::Missing or empty tracefile: $trace_in"
+               exit 1
+            fi
 
-          # Prepend '*/' so lcov matches full source paths in the tracefile
-          mapfile -t patterns < <(awk '{print "*/"$0}' changed_files.txt 2>/dev/null || true)
+            # Prepare patterns from changed files
+            echo "${CPP_FILES:-}" | tr ',' '\n' | sed '/^\s*$/d' > changed_files.txt || true
+            echo "=== Changed files (for filtering) ==="
+            cat changed_files.txt || true
 
-          if [[ -s changed_files.txt && ${#patterns[@]} -gt 0 ]]; then
-            echo "Filtering coverage to changed files..."
-            lcov --extract "$trace_in" "${patterns[@]}" -o "$trace_filtered"
-            genhtml "$trace_filtered" -o "$html_dir"
-            summary_src="$trace_filtered"
-          else
-            echo "No changed files provided; generating full coverage HTML..."
-            genhtml "$trace_in" -o "$html_full"
-            summary_src="$trace_in"
-          fi
+            # Build lcov extract patterns (match by suffix path)
+            mapfile -t patterns < <(awk '{print "*/"$0}' changed_files.txt 2>/dev/null || true)
 
-          echo "=== COVERAGE SUMMARY ===" | tee coverage_summary.txt
-          lcov --summary "$summary_src" | tee -a coverage_summary.txt || true
+            # Preflight: do any of the changed basenames appear in the trace?
+            should_filter=false
+            if [[ -s changed_files.txt && ${#patterns[@]} -gt 0 ]]; then
+               while IFS= read -r f; do
+                  b="$(basename "$f")"
+                  if grep -Fq "/$b" "$trace_in"; then
+                     should_filter=true
+                     break
+                  fi
+               done < changed_files.txt
+            fi
 
-          # Extract overall line coverage percentage
-          PCT=$(lcov --summary "$summary_src" 2>/dev/null | awk '/lines/ {gsub("%","",$2); print $2; exit}')
-          PCT=${PCT:-0}
-          echo "Extracted Coverage: ${PCT}%"
+            if $should_filter; then
+               echo "Filtering coverage to changed files..."
+               # Allow empty results without hard failing; fall back to full trace if empty.
+               if lcov --extract "$trace_in" "${patterns[@]}" -o "$trace_filtered" --ignore-errors empty; then
+                  if [[ ! -s "$trace_filtered" ]] || ! grep -q '^SF:' "$trace_filtered"; then
+                     echo "No matching records after filter; falling back to full trace."
+                     cp "$trace_in" "$trace_filtered"
+                  fi
+               else
+                  echo "lcov --extract failed; falling back to full trace."
+                  cp "$trace_in" "$trace_filtered"
+               fi
 
-          # Store for potential PR comment
-          echo "ACTUAL_COVERAGE=$PCT" >> $GITHUB_ENV
+               genhtml "$trace_filtered" -o "$html_dir" || true
+               summary_src="$trace_filtered"
+            else
+               if [[ -s changed_files.txt ]]; then
+                  echo "None of the changed files appear in the trace; generating full coverage HTML..."
+               else
+                  echo "No changed files provided; generating full coverage HTML..."
+               fi
+               genhtml "$trace_in" -o "$html_full" || true
+               summary_src="$trace_in"
+            fi
 
-          # Enforce required coverage threshold
-          if awk -v p="$PCT" -v r="${REQUIRED_COVERAGE:-0}" 'BEGIN {exit (p+0<r+0)}'; then
-            echo "✅ Coverage requirement MET (${PCT}% >= ${REQUIRED_COVERAGE:-0}%)"
-          else
-            echo "❌ Coverage requirement NOT MET (${PCT}% < ${REQUIRED_COVERAGE:-0}%)"
-            echo "::error::Code coverage (${PCT}%) is below required threshold (${REQUIRED_COVERAGE:-0}%)"
-            exit 1
-          fi
+            echo "=== COVERAGE SUMMARY ===" | tee coverage_summary.txt
+            lcov --summary "$summary_src" | tee -a coverage_summary.txt || true
+
+            # Extract overall line coverage percentage
+            PCT=$(lcov --summary "$summary_src" 2>/dev/null | awk '/lines/ {gsub("%","",$2); print $2; exit}')
+            PCT=${PCT:-0}
+            echo "Extracted Coverage: ${PCT}%"
+
+            # Store for potential PR comment
+            echo "ACTUAL_COVERAGE=$PCT" >> "$GITHUB_ENV"
+
+            # Enforce required coverage threshold
+            if awk -v p="$PCT" -v r="${REQUIRED_COVERAGE:-0}" 'BEGIN {exit (p+0<r+0)}'; then
+               echo "✅ Coverage requirement MET (${PCT}% >= ${REQUIRED_COVERAGE:-0}%)"
+            else
+               echo "❌ Coverage requirement NOT MET (${PCT}% < ${REQUIRED_COVERAGE:-0}%)"
+               echo "::error::Code coverage (${PCT}%) is below required threshold (${REQUIRED_COVERAGE:-0}%)"
+               exit 1
+            fi
+
 
       - name: "Summary Report"
         if: always() && env.HAS_CPP_FILES == 'true'
