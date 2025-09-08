@@ -1,0 +1,650 @@
+name: "AI Unit Test Validator"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  ai-unit-test-validation:
+    name: "AI Unit Test Validator"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Install dependencies"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq lcov
+          sudo apt-get install -y libglib2.0-dev libdbus-1-dev
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: "Install Python dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests litellm
+
+      - name: "Fetch PR Diff and Analyze Changes"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+
+          # Fetch PR diff with pagination
+          page=1
+          : > pr_diff.jsonl
+          while : ; do
+            resp=$(curl -sS -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/files?per_page=100&page=$page")
+            count=$(echo "$resp" | jq 'length')
+            echo "$resp" | jq -c '.[]' >> pr_diff.jsonl
+            if [ "$count" -lt 100 ]; then break; fi
+            page=$((page+1))
+          done
+
+          # Normalize to one JSON array
+          echo '[' > pr_diff.json
+          sed -e '$!s/$/,/' pr_diff.jsonl >> pr_diff.json
+          echo ']' >> pr_diff.json
+
+          echo "=== PR Diff JSON Response (count) ==="
+          jq 'length' pr_diff.json
+
+          # Filter C/C++ files from the PR diff
+          jq -r '.[] | select(.filename | test("\\.(c|cpp|cc|cxx|h|hpp|hxx)$")) | .filename' pr_diff.json > cpp_files.txt || true
+
+          echo "C/C++ files changed in this PR:"
+          cat cpp_files.txt || true
+
+          CPP_FILE_COUNT=$(wc -l < cpp_files.txt 2>/dev/null || echo "0")
+
+          # Sum only additions for threshold policy
+          TOTAL_CHANGES=$(jq -r '.[] | select(.filename | test("\\.(c|cpp|cc|cxx|h|hpp|hxx)$")) | (.additions)' pr_diff.json | awk '{sum += $1} END {print (sum+0)}')
+
+          if [ "$CPP_FILE_COUNT" -eq 0 ]; then
+            echo "No C/C++ files changed in this PR - exiting workflow"
+            echo "HAS_CPP_FILES=false" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "=== PR Change Summary ==="
+          echo "Total lines added in C/C++ files: $TOTAL_CHANGES"
+          echo "C/C++ file count: $CPP_FILE_COUNT"
+
+          # Coverage policy
+          if [ "$TOTAL_CHANGES" -le 10 ]; then
+            REQUIRED_COVERAGE=90
+            echo "Changes are minimal (≤10 lines) → Require 100% coverage for changed lines"
+          else
+            REQUIRED_COVERAGE=80
+            echo "Changes are significant (>10 lines) → Require ≥90% coverage for changed lines"
+          fi
+
+          echo "Required code coverage: ${REQUIRED_COVERAGE}%"
+
+          # Convert cpp_files.txt to comma-separated string
+          CPP_FILES=$(cat cpp_files.txt | tr '\n' ',' | sed 's/,$//')
+
+          # Store values in environment for next steps
+          echo "HAS_CPP_FILES=true" >> $GITHUB_ENV
+          echo "TOTAL_CHANGES=$TOTAL_CHANGES" >> $GITHUB_ENV
+          echo "REQUIRED_COVERAGE=$REQUIRED_COVERAGE" >> $GITHUB_ENV
+          echo "CPP_FILES=$CPP_FILES" >> $GITHUB_ENV
+
+          # Print detailed breakdown
+          echo ""
+          echo "=== Detailed File Changes ==="
+          jq -r '.[] | select(.filename | test("\\.(c|cpp|cc|cxx|h|hpp|hxx)$")) | "File: \(.filename) | Additions: \(.additions) | Deletions: \(.deletions) | Total: \(.additions + .deletions)"' pr_diff.json
+
+      - name: "Find Existing GTest Unit Tests"
+        if: env.HAS_CPP_FILES == 'true'
+        run: |
+          set -euo pipefail
+          echo "=== Finding Existing GTest Unit Tests ==="
+
+          # Convert comma-separated string back to array
+          IFS=',' read -ra modified_files <<< "$CPP_FILES"
+          echo "Modified C/C++ files: ${#modified_files[@]}"
+
+          search_root="src/app/tests"
+          if [ -d "$search_root" ]; then
+            echo "Searching for GTest files in $search_root..."
+            # Find test files containing common GTest patterns
+            find "$search_root" -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -exec grep -l -E "TEST\(|EXPECT_|ASSERT_" {} \; > found_test_files.txt 2>/dev/null || true
+
+            test_file_count=$(wc -l < found_test_files.txt 2>/dev/null || echo "0")
+            echo "Total GTest files found: $test_file_count"
+
+            files_with_tests=0
+            : > file_test_mapping.txt
+            declare -a all_test_files
+
+            for modified_file in "${modified_files[@]}"; do
+              [ -z "$modified_file" ] && continue
+
+              include_tests=""
+              if [ -f "$modified_file" ]; then
+                include_name=$(basename "$modified_file")
+                include_tests=$(find "$search_root" -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -exec grep -l -E "#include.*${include_name}" {} \; 2>/dev/null || true)
+              fi
+
+              if [ -n "$include_tests" ]; then
+                files_with_tests=$((files_with_tests + 1))
+                echo "$modified_file:$include_tests" >> file_test_mapping.txt
+                while IFS= read -r test_file; do
+                  [ -z "$test_file" ] && continue
+                  all_test_files+=("$test_file")
+                done <<< "$include_tests"
+              else
+                echo "$modified_file:" >> file_test_mapping.txt
+              fi
+            done
+
+            echo "Files with existing tests: $files_with_tests out of ${#modified_files[@]}"
+            cat file_test_mapping.txt || true
+
+            if [ "$files_with_tests" -gt 0 ]; then
+              echo "HAS_TEST_MAPPINGS=true" >> $GITHUB_ENV
+              TEST_FILES=$(printf '%s\n' "${all_test_files[@]}" | sort -u | tr '\n' ',' | sed 's/,$//')
+              echo "TEST_FILES=$TEST_FILES" >> $GITHUB_ENV
+              echo "FILES_WITH_TESTS=$files_with_tests" >> $GITHUB_ENV
+            else
+              echo "HAS_TEST_MAPPINGS=false" >> $GITHUB_ENV
+              echo "TEST_FILES=" >> $GITHUB_ENV
+              echo "FILES_WITH_TESTS=0" >> $GITHUB_ENV
+            fi
+          else
+            echo "$search_root directory not found"
+            echo "HAS_TEST_MAPPINGS=false" >> $GITHUB_ENV
+            echo "TEST_FILES=" >> $GITHUB_ENV
+            echo "FILES_WITH_TESTS=0" >> $GITHUB_ENV
+          fi
+
+      - name: "Validate Existing GTest Unit Tests"
+        if: env.HAS_TEST_MAPPINGS == 'true'
+        env:
+          LITELLM_TOKEN: ${{ secrets.LITELLM_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "=== Validating Existing GTest Unit Tests ==="
+
+          if [ -z "${TEST_FILES:-}" ]; then
+            echo "No test files to validate"
+            exit 0
+          fi
+
+          # Convert comma-separated test files to array
+          IFS=',' read -ra test_files <<< "${TEST_FILES}"
+
+          # Initialize validation results file
+          echo "=== Unit Test Validation Results ===" > validation_results.txt
+          echo "" >> validation_results.txt
+
+          # Validate each test file
+          for test_file in "${test_files[@]}"; do
+            [ -z "$test_file" ] && continue
+            
+            echo "Validating: $test_file"
+            
+            # Run validation and capture result
+            if python3 internal/silabs/ai_unit_test/validate_with_litellm.py "$test_file" >> validation_results.txt 2>&1; then
+              echo "✅ Validation completed for: $test_file"
+            else
+              echo "⚠️ Validation had issues for: $test_file"
+            fi
+            
+            echo "" >> validation_results.txt
+            echo "---" >> validation_results.txt
+            echo "" >> validation_results.txt
+          done
+
+          # Display all validation results
+          echo ""
+          echo "=== COMPLETE VALIDATION RESULTS ==="
+          cat validation_results.txt
+
+      - name: "Initialize Required Submodules"
+        if: env.HAS_TEST_MAPPINGS == 'true'
+        run: |
+          echo "Initializing submodules for build..."
+          ./scripts/checkout_submodules.py --shallow --platform linux
+
+      - name: "Build & Generate Coverage"
+        if: env.HAS_TEST_MAPPINGS == 'true'
+        env:
+          TERM: xterm-256color
+        run: |
+          set -euo pipefail
+          set +u
+          source scripts/bootstrap.sh
+          set -u
+          gn gen out/coverage --args='use_coverage=true'
+          ninja -C out/coverage check -k 0
+
+          # sanity check
+          find out/coverage/obj/src -name '*.gcno' | head || true
+          find out/coverage/obj/src -name '*.gcda' | head || true
+
+          # collect coverage
+          ./scripts/build_coverage.sh -o=out/coverage --code=all
+
+      - name: "Filter & Report Coverage"
+        if: env.HAS_TEST_MAPPINGS == 'true'
+        run: |
+          set -euo pipefail
+          echo "=== Coverage Analysis ==="
+          echo "Required Coverage: ${REQUIRED_COVERAGE:-}%"
+          echo "Test Files: ${TEST_FILES:-}"
+          echo "CPP Files: ${CPP_FILES:-}"
+
+          mkdir -p out/coverage/coverage
+
+          trace_in="out/coverage/coverage/lcov_final.info"
+          trace_filtered="out/coverage/coverage/lcov_filtered.info"
+          html_dir="out/coverage/coverage/html_filtered"
+          html_full="out/coverage/coverage/html"
+          COVERAGE_NOTE=""
+
+          if [[ ! -s "$trace_in" ]]; then
+             echo "::error::Missing or empty tracefile: $trace_in"
+             exit 1
+          fi
+
+          # Prepare patterns from changed files
+          echo "${CPP_FILES:-}" | tr ',' '\n' | sed '/^\s*$/d' > changed_files.txt || true
+          echo "=== Changed files (for filtering) ==="
+          cat changed_files.txt || true
+
+          # Build lcov extract patterns (match by suffix path)
+          mapfile -t patterns < <(awk '{print "*/"$0}' changed_files.txt 2>/dev/null || true)
+
+          # Preflight: do any of the changed basenames appear in the trace?
+          should_filter=false
+          if [[ -s changed_files.txt && ${#patterns[@]} -gt 0 ]]; then
+             while IFS= read -r f; do
+                b="$(basename "$f")"
+                if grep -Fq "/$b" "$trace_in"; then
+                   should_filter=true
+                   break
+                fi
+             done < changed_files.txt
+          fi
+
+          if $should_filter; then
+             echo "Filtering coverage to changed files..."
+             if lcov --extract "$trace_in" "${patterns[@]}" -o "$trace_filtered" --ignore-errors empty; then
+                if [[ ! -s "$trace_filtered" ]] || ! grep -q '^SF:' "$trace_filtered"; then
+                   echo "No matching records after filter; falling back to full trace."
+                   COVERAGE_NOTE="Filtering matched no files; fell back to full trace."
+                   cp "$trace_in" "$trace_filtered"
+                fi
+             else
+                echo "lcov --extract failed; falling back to full trace."
+                COVERAGE_NOTE="Filtering failed; fell back to full trace."
+                cp "$trace_in" "$trace_filtered"
+             fi
+
+             genhtml "$trace_filtered" -o "$html_dir" || true
+             summary_src="$trace_filtered"
+          else
+             if [[ -s changed_files.txt ]]; then
+                echo "None of the changed files appear in the trace; generating full coverage HTML..."
+                COVERAGE_NOTE="Changed files not present in coverage; using full trace."
+             else
+                echo "No changed files provided; generating full coverage HTML..."
+                COVERAGE_NOTE="No changed files provided; using full trace."
+             fi
+             genhtml "$trace_in" -o "$html_full" || true
+             summary_src="$trace_in"
+          fi
+
+          echo "=== COVERAGE SUMMARY ===" | tee coverage_summary.txt
+          lcov --summary "$summary_src" | tee -a coverage_summary.txt || true
+
+          # Extract overall line coverage percentage
+          PCT=$(lcov --summary "$summary_src" 2>/dev/null | awk '/lines/ {gsub("%","",$2); print $2; exit}')
+          PCT=${PCT:-0}
+          echo "Extracted Coverage: ${PCT}%"
+
+          # Store for potential PR comment
+          echo "ACTUAL_COVERAGE=$PCT" >> "$GITHUB_ENV"
+          echo "COVERAGE_NOTE=$COVERAGE_NOTE" >> "$GITHUB_ENV"
+
+          # Enforce required coverage threshold
+          if awk -v p="$PCT" -v r="${REQUIRED_COVERAGE:-0}" 'BEGIN {exit (p+0<r+0)}'; then
+             echo "✅ Coverage requirement MET (${PCT}% >= ${REQUIRED_COVERAGE:-0}%)"
+          else
+             echo "❌ Coverage requirement NOT MET (${PCT}% < ${REQUIRED_COVERAGE:-0}%)"
+             echo "::error::Code coverage (${PCT}%) is below required threshold (${REQUIRED_COVERAGE:-0}%)"
+             exit 1
+          fi
+
+      - name: "Generate Additional Unit Tests with AI"
+        id: generate-tests
+        if: env.HAS_CPP_FILES == 'true'
+        env:
+          LITELLM_TOKEN: ${{ secrets.LITELLM_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "=== Generating Additional Tests with AI ==="
+
+          # Check if we have the test generation script
+          if [ ! -f "internal/silabs/ai_unit_test/generate_tests_with_litellm.py" ]; then
+            echo "❌ Test generation script not found"
+            exit 1
+          fi
+
+          if [ ! -f "internal/silabs/ai_unit_test/UnitTestTemplate.md" ]; then
+            echo "❌ UnitTestTemplate.md not found"
+            exit 1
+          fi
+
+          # Store original coverage for comparison
+          echo "Original coverage: ${ACTUAL_COVERAGE:-0}%"
+
+          # Generate tests for each C/C++ source file
+          IFS=',' read -ra cpp_files <<< "${CPP_FILES:-}"
+          generated_tests=""
+
+          for cpp_file in "${cpp_files[@]}"; do
+            [ -z "$cpp_file" ] && continue
+
+            # Skip header files and test files
+            if [[ "$cpp_file" == *.h ]] || [[ "$cpp_file" == *.hpp ]] || [[ "$cpp_file" == *Test* ]] || [[ "$cpp_file" == *test* ]]; then
+              echo "Skipping $cpp_file (header or test file)"
+              continue
+            fi
+
+            echo "Generating test for: $cpp_file"
+
+            if python3 internal/silabs/ai_unit_test/generate_tests_with_litellm.py \
+              "$cpp_file" \
+              --template internal/silabs/ai_unit_test/UnitTestTemplate.md \
+              --coverage coverage_summary.txt \
+              --out-dir src/app/tests/ \
+              --overwrite; then
+
+              test_name=$(basename "$cpp_file" .cpp)
+              test_name=$(basename "$test_name" .c)
+              generated_test="src/app/tests/Test_${test_name}.cpp"
+
+              if [ -f "$generated_test" ]; then
+                echo "✅ Generated: $generated_test"
+                generated_tests="${generated_tests},$generated_test"
+              fi
+            else
+              echo "⚠️ Failed to generate test for: $cpp_file"
+            fi
+          done
+
+          # Remove leading comma
+          generated_tests="${generated_tests#,}"
+
+          if [ -n "$generated_tests" ]; then
+            echo "=== Generated test files: ==="
+            echo "$generated_tests" | tr ',' '\n'
+            echo "GENERATED_TESTS=$generated_tests" >> $GITHUB_ENV
+            echo "HAS_GENERATED_TESTS=true" >> $GITHUB_ENV
+          else
+            echo "No tests were generated"
+            echo "GENERATED_TESTS=" >> $GITHUB_ENV
+            echo "HAS_GENERATED_TESTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: "Rebuild & Generate Updated Coverage"
+        if: env.HAS_GENERATED_TESTS == 'true'
+        env:
+          TERM: xterm-256color
+        run: |
+          set -euo pipefail
+          echo "=== Rebuilding with Generated Tests ==="
+          set +u
+          source scripts/bootstrap.sh
+          set -u
+
+          # Clean previous build artifacts
+          rm -rf out/coverage/obj/src/app/tests/Test_*.o* || true
+
+          # Rebuild with new tests
+          gn gen out/coverage --args='use_coverage=true'
+          ninja -C out/coverage check -k 0
+
+          # Regenerate coverage
+          ./scripts/build_coverage.sh -o=out/coverage --code=all
+
+      - name: "Filter & Report Updated Coverage"
+        if: env.HAS_GENERATED_TESTS == 'true'
+        run: |
+          set -euo pipefail
+          echo "=== Updated Coverage Analysis ==="
+          echo "Required Coverage: ${REQUIRED_COVERAGE:-}%"
+          echo "Original Coverage: ${ACTUAL_COVERAGE:-}%"
+          echo "Generated Tests: ${GENERATED_TESTS:-}"
+
+          trace_in="out/coverage/coverage/lcov_final.info"
+          trace_filtered="out/coverage/coverage/lcov_filtered_updated.info"
+          html_dir="out/coverage/coverage/html_filtered_updated"
+          html_full="out/coverage/coverage/html_updated"
+          UPDATED_COVERAGE_NOTE=""
+
+          if [[ ! -s "$trace_in" ]]; then
+             echo "::error::Missing or empty tracefile: $trace_in"
+             exit 1
+          fi
+
+          # Prepare patterns from changed files
+          echo "${CPP_FILES:-}" | tr ',' '\n' | sed '/^\s*$/d' > changed_files_updated.txt || true
+          echo "=== Changed files (for filtering) ==="
+          cat changed_files_updated.txt || true
+
+          # Build lcov extract patterns (match by suffix path)
+          mapfile -t patterns < <(awk '{print "*/"$0}' changed_files_updated.txt 2>/dev/null || true)
+
+          # Preflight: do any of the changed basenames appear in the trace?
+          should_filter=false
+          if [[ -s changed_files_updated.txt && ${#patterns[@]} -gt 0 ]]; then
+             while IFS= read -r f; do
+                b="$(basename "$f")"
+                if grep -Fq "/$b" "$trace_in"; then
+                   should_filter=true
+                   break
+                fi
+             done < changed_files_updated.txt
+          fi
+
+          if $should_filter; then
+             echo "Filtering updated coverage to changed files..."
+             if lcov --extract "$trace_in" "${patterns[@]}" -o "$trace_filtered" --ignore-errors empty; then
+                if [[ ! -s "$trace_filtered" ]] || ! grep -q '^SF:' "$trace_filtered"; then
+                   echo "No matching records after filter; falling back to full trace."
+                   UPDATED_COVERAGE_NOTE="Filtering matched no files; fell back to full trace."
+                   cp "$trace_in" "$trace_filtered"
+                fi
+             else
+                echo "lcov --extract failed; falling back to full trace."
+                UPDATED_COVERAGE_NOTE="Filtering failed; fell back to full trace."
+                cp "$trace_in" "$trace_filtered"
+             fi
+
+             genhtml "$trace_filtered" -o "$html_dir" || true
+             summary_src="$trace_filtered"
+          else
+             if [[ -s changed_files_updated.txt ]]; then
+                echo "None of the changed files appear in the trace; generating full coverage HTML..."
+                UPDATED_COVERAGE_NOTE="Changed files not present in coverage; using full trace."
+             else
+                echo "No changed files provided; generating full coverage HTML..."
+                UPDATED_COVERAGE_NOTE="No changed files provided; using full trace."
+             fi
+             genhtml "$trace_in" -o "$html_full" || true
+             summary_src="$trace_in"
+          fi
+
+          echo "=== UPDATED COVERAGE SUMMARY ===" | tee coverage_summary_updated.txt
+          lcov --summary "$summary_src" | tee -a coverage_summary_updated.txt || true
+
+          # Extract updated overall line coverage percentage
+          UPDATED_PCT=$(lcov --summary "$summary_src" 2>/dev/null | awk '/lines/ {gsub("%","",$2); print $2; exit}')
+          UPDATED_PCT=${UPDATED_PCT:-0}
+          echo "Updated Coverage: ${UPDATED_PCT}%"
+
+          # Store for potential PR comment
+          echo "UPDATED_COVERAGE=$UPDATED_PCT" >> "$GITHUB_ENV"
+          echo "UPDATED_COVERAGE_NOTE=$UPDATED_COVERAGE_NOTE" >> "$GITHUB_ENV"
+
+          # Show improvement
+          ORIGINAL_COV=${ACTUAL_COVERAGE:-0}
+          echo "Coverage improvement: ${ORIGINAL_COV}% → ${UPDATED_PCT}%"
+
+          # Enforce required coverage threshold on updated coverage
+          if awk -v p="$UPDATED_PCT" -v r="${REQUIRED_COVERAGE:-0}" 'BEGIN {exit (p+0<r+0)}'; then
+             echo "✅ Updated coverage requirement MET (${UPDATED_PCT}% >= ${REQUIRED_COVERAGE:-0}%)"
+          else
+             echo "❌ Updated coverage requirement NOT MET (${UPDATED_PCT}% < ${REQUIRED_COVERAGE:-0}%)"
+             echo "::error::Updated code coverage (${UPDATED_PCT}%) is still below required threshold (${REQUIRED_COVERAGE:-0}%)"
+             exit 1
+          fi
+
+      - name: "Summary Report"
+        if: always() && env.HAS_CPP_FILES == 'true'
+        run: |
+          echo "=== WORKFLOW SUMMARY ==="
+          echo "Total C/C++ files changed: $(echo "${CPP_FILES:-}" | tr ',' '\n' | wc -l)"
+          echo "Total lines added: ${TOTAL_CHANGES:-0}"
+          echo "Required coverage: ${REQUIRED_COVERAGE:-0}%"
+          echo "Original coverage: ${ACTUAL_COVERAGE:-0}%"
+          if [ "${HAS_GENERATED_TESTS:-false}" = "true" ]; then
+            echo "Updated coverage (after AI tests): ${UPDATED_COVERAGE:-0}%"
+            echo "Generated tests: $(echo "${GENERATED_TESTS:-}" | tr ',' '\n' | sed '/^$/d' | wc -l)"
+          fi
+          echo "Files with tests: ${FILES_WITH_TESTS:-0}"
+          echo "Test files found: $(echo "${TEST_FILES:-}" | tr ',' '\n' | sed '/^$/d' | wc -l)"
+
+      - name: "Post Summary Comment on PR"
+        if: always() && env.HAS_CPP_FILES == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const botUserId = 'github-actions[bot]';
+
+            // Delete previous bot comments
+            try {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+              });
+
+              const botComments = comments.filter(comment => 
+                comment.user.login === botUserId && 
+                comment.body.includes('Unit Test Validator Summary')
+              );
+
+              for (const comment of botComments) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: comment.id,
+                });
+                console.log(`Deleted previous bot comment: ${comment.id}`);
+              }
+            } catch (error) {
+              console.log('Error deleting previous comments:', error.message);
+            }
+
+            // Prepare summary data
+            const totalFiles = process.env.CPP_FILES ? process.env.CPP_FILES.split(',').filter(f => f.trim()).length : 0;
+            const totalChanges = process.env.TOTAL_CHANGES || '0';
+            const requiredCoverage = process.env.REQUIRED_COVERAGE || '0';
+            const actualCoverage = process.env.ACTUAL_COVERAGE || '0';
+            const updatedCoverage = process.env.UPDATED_COVERAGE || '';
+            const hasGeneratedTests = process.env.HAS_GENERATED_TESTS === 'true';
+            const generatedTests = process.env.GENERATED_TESTS ? process.env.GENERATED_TESTS.split(',').filter(f => f.trim()).length : 0;
+            const filesWithTests = process.env.FILES_WITH_TESTS || '0';
+            const testFiles = process.env.TEST_FILES ? process.env.TEST_FILES.split(',').filter(f => f.trim()).length : 0;
+            const coverageNote = process.env.COVERAGE_NOTE || '';
+            const updatedCoverageNote = process.env.UPDATED_COVERAGE_NOTE || '';
+
+            // Determine status (use updated coverage if available)
+            const finalCoverage = updatedCoverage || actualCoverage;
+            const coverageMet = parseFloat(finalCoverage) >= parseFloat(requiredCoverage);
+            const statusIcon = coverageMet ? '✅' : '❌';
+            const statusText = coverageMet ? 'PASSED' : 'FAILED';
+
+            // Create comment body
+            const commentBody = `## Unit Test Validator Summary
+
+            **Status:** ${statusIcon} **${statusText}**
+
+            ### Coverage Analysis
+            | Metric | Value |
+            |--------|-------|
+            | **Required Coverage** | ${requiredCoverage}% |
+            | **Original Coverage** | ${actualCoverage}% |
+            ${hasGeneratedTests ? `| **Updated Coverage** | ${updatedCoverage}% |` : ''}
+            | **Final Coverage** | ${finalCoverage}% |
+            | **Coverage Status** | ${coverageMet ? '✅ Met requirement' : '❌ Below threshold'} |
+            ${coverageNote ? `\n> _Original: ${coverageNote}_\n` : ''}
+            ${updatedCoverageNote ? `\n> _Updated: ${updatedCoverageNote}_\n` : ''}
+
+            ### Test Generation
+            | Metric | Count |
+            |--------|-------|
+            | **Existing Test Files** | ${testFiles} |
+            ${hasGeneratedTests ? `| **AI Generated Tests** | ${generatedTests} |` : ''}
+            | **Files with Tests** | ${filesWithTests} |
+
+            ### File Analysis
+            | Metric | Count |
+            |--------|-------|
+            | **C/C++ Files Changed** | ${totalFiles} |
+            | **Lines Added** | ${totalChanges} |
+
+            ### Coverage Policy
+            ${parseInt(totalChanges) <= 10 ? 
+              'Minimal changes (≤10 lines) → Requires **100% coverage** for changed lines' : 
+              'Significant changes (>10 lines) → Requires **≥90% coverage** for changed lines'
+            }
+
+            ${hasGeneratedTests ? `
+            ### AI Test Generation
+            ✅ **${generatedTests} additional test(s)** were generated using AI
+            📈 Coverage improved from **${actualCoverage}%** to **${updatedCoverage}%**
+            ` : ''}
+
+            ${!coverageMet ? `
+            ### Action Required
+            Code coverage is below the required threshold. Please:
+            1. Add unit tests for the modified code
+            2. Ensure existing tests cover the changes
+            3. Verify test quality and edge case coverage
+            ` : `
+            ### Coverage Met
+            Code coverage meets the required standards. Your changes are well-tested!
+            `}
+            ---
+            *Generated by Unit Test Validator • ${new Date().toISOString()}*`;
+
+            // Post new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody
+            });
+
+            console.log('Posted summary comment to PR');
