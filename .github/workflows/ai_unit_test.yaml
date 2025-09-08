@@ -318,6 +318,13 @@ jobs:
           PCT=${PCT:-0}
           echo "Extracted Coverage: ${PCT}%"
 
+          # Add coverage percentage to the summary file for AI script
+          echo "" >> coverage_summary.txt
+          echo "=== EXTRACTED METRICS ===" >> coverage_summary.txt
+          echo "Overall Line Coverage: ${PCT}%" >> coverage_summary.txt
+          echo "Required Coverage: ${REQUIRED_COVERAGE:-0}%" >> coverage_summary.txt
+          echo "Coverage Status: $([ $(echo "$PCT >= ${REQUIRED_COVERAGE:-0}" | bc -l) -eq 1 ] && echo "MET" || echo "BELOW THRESHOLD")" >> coverage_summary.txt
+
           # Store for potential PR comment
           echo "ACTUAL_COVERAGE=$PCT" >> "$GITHUB_ENV"
           echo "COVERAGE_NOTE=$COVERAGE_NOTE" >> "$GITHUB_ENV"
@@ -647,4 +654,4 @@ jobs:
               body: commentBody
             });
 
-            console.log('Posted summary comment to PR');
+            console.log('Posted summary comment to PR')
