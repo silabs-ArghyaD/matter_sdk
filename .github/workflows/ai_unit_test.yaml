@@ -602,7 +602,7 @@ jobs:
             |--------|-------|
             | **Required Coverage** | ${requiredCoverage}% |
             | **Original Coverage** | ${actualCoverage}% |
-            ${hasGeneratedTests ? `| **Updated Coverage** | ${updatedCoverage}% |` : ''}
+            | **Updated Coverage** | ${updatedCoverage || 'Not Generated'} |
             | **Final Coverage** | ${finalCoverage}% |
             | **Coverage Status** | ${coverageMet ? '✅ Met requirement' : '❌ Below threshold'} |
             ${coverageNote ? `\n> _Original: ${coverageNote}_\n` : ''}
@@ -612,7 +612,7 @@ jobs:
             | Metric | Count |
             |--------|-------|
             | **Existing Test Files** | ${testFiles} |
-            ${hasGeneratedTests ? `| **AI Generated Tests** | ${generatedTests} |` : ''}
+            | **AI Generated Tests** | ${hasGeneratedTests ? generatedTests : 'Not Generated'} |
             | **Files with Tests** | ${filesWithTests} |
 
             ### File Analysis
@@ -622,25 +622,19 @@ jobs:
             | **Lines Added** | ${totalChanges} |
 
             ### Coverage Policy
-            ${parseInt(totalChanges) <= 10 ? 
-              'Minimal changes (≤10 lines) → Requires **100% coverage** for changed lines' : 
-              'Significant changes (>10 lines) → Requires **≥90% coverage** for changed lines'
-            }
+            ${parseInt(totalChanges) <= 10 ? 'Minimal changes (≤10 lines) → Requires **100% coverage** for changed lines' : 'Significant changes (>10 lines) → Requires **≥90% coverage** for changed lines'}
 
-            ${hasGeneratedTests ? `
-            ### AI Test Generation
+            ${hasGeneratedTests ? `### AI Test Generation
             ✅ **${generatedTests} additional test(s)** were generated using AI
             📈 Coverage improved from **${actualCoverage}%** to **${updatedCoverage}%**
             ` : ''}
 
-            ${!coverageMet ? `
-            ### Action Required
+            ${!coverageMet ? `### Action Required
             Code coverage is below the required threshold. Please:
             1. Add unit tests for the modified code
             2. Ensure existing tests cover the changes
             3. Verify test quality and edge case coverage
-            ` : `
-            ### Coverage Met
+            ` : `### Coverage Met
             Code coverage meets the required standards. Your changes are well-tested!
             `}
             ---
