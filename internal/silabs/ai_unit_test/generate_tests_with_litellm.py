@@ -36,7 +36,19 @@ def compute_output_path(src_path: Path, out_dir: Optional[str]) -> Path:
     # put next to source by default
     return (src_path.parent / default_name).resolve()
 
-def build_prompt(unit_test_template: str, source_path: Path, source_code: str) -> str:
+def build_prompt(unit_test_template: str, source_path: Path, source_code: str, coverage_info: Optional[str] = None) -> str:
+    coverage_section = ""
+    if coverage_info:
+        coverage_section = f"""
+CURRENT COVERAGE ANALYSIS:
+{coverage_info}
+
+COVERAGE CONTEXT:
+- Focus on areas with low or missing coverage
+- Prioritize critical code paths and edge cases
+- Generate tests that will improve the overall coverage metrics
+"""
+
     return f"""You are generating a C++ unit test file for the provided component implementation.
 Follow the style and requirements from the UNIT TEST TEMPLATE below.
 
@@ -49,7 +61,7 @@ SOURCE IMPLEMENTATION CONTENT:
 ```cpp
 {source_code}
 ```
-
+{coverage_section}
 RESPONSE RULES (MUST FOLLOW):
 - Return ONLY the contents of a single valid C++ test file.
 - No markdown, no backticks, no commentary, no headers, no explanations.
@@ -59,6 +71,7 @@ RESPONSE RULES (MUST FOLLOW):
 - Ensure it compiles assuming the component is located as shown in the include paths.
 - Include at least one positive and one negative test if meaningful.
 - Keep it concise and focused on template conformance.
+- If coverage information is provided, prioritize tests for uncovered or poorly covered areas.
 """
 
 def extract_cpp(raw: str) -> str:
@@ -101,6 +114,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate C++ test file from UnitTestTemplate.md using LiteLLM GPT-4.1")
     parser.add_argument("source", help="Path to the component .cpp file to create tests for")
     parser.add_argument("--template", help="Path to UnitTestTemplate.md (defaults to file next to this script)")
+    parser.add_argument("--coverage", help="Path to coverage summary file for informed test generation")
     parser.add_argument("--out-dir", help="Directory to write the generated test (defaults next to source)")
     parser.add_argument("--overwrite", action="store_true", help="Allow overwriting the output file")
     args = parser.parse_args()
@@ -126,6 +140,19 @@ def main():
     if unit_test_template is None:
         sys.exit(1)
 
+    # Read coverage information if provided
+    coverage_info = None
+    if args.coverage:
+        coverage_path = Path(args.coverage).expanduser().resolve()
+        if coverage_path.exists():
+            coverage_info = read_text(coverage_path)
+            if coverage_info:
+                print(f"📊 Using coverage data: {coverage_path}")
+            else:
+                print(f"⚠️ Failed to read coverage file: {coverage_path}")
+        else:
+            print(f"⚠️ Coverage file not found: {coverage_path}")
+
     out_path = compute_output_path(src_path, args.out_dir)
     if out_path.exists() and not args.overwrite:
         print(f"❌ Output already exists: {out_path}. Use --overwrite to replace it.")
@@ -137,7 +164,7 @@ def main():
 
     try:
         raw = call_litellm_gpt41(
-            build_prompt(unit_test_template, src_path, source_code),
+            build_prompt(unit_test_template, src_path, source_code, coverage_info),
             token=token
         )
         cpp_test_code = extract_cpp(raw)
