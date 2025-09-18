@@ -172,47 +172,62 @@ jobs:
             echo "FILES_WITH_TESTS=0" >> $GITHUB_ENV
           fi
 
-      - name: "Validate Existing GTest Unit Tests"
-        if: env.HAS_TEST_MAPPINGS == 'true'
+      - name: "Validate New Unit Tests"
+        if: env.HAS_CPP_FILES == 'true'
         env:
           LITELLM_TOKEN: ${{ secrets.LITELLM_TOKEN }}
         run: |
           set -euo pipefail
-          echo "=== Validating Existing GTest Unit Tests ==="
+          echo "=== Validating New Unit Tests (changed files starting with 'Test') ==="
 
-          if [ -z "${TEST_FILES:-}" ]; then
-            echo "No test files to validate"
+          if [ ! -f cpp_files.txt ]; then
+            echo "cpp_files.txt not found - skipping"
             exit 0
           fi
 
-          # Convert comma-separated test files to array
-          IFS=',' read -ra test_files <<< "${TEST_FILES}"
+          : > new_test_files.txt
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            base="$(basename "$f")"
+            case "$base" in
+              Test*)
+                if [ -f "$f" ]; then
+                  echo "$f" >> new_test_files.txt
+                fi
+                ;;
+            esac
+          done < cpp_files.txt
 
-          # Initialize validation results file
-          echo "=== Unit Test Validation Results ===" > validation_results.txt
+          if [ ! -s new_test_files.txt ]; then
+            echo "No new/modified test files (starting with 'Test') detected in this PR."
+            exit 0
+          fi
+
+          echo "Discovered new/modified test files:"
+            cat new_test_files.txt
+
+          NEW_TEST_FILES=$(tr '\n' ',' < new_test_files.txt | sed 's/,$//')
+          echo "NEW_TEST_FILES=$NEW_TEST_FILES" >> $GITHUB_ENV
+
+          echo "=== New Unit Test Validation Results ===" > validation_results.txt
           echo "" >> validation_results.txt
 
-          # Validate each test file
+          IFS=',' read -ra test_files <<< "$NEW_TEST_FILES"
           for test_file in "${test_files[@]}"; do
             [ -z "$test_file" ] && continue
-            
             echo "Validating: $test_file"
-            
-            # Run validation and capture result
             if python3 internal/silabs/ai_unit_test/validate_with_litellm.py "$test_file" >> validation_results.txt 2>&1; then
               echo "✅ Validation completed for: $test_file"
             else
               echo "⚠️ Validation had issues for: $test_file"
             fi
-            
             echo "" >> validation_results.txt
             echo "---" >> validation_results.txt
             echo "" >> validation_results.txt
           done
 
-          # Display all validation results
           echo ""
-          echo "=== COMPLETE VALIDATION RESULTS ==="
+          echo "=== COMPLETE NEW TEST VALIDATION RESULTS ==="
           cat validation_results.txt
 
       - name: "Initialize Required Submodules"
