@@ -2,7 +2,7 @@ name: "Unit Test Validator"
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, reopened]
 
 jobs:
   validate-tests:
@@ -156,7 +156,8 @@ jobs:
             done
             
             echo "Files with existing tests: $files_with_tests out of ${#modified_files[@]}"
-            
+            cat file_test_mapping.txt
+
           else
             echo "src/app/tests directory not found"
             touch found_test_files.txt

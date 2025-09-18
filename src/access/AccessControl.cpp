@@ -32,6 +32,10 @@ using chip::CATValues;
 using chip::FabricIndex;
 using chip::NodeId;
 
+/*
+Just adding a demo comment
+*/
+
 namespace {
 
 Global<AccessControl> defaultAccessControl;

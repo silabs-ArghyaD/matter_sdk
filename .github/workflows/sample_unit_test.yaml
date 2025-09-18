@@ -1,0 +1,602 @@
+# sample_unit_test.yaml
+name: "[FROM DEMO] Sample Unit Test Validator"
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  analyze-pr-changes:
+    name: "Analyze PR Changes"
+    runs-on: ubuntu-latest
+    outputs:
+      total-changes: ${{ steps.calculate.outputs.total-changes }}
+      required-coverage: ${{ steps.calculate.outputs.required-coverage }}
+      has-cpp-files: ${{ steps.calculate.outputs.has-cpp-files }}
+      cpp-files: ${{ steps.calculate.outputs.cpp-files }}
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Install jq"
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: "Fetch PR Diff using GitHub REST API (with pagination)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+
+          page=1
+          : > pr_diff.jsonl
+          while : ; do
+            resp=$(curl -sS -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/files?per_page=100&page=$page")
+            count=$(echo "$resp" | jq 'length')
+            echo "$resp" | jq -c '.[]' >> pr_diff.jsonl
+            if [ "$count" -lt 100 ]; then break; fi
+            page=$((page+1))
+          done
+
+          # Normalize to one JSON array
+          echo '[' > pr_diff.json
+          sed -e '$!s/$/,/' pr_diff.jsonl >> pr_diff.json
+          echo ']' >> pr_diff.json
+
+          echo "=== PR Diff JSON Response (count) ==="
+          jq 'length' pr_diff.json
+
+      - name: "Filter C/C++ files and calculate changes"
+        id: calculate
+        run: |
+          set -euo pipefail
+          # Filter C/C++ files from the PR diff
+          jq -r '.[] | select(.filename | test("\\.(c|cpp|cc|cxx|h|hpp|hxx)$")) | .filename' pr_diff.json > cpp_files.txt || true
+
+          echo "C/C++ files changed in this PR:"
+          cat cpp_files.txt || true
+
+          CPP_FILE_COUNT=$(wc -l < cpp_files.txt 2>/dev/null || echo "0")
+
+          # Sum only additions for threshold policy (even if 0)
+          TOTAL_CHANGES=$(jq -r '.[] | select(.filename | test("\\.(c|cpp|cc|cxx|h|hpp|hxx)$")) | (.additions)' pr_diff.json | awk '{sum += $1} END {print (sum+0)}')
+
+          if [ "$CPP_FILE_COUNT" -eq 0 ]; then
+            echo "No C/C++ files changed in this PR"
+            echo "total-changes=0" >> $GITHUB_OUTPUT
+            echo "required-coverage=0" >> $GITHUB_OUTPUT
+            echo "has-cpp-files=false" >> $GITHUB_OUTPUT
+            echo "cpp-files=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "=== PR Change Summary ==="
+          echo "Total lines added in C/C++ files: $TOTAL_CHANGES"
+          echo "C/C++ file count: $CPP_FILE_COUNT"
+
+          # Coverage policy (matches your flowchart intent)
+          if [ "$TOTAL_CHANGES" -le 10 ]; then
+            REQUIRED_COVERAGE=100
+            echo "Changes are minimal (≤10 lines) → Require 100% coverage for changed lines"
+          else
+            REQUIRED_COVERAGE=90
+            echo "Changes are significant (>10 lines) → Require ≥90% coverage for changed lines"
+          fi
+
+          echo "Required code coverage: ${REQUIRED_COVERAGE}%"
+
+          # Convert cpp_files.txt to comma-separated string for output
+          CPP_FILES=$(cat cpp_files.txt | tr '\n' ',' | sed 's/,$//')
+
+          # Store values for other jobs
+          echo "total-changes=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
+          echo "required-coverage=$REQUIRED_COVERAGE" >> $GITHUB_OUTPUT
+          echo "has-cpp-files=true" >> $GITHUB_OUTPUT
+          echo "cpp-files=$CPP_FILES" >> $GITHUB_OUTPUT
+
+          # Print detailed breakdown
+          echo ""
+          echo "=== Detailed File Changes ==="
+          jq -r '.[] | select(.filename | test("\\.(c|cpp|cc|cxx|h|hpp|hxx)$")) | "File: \(.filename) | Additions: \(.additions) | Deletions: \(.deletions) | Total: \(.additions + .deletions)"' pr_diff.json
+
+  find-and-validate-tests:
+    name: "Find Tests & AI Validation"
+    runs-on: ubuntu-latest
+    needs: analyze-pr-changes
+    if: needs.analyze-pr-changes.outputs.has-cpp-files == 'true'
+    outputs:
+      has-test-mappings: ${{ steps.mapping.outputs.has-mappings }}
+      files-with-tests: ${{ steps.mapping.outputs.files-with-tests }}
+      test-files: ${{ steps.mapping.outputs.test-files }}
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: "Install Python dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests litellm
+
+      - name: "Find Existing GTest Unit Tests"
+        id: mapping
+        env:
+          CPP_FILES: ${{ needs.analyze-pr-changes.outputs.cpp-files }}
+        run: |
+          set -euo pipefail
+          echo "=== Finding Existing GTest Unit Tests ==="
+
+          # Convert comma-separated string back to array
+          IFS=',' read -ra modified_files <<< "$CPP_FILES"
+          echo "Modified C/C++ files: ${#modified_files[@]}"
+
+          search_root="src/app/tests"
+          if [ -d "$search_root" ]; then
+            echo "Searching for GTest files in $search_root..."
+            # Find test files containing common GTest patterns
+            find "$search_root" -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -exec grep -l -E "TEST\(|EXPECT_|ASSERT_" {} \; > found_test_files.txt 2>/dev/null || true
+
+            test_file_count=$(wc -l < found_test_files.txt 2>/dev/null || echo "0")
+            echo "Total GTest files found: $test_file_count"
+
+            files_with_tests=0
+            : > file_test_mapping.txt
+            declare -a all_test_files
+
+            for modified_file in "${modified_files[@]}"; do
+              [ -z "$modified_file" ] && continue
+
+              include_tests=""
+              if [ -f "$modified_file" ]; then
+                include_name=$(basename "$modified_file")
+                include_tests=$(find "$search_root" -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -exec grep -l -E "#include.*${include_name}" {} \; 2>/dev/null || true)
+              fi
+
+              if [ -n "$include_tests" ]; then
+                files_with_tests=$((files_with_tests + 1))
+                echo "$modified_file:$include_tests" >> file_test_mapping.txt
+                while IFS= read -r test_file; do
+                  [ -z "$test_file" ] && continue
+                  all_test_files+=("$test_file")
+                done <<< "$include_tests"
+              else
+                echo "$modified_file:" >> file_test_mapping.txt
+              fi
+            done
+
+            echo "Files with existing tests: $files_with_tests out of ${#modified_files[@]}"
+            cat file_test_mapping.txt || true
+
+            if [ "$files_with_tests" -gt 0 ]; then
+              echo "has-mappings=true" >> $GITHUB_OUTPUT
+              TEST_FILES=$(printf '%s\n' "${all_test_files[@]}" | sort -u | tr '\n' ',' | sed 's/,$//')
+              echo "test-files=$TEST_FILES" >> $GITHUB_OUTPUT
+            else
+              echo "has-mappings=false" >> $GITHUB_OUTPUT
+              echo "test-files=" >> $GITHUB_OUTPUT
+            fi
+
+            echo "files-with-tests=$files_with_tests" >> $GITHUB_OUTPUT
+          else
+            echo "$search_root directory not found"
+            echo "has-mappings=false" >> $GITHUB_OUTPUT
+            echo "files-with-tests=0" >> $GITHUB_OUTPUT
+            echo "test-files=" >> $GITHUB_OUTPUT
+          fi
+
+#      - name: "Validate Existing GTest Unit Tests"
+#        if: steps.mapping.outputs.has-mappings == 'true'
+#        env:
+#          LITELLM_TOKEN: ${{ secrets.LITELLM_TOKEN }}
+#          TEST_FILES: ${{ steps.mapping.outputs.test-files }}
+#        run: |
+#          set -euo pipefail
+#          echo "=== Validating Existing GTest Unit Tests ==="
+#
+#          if [ -z "$TEST_FILES" ]; then
+#            echo "No test files to validate"
+#            exit 0
+#          fi
+#
+#          # Convert comma-separated test files to array
+#          IFS=',' read -ra test_files <<< "$TEST_FILES"
+#
+#          # Initialize validation results file
+#          echo "=== Unit Test Validation Results ===" > validation_results.txt
+#          echo "" >> validation_results.txt
+#
+#          # Validate each test file
+#          for test_file in "${test_files[@]}"; do
+#            [ -z "$test_file" ] && continue
+#            
+#            echo "Validating: $test_file"
+#            
+#            # Run validation and capture result
+#            if python3 internal/silabs/ai_unit_test/validate_with_litellm.py "$test_file" >> validation_results.txt 2>&1; then
+#              echo "✅ Validation completed for: $test_file"
+#            else
+#              echo "⚠️ Validation had issues for: $test_file"
+#            fi
+#            
+#            echo "" >> validation_results.txt
+#            echo "---" >> validation_results.txt
+#            echo "" >> validation_results.txt
+#          done
+#
+#          # Display all validation results
+#          echo ""
+#          echo "=== COMPLETE VALIDATION RESULTS ==="
+#          cat validation_results.txt
+
+  code-coverage-analysis:
+    name: "Code Coverage Analysis"
+    runs-on: ubuntu-latest
+    needs: [analyze-pr-changes, find-and-validate-tests]
+    if: needs.find-and-validate-tests.outputs.has-test-mappings == 'true'
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Install GCC, GTest, and Coverage Tools"
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y build-essential lcov libgtest-dev cmake gcovr
+
+          # Build Google Test static libs
+          cd /usr/src/gtest
+          sudo cmake .
+           sudo cmake --build . --config Release
+           sudo cp lib/*.a /usr/lib/ || sudo cp *.a /usr/lib/
+          cd -
+
+          # Optional: Google Mock
+          if [ -d "/usr/src/gmock" ]; then
+            cd /usr/src/gmock
+           sudo cmake .
+            sudo cmake --build . --config Release
+            sudo cp lib/*.a /usr/lib/ || sudo cp *.a /usr/lib/
+            cd -
+          fi
+
+
+        # Smoke test GTest
+        echo '#include <gtest/gtest.h>
+        TEST(TestSuite, TestCase) { EXPECT_EQ(1, 1); }
+        int main(int argc, char **argv) {
+         ::testing::InitGoogleTest(&argc, argv);
+         return RUN_ALL_TESTS(); }' > /tmp/test_gtest.cpp
+        g++ -std=c++17 /tmp/test_gtest.cpp -lgtest -lgtest_main -pthread -o /tmp/test_gtest && echo "✅ GTest installation OK" || echo "❌ GTest installation failed"
+
+# - name: "Build & Run Tests with Coverage (filter to changed files) - ORIGINAL VERSION"
+#   env:
+#     REQUIRED_COVERAGE: ${{ needs.analyze-pr-changes.outputs.required-coverage }}
+#     TEST_FILES: ${{ needs.find-and-validate-tests.outputs.test-files }}
+#     CPP_FILES: ${{ needs.analyze-pr-changes.outputs.cpp-files }}
+#   run: |
+#     set -euo pipefail
+#     echo "Required Coverage: $REQUIRED_COVERAGE%"
+#
+#     if [ -z "$TEST_FILES" ]; then
+#       echo "No test files found - skipping coverage analysis"
+#       exit 0
+#     fi
+#
+#     echo "$CPP_FILES" | tr ',' '\n' > changed_files.txt
+#     echo "=== Changed files ==="
+#     cat changed_files.txt
+#
+#     mkdir -p build && cd build
+#     fail_count=0
+#     pass_count=0
+#
+#     # Build each test with likely source(s) included (best-effort heuristic)
+#     while IFS= read -r tf; do
+#       [ -z "$tf" ] && continue
+#       echo ""
+#       echo "=== Processing test: $tf ==="
+#       test_name=$(basename "$tf")
+#       exe_name="${test_name%.*}"
+#
+#       # Collect candidate sources by matching #includes to changed files basenames
+#       includes=$(grep -oE '#include *["<][^">]+' "../$tf" | sed 's/#include *["<]//' || true)
+#       srcs=""
+#       while IFS= read -r inc; do
+#         [ -z "$inc" ] && continue
+#         base=$(basename "$inc")
+#         hit=$(grep -m1 -R --include=\*.{c,cc,cpp} -n "$base" .. | cut -d: -f1 | head -n1 || true)
+#         if [ -n "$hit" ]; then
+#           srcs="$srcs $hit"
+#         fi
+#       done <<< "$includes"
+#
+#       echo "Candidate sources: $srcs"
+#
+#       if g++ -std=c++17 -fprofile-arcs -ftest-coverage -pthread ../"$tf" $srcs -lgtest -lgtest_main -o "$exe_name"; then
+#         echo "✅ Build OK: $tf"
+#         if ./"$exe_name"; then
+#           echo "✅ Tests passed: $tf"
+#           pass_count=$((pass_count+1))
+#         else
+#           echo "⚠️ Tests failed (continuing): $tf"
+#         fi
+#       else
+#         echo "⚠️ Build failed (continuing): $tf"
+#         fail_count=$((fail_count+1))
+#         continue
+#       fi
+#     done < <(echo "$TEST_FILES" | tr ',' '\n')
+#
+#     echo ""
+#     echo "Build summary: pass=$pass_count, fail=$fail_count"
+#
+#     # Generate coverage only for changed files
+#     cd ..
+#     # gcovr filter expects paths; prepend repo root to each
+#     mapfile -t FILTERS < <(sed "s|^|$(pwd)/|" changed_files.txt)
+#     # Create a temporary file with --filter entries (one per line)
+#     : > filters.txt
+#     for f in "${FILTERS[@]}"; do echo "$f" >> filters.txt; done
+#
+#     echo "=== Generating coverage (changed files only) ==="
+#     # gcovr prints a summary including 'lines: XX.YY%'
+#     gcovr --root . --gcov-executable gcov --exclude-unreachable-branches \
+#           --txt --filter "$(pwd)" \
+#           $(awk '{printf("--filter %s ", $0)}' filters.txt) \
+#           > coverage_summary.txt || true
+#
+#     echo "=== COVERAGE SUMMARY (raw) ==="
+#     cat coverage_summary.txt || true
+#
+#     PCT=$(grep -Eo 'lines:\s*[0-9.]+%' coverage_summary.txt | tail -1 | tr -dc '0-9.')
+#     PCT=${PCT:-0}
+#     echo "Average Coverage (changed files): ${PCT}%"
+#     awk -v p="$PCT" -v r="$REQUIRED_COVERAGE" 'BEGIN { if (p+0 < r+0) exit 1 }' \
+#       || { echo "::error::Code coverage (${PCT}%) is below required threshold ($REQUIRED_COVERAGE%)"; exit 1; }
+
+ - name: "Build & Run Tests with Coverage (filter to changed files)"
+   id: coverage
+   env:
+     REQUIRED_COVERAGE: ${{ needs.analyze-pr-changes.outputs.required-coverage }}
+     TEST_FILES: ${{ needs.find-and-validate-tests.outputs.test-files }}
+     CPP_FILES: ${{ needs.analyze-pr-changes.outputs.cpp-files }}
+   run: |
+     echo "=== DEBUG: Input Variables ==="
+     echo "Required Coverage: $REQUIRED_COVERAGE%"
+     echo "Test Files: $TEST_FILES"
+     echo "CPP Files: $CPP_FILES"
+
+     # Initialize coverage output early to prevent undefined errors
+     echo "actual-coverage=0" >> $GITHUB_OUTPUT
+
+     if [ -z "$TEST_FILES" ]; then
+       echo "No test files found - skipping coverage analysis"
+       exit 0
+     fi
+
+     echo "$CPP_FILES" | tr ',' '\n' > changed_files.txt
+     echo "=== Changed files ==="
+     cat changed_files.txt
+
+     mkdir -p build && cd build
+     fail_count=0
+     pass_count=0
+
+     # Build each test with proper source linking
+     while IFS= read -r tf; do
+       [ -z "$tf" ] && continue
+       echo ""
+       echo "=== Processing test: $tf ==="
+       test_name=$(basename "$tf")
+       exe_name="${test_name%.*}"
+
+       # Generic source file detection based on includes in the test file
+       srcs=""
+       echo "Looking for includes in $tf..."
+       includes=$(grep -oE '#include *["<][^">]+\.h' "../$tf" | sed 's/#include *["<]//' | sed 's/"//' || true)
+       echo "Found includes: $includes"
+       for inc in $includes; do
+         [ -z "$inc" ] && continue
+         base=$(basename "$inc" .h)
+         echo "Looking for ${base}.c or ${base}.cpp..."
+         # Look for corresponding .c or .cpp file
+         c_file=$(find .. -name "${base}.c" -type f | head -n1 || true)
+         cpp_file=$(find .. -name "${base}.cpp" -type f | head -n1 || true)
+
+         if [ -n "$c_file" ] && [ -f "$c_file" ]; then
+           srcs="$srcs $c_file"
+           echo "Found C source: $c_file"
+         elif [ -n "$cpp_file" ] && [ -f "$cpp_file" ]; then
+           srcs="$srcs $cpp_file"
+           echo "Found C++ source: $cpp_file"
+         fi
+       done
+
+       echo "Source files to link: $srcs"
+
+       # Compile test with proper source files
+       if [ -n "$srcs" ]; then
+         # Compile with source files
+         echo "Compiling with sources: g++ -std=c++17 -fprofile-arcs -ftest-coverage -pthread ../$tf $srcs -lgtest -lgtest_main -o $exe_name"
+         if g++ -std=c++17 -fprofile-arcs -ftest-coverage -pthread "../$tf" $srcs -lgtest -lgtest_main -o "$exe_name" 2>&1; then
+           echo "✅ Build OK: $tf (with sources: $srcs)"
+           if ./"$exe_name" 2>&1; then
+             echo "✅ Tests passed: $tf"
+             pass_count=$((pass_count+1))
+           else
+             echo "⚠️ Tests failed but continuing: $tf"
+           fi
+         else
+           echo "❌ Build failed with sources: $tf"
+           fail_count=$((fail_count+1))
+           continue
+         fi
+       else
+         # Try to compile without additional sources (self-contained test)
+         echo "Trying self-contained compilation..."
+         if g++ -std=c++17 -fprofile-arcs -ftest-coverage -pthread "../$tf" -lgtest -lgtest_main -o "$exe_name" 2>&1; then
+           echo "✅ Build OK: $tf (self-contained)"
+           if ./"$exe_name" 2>&1; then
+             echo "✅ Tests passed: $tf"
+             pass_count=$((pass_count+1))
+           else
+             echo "⚠️ Tests failed but continuing: $tf"
+           fi
+         else
+           echo "❌ Build failed - no sources found: $tf"
+           fail_count=$((fail_count+1))
+           continue
+         fi
+       fi
+     done < <(echo "$TEST_FILES" | tr ',' '\n')
+
+     echo ""
+     echo "Build summary: pass=$pass_count, fail=$fail_count"
+
+     # Only proceed with coverage if we had at least one successful build
+     if [ "$pass_count" -eq 0 ]; then
+       echo "❌ No tests compiled successfully - cannot generate coverage"
+       echo "actual-coverage=0" >> $GITHUB_OUTPUT
+       exit 1
+     fi
+
+     # Generate coverage only for changed files
+     cd ..
+     echo "=== Generating coverage report ==="
+
+     # Try gcovr first (preferred)
+     if command -v gcovr >/dev/null 2>&1; then
+       echo "Using gcovr for coverage report..."
+       gcovr --root . --gcov-executable gcov --exclude-unreachable-branches --txt > coverage_summary.txt 2>&1 || true
+     else
+       echo "gcovr not found, trying lcov..."
+       lcov --capture --directory . --output-file coverage.info 2>&1 || true
+       lcov --list coverage.info > coverage_summary.txt 2>&1 || true
+     fi
+
+     echo "=== COVERAGE SUMMARY (raw) ==="
+     cat coverage_summary.txt || echo "No coverage summary generated"
+
+     # Extract coverage percentage with multiple fallback methods
+     PCT=""
+
+     # Method 1: gcovr format
+     PCT=$(grep -Eo 'lines:\s*[0-9.]+%' coverage_summary.txt | tail -1 | tr -dc '0-9.' || true)
+
+     # Method 2: lcov format
+     if [ -z "$PCT" ]; then
+       PCT=$(grep -Eo '[0-9.]+%' coverage_summary.txt | tail -1 | tr -dc '0-9.' || true)
+     fi
+
+     # Method 3: TOTAL line format
+     if [ -z "$PCT" ]; then
+       PCT=$(grep -i "TOTAL" coverage_summary.txt | grep -Eo '[0-9.]+%' | tr -dc '0-9.' || true)
+     fi
+
+     PCT=${PCT:-0}
+     echo "Extracted Coverage: ${PCT}%"
+
+     # Update the output with actual coverage
+     echo "actual-coverage=$PCT" >> $GITHUB_OUTPUT
+
+     # Check if coverage meets requirement (but don't fail the step - let PR comment show the result)
+     if awk -v p="$PCT" -v r="$REQUIRED_COVERAGE" 'BEGIN { if (p+0 < r+0) exit 1 }'; then
+       echo "✅ Coverage requirement MET (${PCT}% >= $REQUIRED_COVERAGE%)"
+     else
+       echo "❌ Coverage requirement NOT MET (${PCT}% < $REQUIRED_COVERAGE%)"
+       echo "::error::Code coverage (${PCT}%) is below required threshold ($REQUIRED_COVERAGE%)"
+       exit 1
+     fi
+
+# - name: "Post Code Coverage Comment on PR"
+#   if: always()
+#   uses: actions/github-script@v6
+#   with:
+#     github-token: ${{ secrets.GITHUB_TOKEN }}
+#     script: |
+#       const prNumber = context.payload.pull_request.number;
+#       const botUserId = 'github-actions[bot]';
+#
+#       // Get all comments on the PR
+#       const { data: comments } = await github.rest.issues.listComments({
+#         owner: context.repo.owner,
+#         repo: context.repo.repo,
+#         issue_number: prNumber,
+#       });
+#
+#       // Find and delete previous bot comments that contain coverage reports
+#       for (const comment of comments) {
+#         if (comment.user.login === botUserId &&
+#             comment.body.includes('Code Coverage Report')) {
+#           console.log(`Deleting previous coverage comment: ${comment.id}`);
+#           await github.rest.issues.deleteComment({
+#             owner: context.repo.owner,
+#             repo: context.repo.repo,
+#             comment_id: comment.id,
+#           });
+#         }
+#       }
+#
+#       // Prepare the new coverage comment
+#       const requiredCoverage = '${{ needs.analyze-pr-changes.outputs.required-coverage }}';
+#       const actualCoverage = '${{ steps.coverage.outputs.actual-coverage }}' || '0';
+#       const totalChanges = '${{ needs.analyze-pr-changes.outputs.total-changes }}';
+#       const cppFiles = '${{ needs.analyze-pr-changes.outputs.cpp-files }}';
+#       const testFiles = '${{ needs.find-and-validate-tests.outputs.test-files }}';
+#       const filesWithTests = '${{ needs.find-and-validate-tests.outputs.files-with-tests }}';
+#
+#       const coverageStatus = parseFloat(actualCoverage) >= parseFloat(requiredCoverage) ? '✅' : '❌';
+#       // const coverageEmoji = parseFloat(actualCoverage) >= parseFloat(requiredCoverage) ? '🎯' : '⚠️';
+#
+#       const changedFilesList = cppFiles ? cppFiles.split(',').map(f => `- \`${f.trim()}\``).join('\n') : '- None';
+#       const testFilesList = testFiles ? testFiles.split(',').map(f => `- \`${f.trim()}\``).join('\n') : '- None found';
+#
+#       const passedMessage = '🎉 **Great job!** Your code coverage meets the requirements.';
+#       const failedMessage = `📝 **Action Required**: Code coverage is below the required threshold of ${requiredCoverage}%. Please add more tests or improve existing ones.`;
+#       const finalMessage = parseFloat(actualCoverage) >= parseFloat(requiredCoverage) ? passedMessage : failedMessage;
+#
+#       const commentBody = [
+#         `## Code Coverage Report`,
+#         '',
+#         '### Coverage Summary',
+#         `- **Required Coverage**: ${requiredCoverage}%`,
+#         `- **Actual Coverage**: ${actualCoverage}%`,
+#         `- **Status**: ${coverageStatus} ${parseFloat(actualCoverage) >= parseFloat(requiredCoverage) ? 'PASSED' : 'FAILED'}`,
+#         '',
+#         '### PR Analysis',
+#         `- **Total C/C++ Lines Added**: ${totalChanges}`,
+#         `- **Files with Existing Tests**: ${filesWithTests}`,
+#         '',
+#         '### Changed Files',
+#         changedFilesList,
+#         '',
+#         '### Test Files Found',
+#         testFilesList,
+#         '',
+#         '---',
+#         finalMessage,
+#         '',
+#         '*This comment will be updated automatically on each push.*'
+#       ].join('\n');
+#
+#       // Post the new comment
+#       await github.rest.issues.createComment({
+#         owner: context.repo.owner,
+#         repo: context.repo.repo,
+#         issue_number: prNumber,
+#         body: commentBody,
+#       });
