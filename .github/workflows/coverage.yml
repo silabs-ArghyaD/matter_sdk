@@ -50,7 +50,7 @@ jobs:
           apt-get update
           apt-get install -y jq lcov
           apt-get install -y libglib2.0-dev libdbus-1-dev
-          
+
       - name: Checkout submodules & Bootstrap
         uses: ./.github/actions/checkout-submodules-and-bootstrap
         with:
@@ -59,6 +59,7 @@ jobs:
 
       - name: Setup Build
         run: |
+          source scripts/bootstrap.sh
           gn gen out/coverage --args='use_coverage=true'
           ninja -C out/coverage check -k 0
 
