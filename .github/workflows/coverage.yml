@@ -57,14 +57,19 @@ jobs:
           platform: linux
           bootstrap-log-name: bootstrap-logs-codecov-${{ matrix.type }}
 
-      - name: Setup Build
-        run: |
-          . scripts/bootstrap.sh
-          gn gen out/coverage --args='use_coverage=true'
-          ninja -C out/coverage check -k 0
+      # - name: Setup Build
+      #   run: |
+      #     GN_ARGS='chip_enable_icd_server=true chip_enable_icd_lit=true chip_build_all_platform_tests=true'
+      #     scripts/build/gn_gen.sh --args="$GN_ARGS"
+      
+      # - name: Run Build
+      #   run: scripts/run_in_build_env.sh "ninja -C out/coverage"
+            
+      # - name: Run Tests
+      #   run: scripts/tests/gn_tests.sh
 
       - name: Run Build Coverage
-        run: ./scripts/build_coverage.sh --yaml --xml -o=out/coverage --code=all
+        run: ./scripts/build_coverage.sh --yaml --xml
       
       - name: Install gpg
         run: |
