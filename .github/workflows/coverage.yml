@@ -50,7 +50,7 @@ jobs:
           apt-get update
           apt-get install -y jq lcov
           apt-get install -y libglib2.0-dev libdbus-1-dev
-
+          
       - name: Checkout submodules & Bootstrap
         uses: ./.github/actions/checkout-submodules-and-bootstrap
         with:
