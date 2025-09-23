@@ -59,7 +59,7 @@ jobs:
 
       - name: Setup Build
         run: |
-          source scripts/bootstrap.sh
+          . scripts/bootstrap.sh
           gn gen out/coverage --args='use_coverage=true'
           ninja -C out/coverage check -k 0
 
