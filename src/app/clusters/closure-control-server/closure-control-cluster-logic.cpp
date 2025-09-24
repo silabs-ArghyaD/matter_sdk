@@ -689,7 +689,7 @@ CHIP_ERROR ClusterLogic::GenerateSecureStateChangedEvent(const bool secureValue)
     return CHIP_NO_ERROR;
 }
 
-void ClusterLogic::DemoFunction()
+void DemoFunction()
 {
     // Demo function for testing coverage - basic print statements
     ChipLogProgress(AppServer, "Demo function started - line 1");
