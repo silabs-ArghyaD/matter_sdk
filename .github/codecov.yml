@@ -25,5 +25,5 @@ parsers:
 #   hide_project_coverage: false # [true :: only show coverage on the git diff aka patch coverage]
 
 comment:
-  ayout: "header, files, footer" # remove "new" from "header" and "footer"
+  layout: "header, files, footer" # remove "new" from "header" and "footer"
   hide_project_coverage: false # set to false
