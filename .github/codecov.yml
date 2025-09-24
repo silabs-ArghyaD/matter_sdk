@@ -5,10 +5,12 @@ coverage:
   status:
     project:
       default:
+        target: 50%
         informational: true
         if_ci_failed: ignore
     patch:
       default:
+        target: 50%
         informational: true
         if_ci_failed: ignore
 
