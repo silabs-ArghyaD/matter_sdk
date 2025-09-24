@@ -5,11 +5,11 @@ coverage:
   status:
     project:
       default:
-        # informational: true
+        informational: true
         if_ci_failed: ignore
     patch:
       default:
-        # informational: true
+        informational: true
         if_ci_failed: ignore
 
 parsers:
@@ -25,5 +25,9 @@ parsers:
 #   hide_project_coverage: false # [true :: only show coverage on the git diff aka patch coverage]
 
 comment:
-  layout: "header, files, footer" # remove "new" from "header" and "footer"
-  hide_project_coverage: false # set to false
+  layout: "header, diff, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: false
+  hide_project_coverage: false
