@@ -306,7 +306,7 @@ public:
      *          Success on succesful handling.
      */
     Protocols::InteractionModel::Status HandleMoveTo(Optional<TargetPositionEnum> position, Optional<bool> latch,
-                                                     Optional<Globals::ThreeLevelAutoEnum> speed, bool condition);
+                                                     Optional<Globals::ThreeLevelAutoEnum> speed);
 
     /**
      *  @brief Calls delegate HandleCalibrateCommand function after validating the parameters and conformance.
