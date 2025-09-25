@@ -561,6 +561,39 @@ Protocols::InteractionModel::Status ClusterLogic::HandleMoveTo(Optional<TargetPo
     ChipLogProgress(AppServer, "Demo function - line 25");
     VerifyOrDieWithMsg(mIsInitialized, AppServer, "MoveTo Command called before Initialization of closure");
 
+    if(1){
+        ChipLogProgress(AppServer, "Demo function - line 1");
+        ChipLogProgress(AppServer, "Demo function - line 2");
+        ChipLogProgress(AppServer, "Demo function - line 3");
+        ChipLogProgress(AppServer, "Demo function - line 4");
+        ChipLogProgress(AppServer, "Demo function - line 5");
+        ChipLogProgress(AppServer, "Demo function - line 6");
+        ChipLogProgress(AppServer, "Demo function - line 7");
+        ChipLogProgress(AppServer, "Demo function - line 8");
+        ChipLogProgress(AppServer, "Demo function - line 9");
+        ChipLogProgress(AppServer, "Demo function - line 10");
+        ChipLogProgress(AppServer, "Demo function - line 11");
+        ChipLogProgress(AppServer, "Demo function - line 12");
+        ChipLogProgress(AppServer, "Demo function - line 13");
+        ChipLogProgress(AppServer, "Demo function - line 14");
+    }
+    else{
+        ChipLogProgress(AppServer, " ELSE Demo function - line 1");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 2");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 3");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 4");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 5");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 6");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 7");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 8");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 9");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 10");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 11");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 12");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 13");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 14");
+    }
+
     VerifyOrReturnError(position.HasValue() || latch.HasValue() || speed.HasValue(), Status::InvalidCommand);
 
     DataModel::Nullable<GenericOverallCurrentState> overallCurrentState;
