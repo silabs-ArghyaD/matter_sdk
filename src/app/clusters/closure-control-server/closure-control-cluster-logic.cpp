@@ -727,11 +727,6 @@ void DemoFunction()
     ChipLogProgress(AppServer, "Demo function - line 8");
     ChipLogProgress(AppServer, "Demo function - line 9");
     ChipLogProgress(AppServer, "Demo function - line 10");
-    ChipLogProgress(AppServer, "Demo function - line 11");
-    ChipLogProgress(AppServer, "Demo function - line 12");
-    ChipLogProgress(AppServer, "Demo function - line 13");
-    ChipLogProgress(AppServer, "Demo function - line 14");
-    ChipLogProgress(AppServer, "Demo function - line 15");
     ChipLogProgress(AppServer, "Demo function completed - final line");
 }
 
