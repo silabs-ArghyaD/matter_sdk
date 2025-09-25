@@ -572,10 +572,6 @@ Protocols::InteractionModel::Status ClusterLogic::HandleMoveTo(Optional<TargetPo
         ChipLogProgress(AppServer, "Demo function - line 8");
         ChipLogProgress(AppServer, "Demo function - line 9");
         ChipLogProgress(AppServer, "Demo function - line 10");
-        ChipLogProgress(AppServer, "Demo function - line 11");
-        ChipLogProgress(AppServer, "Demo function - line 12");
-        ChipLogProgress(AppServer, "Demo function - line 13");
-        ChipLogProgress(AppServer, "Demo function - line 14");
     }
     else{
         ChipLogProgress(AppServer, " ELSE Demo function - line 1");
@@ -588,10 +584,6 @@ Protocols::InteractionModel::Status ClusterLogic::HandleMoveTo(Optional<TargetPo
         ChipLogProgress(AppServer, " ELSE Demo function - line 8");
         ChipLogProgress(AppServer, " ELSE Demo function - line 9");
         ChipLogProgress(AppServer, " ELSE Demo function - line 10");
-        ChipLogProgress(AppServer, " ELSE Demo function - line 11");
-        ChipLogProgress(AppServer, " ELSE Demo function - line 12");
-        ChipLogProgress(AppServer, " ELSE Demo function - line 13");
-        ChipLogProgress(AppServer, " ELSE Demo function - line 14");
     }
 
     VerifyOrReturnError(position.HasValue() || latch.HasValue() || speed.HasValue(), Status::InvalidCommand);
