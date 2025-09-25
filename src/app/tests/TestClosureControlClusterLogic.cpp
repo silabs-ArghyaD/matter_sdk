@@ -1332,7 +1332,7 @@ TEST_F(TestClosureControlClusterLogic, MoveToCommand_NoArguments)
     mockContext.ResetDirtyFlag();
     mockContext.ResetReportedAttributeId();
 
-    EXPECT_EQ(logic->HandleMoveTo(NullOptional, NullOptional, NullOptional), Status::InvalidCommand);
+    EXPECT_EQ(logic->HandleMoveTo(NullOptional, NullOptional, NullOptional, true), Status::InvalidCommand);
     EXPECT_FALSE(mockContext.HasBeenMarkedDirty());
 }
 

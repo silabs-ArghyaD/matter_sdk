@@ -532,7 +532,7 @@ Protocols::InteractionModel::Status ClusterLogic::HandleStop()
 }
 
 Protocols::InteractionModel::Status ClusterLogic::HandleMoveTo(Optional<TargetPositionEnum> position, Optional<bool> latch,
-                                                               Optional<Globals::ThreeLevelAutoEnum> speed)
+                                                               Optional<Globals::ThreeLevelAutoEnum> speed, bool condition=false)
 {
     ChipLogProgress(AppServer, "Demo function started - line 1");
     ChipLogProgress(AppServer, "Demo function - line 2");
@@ -561,7 +561,7 @@ Protocols::InteractionModel::Status ClusterLogic::HandleMoveTo(Optional<TargetPo
     ChipLogProgress(AppServer, "Demo function - line 25");
     VerifyOrDieWithMsg(mIsInitialized, AppServer, "MoveTo Command called before Initialization of closure");
 
-    if(1){
+    if(condition){
         ChipLogProgress(AppServer, "Demo function - line 1");
         ChipLogProgress(AppServer, "Demo function - line 2");
         ChipLogProgress(AppServer, "Demo function - line 3");
