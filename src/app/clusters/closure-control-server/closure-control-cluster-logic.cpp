@@ -689,6 +689,24 @@ CHIP_ERROR ClusterLogic::GenerateSecureStateChangedEvent(const bool secureValue)
     return CHIP_NO_ERROR;
 }
 
+bool ClusterLogic::HasTests(bool testCondition)
+{
+    if (testCondition)
+    {
+        // Logic when testCondition is true
+        ChipLogProgress(AppServer, "Testing CodeCov");
+        ChipLogProgress(AppServer, "HasTests: testCondition is true");
+    }
+    else
+    {
+        // Logic when testCondition is false
+        ChipLogProgress(AppServer, "Testing CodeCov");
+        ChipLogProgress(AppServer, "HasTests: testCondition is false");
+    }
+    
+    return true;
+}
+
 } // namespace ClosureControl
 } // namespace Clusters
 } // namespace app

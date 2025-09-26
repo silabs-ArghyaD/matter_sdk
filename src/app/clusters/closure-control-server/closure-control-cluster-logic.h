@@ -363,6 +363,15 @@ public:
      */
     CHIP_ERROR GenerateSecureStateChangedEvent(const bool secureValue);
 
+    /**
+     * @brief Function that takes a bool parameter and performs if-else logic
+     *
+     * @param[in] testCondition - Boolean parameter for conditional logic
+     *
+     * @return Always returns true
+     */
+    bool HasTests(bool testCondition);
+
 private:
     bool mIsInitialized = false;
     DelegateBase & mDelegate;
