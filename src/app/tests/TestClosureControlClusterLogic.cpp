@@ -1872,3 +1872,14 @@ TEST_F(TestClosureControlClusterLogic, HasTests_TrueCondition)
     
     EXPECT_TRUE(result);
 }
+
+TEST_F(TestClosureControlClusterLogic, HasTests_FalseCondition)
+{
+    conformance.FeatureMap().Set(Feature::kPositioning);
+    EXPECT_EQ(logic->Init(conformance, initParams), CHIP_NO_ERROR);
+
+    // Test the if condition (testCondition is false)
+    bool result = logic->HasTests(false);
+
+    EXPECT_TRUE(result);
+}
