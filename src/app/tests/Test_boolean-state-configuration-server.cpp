@@ -23,6 +23,7 @@ using namespace chip::app::Clusters;
 using namespace chip::app::Clusters::BooleanStateConfiguration::Attributes;
 using chip::app::Clusters::BooleanStateConfiguration::Delegate;
 using chip::Protocols::InteractionModel::Status;
+using namespace chip::app::Clusters::BooleanStateConfiguration;
 
 TEST(BooleanStateConfigurationServerTest, SetDefaultDelegateAndGetDefaultDelegate)
 {
