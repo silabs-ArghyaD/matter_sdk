@@ -242,7 +242,7 @@ chip_test_suite("tests") {
     "TestAttributePathParams.cpp",
     "TestAttributeValueDecoder.cpp",
     "TestAttributeValueEncoder.cpp",
-    "Test_boolean-state-configuration-server.cpp"
+    "Test_boolean-state-configuration-server.cpp",
     "TestBasicCommandPathRegistry.cpp",
     "TestBuilderParser.cpp",
     "TestCheckInHandler.cpp",
