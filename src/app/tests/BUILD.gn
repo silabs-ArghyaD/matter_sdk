@@ -229,6 +229,26 @@ source_set("closure-control-test-srcs") {
   ]
 }
 
+source_set("boolean-state-configuration-server") {
+  sources = [
+    "${chip_root}/src/app/clusters/boolean-state-configuration-server/boolean-state-configuration-server.cpp",
+    "${chip_root}/src/app/clusters/boolean-state-configuration-server/boolean-state-configuration-server.h",
+    "${chip_root}/src/app/clusters/boolean-state-configuration-server/boolean-state-configuration-delegate.h",
+    "${chip_root}/src/app/clusters/boolean-state-configuration-server/BooleanStateConfigurationTestEventTriggerHandler.cpp",
+    "${chip_root}/src/app/clusters/boolean-state-configuration-server/BooleanStateConfigurationTestEventTriggerHandler.h",
+  ]
+
+  deps = [
+    "${chip_root}/src/app",
+    "${chip_root}/src/app:interaction-model",
+    "${chip_root}/src/app/cluster-building-blocks:cluster-building-blocks",
+    "${chip_root}/src/app/common:enums",
+    "${chip_root}/src/lib/core",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/zzz_generated/app-common/clusters/BooleanStateConfiguration:metadata",
+  ]
+}
+
 chip_test_suite("tests") {
   output_name = "libAppTests"
 
@@ -242,6 +262,7 @@ chip_test_suite("tests") {
     "TestAttributePathParams.cpp",
     "TestAttributeValueDecoder.cpp",
     "TestAttributeValueEncoder.cpp",
+    "Test_boolean-state-configuration-server.cpp",
     "TestBasicCommandPathRegistry.cpp",
     "TestBuilderParser.cpp",
     "TestCheckInHandler.cpp",
