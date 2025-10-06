@@ -1,0 +1,165 @@
+name: Code-Coverage LCOV
+
+on:
+  pull_request:
+  push:
+    branches: [ master, 'v*-branch' ]
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-coverage-${{ (github.event_name == 'pull_request' && github.event.number) || (github.event_name == 'workflow_dispatch' && github.run_number) || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read  
+  pull-requests: write
+
+env:
+  CHIP_NO_LOG_TIMESTAMPS: true
+
+jobs:
+  linux-coverage:
+    name: Coverage
+    if: github.actor != 'restyled-io[bot]'
+    
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/project-chip/chip-build:167
+      volumes:
+        - "/:/runner-root-volume"
+        - "/tmp/log_output:/tmp/test_logs"      
+      options: --privileged --sysctl "net.ipv6.conf.all.disable_ipv6=0 net.ipv4.conf.all.forwarding=1 net.ipv6.conf.all.forwarding=1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y jq lcov
+          apt-get install -y libglib2.0-dev libdbus-1-dev
+          
+      - name: Checkout submodules & Bootstrap
+        uses: ./.github/actions/checkout-submodules-and-bootstrap
+        with:
+          platform: linux
+          bootstrap-log-name: bootstrap-logs-codecov-${{ matrix.type }}
+
+      - name: Run Build Coverage
+        run: ./scripts/build_coverage.sh --yaml --xml
+      
+      - name: Generate Coverage Summary
+        run: |
+          # Generate a human-readable coverage summary
+          lcov --summary out/coverage/coverage/coverage.info > coverage-summary.txt 2>&1 || true
+          
+          # Extract key metrics from the XML file
+          if [ -f "out/coverage/coverage/coverage.xml" ]; then
+            python3 -c '
+          import xml.etree.ElementTree as ET
+          import sys
+          
+          try:
+              tree = ET.parse("out/coverage/coverage/coverage.xml")
+              root = tree.getroot()
+              
+              # Find coverage metrics
+              for coverage in root.findall(".//coverage"):
+                  line_rate = coverage.get("line-rate", "0")
+                  branch_rate = coverage.get("branch-rate", "0")
+                  lines_covered = coverage.get("lines-covered", "0")
+                  lines_valid = coverage.get("lines-valid", "0")
+                  branches_covered = coverage.get("branches-covered", "0")
+                  branches_valid = coverage.get("branches-valid", "0")
+                  
+                  print(f"## 📊 Coverage Report")
+                  print(f"")
+                  print(f"**Overall Coverage Metrics:**")
+                  print(f"- **Line Coverage:** {float(line_rate)*100:.1f}% ({lines_covered}/{lines_valid} lines)")
+                  print(f"- **Branch Coverage:** {float(branch_rate)*100:.1f}% ({branches_covered}/{branches_valid} branches)")
+                  print(f"")
+                  print(f"📁 **Available Reports:**")
+                  print(f"- 📋 Coverage XML (machine-readable)")
+                  print(f"- 📊 Coverage HTML (interactive report)")
+                  print(f"- 📄 Coverage Info (LCOV format)")
+                  print(f"- 📝 Coverage Summary (text)")
+                  break
+          except Exception as e:
+              print(f"## 📊 Coverage Report")
+              print(f"❌ Error parsing coverage data: {e}")
+          ' > coverage-report.md
+          fi
+
+      - name: Upload Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.type }}
+          path: |
+            out/coverage/coverage/coverage.xml
+            out/coverage/coverage/coverage.info
+            out/coverage/coverage/html/**
+            coverage-summary.txt
+            coverage-report.md
+          retention-days: 30
+
+      - name: Comment Coverage Report on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            let coverageReport = '';
+            try {
+              coverageReport = fs.readFileSync('coverage-report.md', 'utf8');
+            } catch (error) {
+              coverageReport = '## 📊 Coverage Report\n❌ Could not generate coverage report';
+            }
+            
+            // Add artifact download instructions
+            const artifactMessage = `
+            
+            ## 📎 How to Access Coverage Reports:
+
+            1. **Download Artifacts:** Go to the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) and download \`coverage-report-${{ matrix.type }}\`
+            2. **View HTML Report:** Extract the artifact and open \`html/index.html\` in your browser for interactive coverage analysis
+            3. **Machine Processing:** Use \`coverage.xml\` (Cobertura format) or \`coverage.info\` (LCOV format) for tooling integration
+
+            ---
+            *Coverage report updated on: ${new Date().toISOString()}*
+            `;
+            
+            const body = coverageReport + artifactMessage;
+            
+            // Find existing coverage comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('📊 Coverage Report')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
