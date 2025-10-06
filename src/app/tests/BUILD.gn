@@ -229,7 +229,7 @@ source_set("closure-control-test-srcs") {
   ]
 }
 
-source_set("boolean-state-configuration-server") {
+source_set("boolean-state-configuration-server-srcs") {
   sources = [
     "${chip_root}/src/app/clusters/boolean-state-configuration-server/boolean-state-configuration-server.cpp",
     "${chip_root}/src/app/clusters/boolean-state-configuration-server/boolean-state-configuration-server.h",
@@ -307,6 +307,7 @@ chip_test_suite("tests") {
 
   public_deps = [
     ":app-test-stubs",
+    ":boolean-state-configuration-server-srcs",
     ":closure-control-test-srcs",
     ":closure-dimension-test-srcs",
     ":ecosystem-information-test-srcs",
