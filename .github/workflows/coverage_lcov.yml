@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/actions/checkout-submodules-and-bootstrap
         with:
           platform: linux
-          bootstrap-log-name: bootstrap-logs-codecov-${{ matrix.type }}
+          bootstrap-log-name: bootstrap-logs-codecov
 
       - name: Run Build Coverage
         run: ./scripts/build_coverage.sh --yaml --xml
@@ -56,47 +56,84 @@ jobs:
           # Generate a human-readable coverage summary
           lcov --summary out/coverage/coverage/coverage.info > coverage-summary.txt 2>&1 || true
           
-          # Extract key metrics from the XML file
+          # Parse XML directly from the first line to extract coverage data
           if [ -f "out/coverage/coverage/coverage.xml" ]; then
             python3 -c '
           import xml.etree.ElementTree as ET
           import sys
+          import os
           
           try:
+              # Parse the XML file
               tree = ET.parse("out/coverage/coverage/coverage.xml")
               root = tree.getroot()
               
-              # Find coverage metrics
-              for coverage in root.findall(".//coverage"):
-                  line_rate = coverage.get("line-rate", "0")
-                  branch_rate = coverage.get("branch-rate", "0")
-                  lines_covered = coverage.get("lines-covered", "0")
-                  lines_valid = coverage.get("lines-valid", "0")
-                  branches_covered = coverage.get("branches-covered", "0")
-                  branches_valid = coverage.get("branches-valid", "0")
-                  
-                  print(f"## 📊 Coverage Report")
-                  print(f"")
-                  print(f"**Overall Coverage Metrics:**")
-                  print(f"- **Line Coverage:** {float(line_rate)*100:.1f}% ({lines_covered}/{lines_valid} lines)")
-                  print(f"- **Branch Coverage:** {float(branch_rate)*100:.1f}% ({branches_covered}/{branches_valid} branches)")
-                  print(f"")
-                  print(f"📁 **Available Reports:**")
-                  print(f"- 📋 Coverage XML (machine-readable)")
-                  print(f"- 📊 Coverage HTML (interactive report)")
-                  print(f"- 📄 Coverage Info (LCOV format)")
-                  print(f"- 📝 Coverage Summary (text)")
-                  break
+              # Extract coverage attributes from the root coverage element
+              line_rate = root.get("line-rate", "0")
+              branch_rate = root.get("branch-rate", "0") 
+              lines_covered = root.get("lines-covered", "0")
+              lines_valid = root.get("lines-valid", "0")
+              branches_covered = root.get("branches-covered", "0")
+              branches_valid = root.get("branches-valid", "0")
+              timestamp = root.get("timestamp", "0")
+              
+              # Convert to percentages
+              line_percentage = float(line_rate) * 100
+              branch_percentage = float(branch_rate) * 100
+              
+              # Generate report
+              print(f"## 📊 Coverage Report")
+              print(f"")
+              print(f"**Overall Coverage Metrics:**")
+              print(f"- **Line Coverage:** {line_percentage:.1f}% ({lines_covered}/{lines_valid} lines)")
+              print(f"- **Branch Coverage:** {branch_percentage:.1f}% ({branches_covered}/{branches_valid} branches)")
+              print(f"")
+              
+              # Add coverage quality indicator
+              if line_percentage >= 80:
+                  quality = "🟢 Excellent"
+              elif line_percentage >= 60:
+                  quality = "🟡 Good" 
+              elif line_percentage >= 40:
+                  quality = "🟠 Fair"
+              else:
+                  quality = "🔴 Needs Improvement"
+              
+              print(f"**Coverage Quality:** {quality}")
+              print(f"")
+              print(f"📁 **Available Reports:**")
+              print(f"- 📋 Coverage XML (machine-readable)")
+              print(f"- 📊 Coverage HTML (interactive report)")
+              print(f"- 📄 Coverage Info (LCOV format)")
+              print(f"- 📝 Coverage Summary (text)")
+              
           except Exception as e:
               print(f"## 📊 Coverage Report")
-              print(f"❌ Error parsing coverage data: {e}")
+              print(f"❌ Error parsing coverage data: {str(e)}")
+              print(f"")
+              # Try to show first few lines of XML for debugging
+              try:
+                  with open("out/coverage/coverage/coverage.xml", "r") as f:
+                      lines = f.readlines()[:3]
+                      print(f"**XML Preview:**")
+                      for line in lines:
+                          print(f"`{line.strip()}`")
+              except:
+                  print("Could not read XML file")
           ' > coverage-report.md
+          
+            # Debug: Show if the report was generated
+            echo "Generated coverage-report.md:"
+            cat coverage-report.md || echo "Failed to generate report"
+          else
+            echo "## 📊 Coverage Report" > coverage-report.md
+            echo "❌ Coverage XML file not found" >> coverage-report.md
           fi
 
       - name: Upload Coverage Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ matrix.type }}
+          name: coverage-report
           path: |
             out/coverage/coverage/coverage.xml
             out/coverage/coverage/coverage.info
@@ -114,9 +151,16 @@ jobs:
             
             let coverageReport = '';
             try {
-              coverageReport = fs.readFileSync('coverage-report.md', 'utf8');
+              if (fs.existsSync('coverage-report.md')) {
+                coverageReport = fs.readFileSync('coverage-report.md', 'utf8');
+                console.log('Coverage report content:', coverageReport);
+              } else {
+                console.log('coverage-report.md not found');
+                coverageReport = '## 📊 Coverage Report\n❌ Coverage report file not found';
+              }
             } catch (error) {
-              coverageReport = '## 📊 Coverage Report\n❌ Could not generate coverage report';
+              console.log('Error reading coverage report:', error);
+              coverageReport = '## 📊 Coverage Report\n❌ Could not read coverage report: ' + error.message;
             }
             
             // Add artifact download instructions
@@ -124,7 +168,7 @@ jobs:
             
             ## 📎 How to Access Coverage Reports:
 
-            1. **Download Artifacts:** Go to the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) and download \`coverage-report-${{ matrix.type }}\`
+            1. **Download Artifacts:** Go to the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) and download \`coverage-report\`
             2. **View HTML Report:** Extract the artifact and open \`html/index.html\` in your browser for interactive coverage analysis
             3. **Machine Processing:** Use \`coverage.xml\` (Cobertura format) or \`coverage.info\` (LCOV format) for tooling integration
 
