@@ -130,7 +130,7 @@ jobs:
       - name: Prepare GitHub Pages Content
         run: |
           # Create _site directory (required by upload-pages-artifact)
-          mkdir -p _site
+          mkdir -p _site/coverage
           
           # Determine the target directory based on event type
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -140,15 +140,12 @@ jobs:
             COVERAGE_PATH="branch-$BRANCH_NAME"
           fi
           
-          # Copy HTML coverage report to _site root (for direct access)
-          cp -r out/coverage/coverage/html/* _site/
+          # Copy HTML coverage report
+          TARGET_DIR="_site/coverage/$COVERAGE_PATH"
+          mkdir -p "$TARGET_DIR"
+          cp -r out/coverage/coverage/html/* "$TARGET_DIR/"
           
-          # ALSO create organized structure for multiple reports
-          mkdir -p "_site/coverage/$COVERAGE_PATH"
-          cp -r out/coverage/coverage/html/* "_site/coverage/$COVERAGE_PATH/"
-          
-          # Create coverage index page
-          mkdir -p _site/coverage
+          # Create/update index page
           cat > _site/coverage/index.html << 'EOF'
           <!DOCTYPE html>
           <html>
