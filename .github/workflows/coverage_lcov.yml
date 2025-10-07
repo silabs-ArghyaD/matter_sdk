@@ -14,13 +14,15 @@ concurrency:
 permissions:
   contents: read  
   pull-requests: write
+  pages: write
+  id-token: write
 
 env:
   CHIP_NO_LOG_TIMESTAMPS: true
 
 jobs:
-  linux-coverage:
-    name: Coverage
+  build-coverage:
+    name: Build Coverage
     if: github.actor != 'restyled-io[bot]'
     
     runs-on: ubuntu-latest
@@ -101,11 +103,6 @@ jobs:
               
               print(f"**Coverage Quality:** {quality}")
               print(f"")
-              print(f"📁 **Available Reports:**")
-              print(f"- 📋 Coverage XML (machine-readable)")
-              print(f"- 📊 Coverage HTML (interactive report)")
-              print(f"- 📄 Coverage Info (LCOV format)")
-              print(f"- 📝 Coverage Summary (text)")
               
           except Exception as e:
               print(f"## 📊 Coverage Report")
@@ -130,6 +127,56 @@ jobs:
             echo "❌ Coverage XML file not found" >> coverage-report.md
           fi
 
+      - name: Prepare GitHub Pages Content
+        run: |
+          # Create _site directory (required by upload-pages-artifact)
+          mkdir -p _site/coverage
+          
+          # Determine the target directory based on event type
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            COVERAGE_PATH="pr-${{ github.event.number }}"
+          else
+            BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9]/-/g')
+            COVERAGE_PATH="branch-$BRANCH_NAME"
+          fi
+          
+          # Copy HTML coverage report
+          TARGET_DIR="_site/coverage/$COVERAGE_PATH"
+          mkdir -p "$TARGET_DIR"
+          cp -r out/coverage/coverage/html/* "$TARGET_DIR/"
+          
+          # Create/update index page
+          cat > _site/coverage/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Coverage Reports</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; }
+                  .report { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 5px; }
+                  .pr { background-color: #f8f9fa; }
+                  .branch { background-color: #e8f5e9; }
+                  .timestamp { color: #666; font-size: 0.9em; }
+                  a { text-decoration: none; color: #0366d6; }
+                  a:hover { text-decoration: underline; }
+              </style>
+          </head>
+          <body>
+              <h1>📊 Coverage Reports</h1>
+              <div id="reports"></div>
+          </body>
+          </html>
+          EOF
+          
+          # Build the correct GitHub Pages URL
+          REPO_NAME="${{ github.event.repository.name }}"
+          REPORT_URL="https://${{ github.repository_owner }}.github.io/${REPO_NAME}/coverage/${COVERAGE_PATH}"
+          
+          echo "REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+          echo "COVERAGE_PATH=$COVERAGE_PATH" >> $GITHUB_ENV
+          
+          echo "Coverage will be available at: $REPORT_URL"
+
       - name: Upload Coverage Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -137,10 +184,13 @@ jobs:
           path: |
             out/coverage/coverage/coverage.xml
             out/coverage/coverage/coverage.info
-            out/coverage/coverage/html/**
-            coverage-summary.txt
             coverage-report.md
-          retention-days: 30
+          retention-days: 7
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
 
       - name: Comment Coverage Report on PR
         if: github.event_name == 'pull_request'
@@ -163,20 +213,23 @@ jobs:
               coverageReport = '## 📊 Coverage Report\n❌ Could not read coverage report: ' + error.message;
             }
             
-            // Add artifact download instructions
-            const artifactMessage = `
+            // Add GitHub Pages link
+            const reportUrl = process.env.REPORT_URL;
+            const pagesMessage = `
+            ## 🌐 Interactive Coverage Report
             
-            ## 📎 How to Access Coverage Reports:
+            **[📊 View Full HTML Coverage Report](${reportUrl})**
+            
+            ## 📎 Additional Reports:
 
             1. **Download Artifacts:** Go to the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) and download \`coverage-report\`
-            2. **View HTML Report:** Extract the artifact and open \`html/index.html\` in your browser for interactive coverage analysis
-            3. **Machine Processing:** Use \`coverage.xml\` (Cobertura format) or \`coverage.info\` (LCOV format) for tooling integration
+            2. **Machine Processing:** Use \`coverage.xml\` (Cobertura format) or \`coverage.info\` (LCOV format) for tooling integration
 
             ---
             *Coverage report updated on: ${new Date().toISOString()}*
             `;
             
-            const body = coverageReport + artifactMessage;
+            const body = coverageReport + pagesMessage;
             
             // Find existing coverage comment
             const comments = await github.rest.issues.listComments({
@@ -207,3 +260,22 @@ jobs:
                 body: body
               });
             }
+
+  deploy-pages:
+    needs: build-coverage
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+    
+    permissions:
+      pages: write
+      id-token: write
+      
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
