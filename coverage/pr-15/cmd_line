@@ -1,0 +1,1 @@
+genhtml /__w/matter_sdk/matter_sdk/out/coverage/coverage/lcov_final.info --ignore-errors inconsistent,inconsistent,category,count --rc max_message_count=1000 --output-directory /__w/matter_sdk/matter_sdk/out/coverage/coverage/html --title SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 --header-title 'Matter SDK Coverage Report' --prefix /__w/matter_sdk/matter_sdk/src

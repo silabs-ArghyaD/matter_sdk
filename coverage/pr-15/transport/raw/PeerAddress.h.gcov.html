@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - transport/raw/PeerAddress.h</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">transport/raw</a> - PeerAddress.h<span style="font-size: 80%;"> (source / <a href="PeerAddress.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryLo">74.4&nbsp;%</td>
+            <td class="headerCovTableEntry">86</td>
+            <td class="headerCovTableEntry">64</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryMed">83.9&nbsp;%</td>
+            <td class="headerCovTableEntry">31</td>
+            <td class="headerCovTableEntry">26</td>
+          </tr>
+                  <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2020 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : </span>
+<span id="L18"><span class="lineNum">      18</span>              : /**</span>
+<span id="L19"><span class="lineNum">      19</span>              :  * @brief</span>
+<span id="L20"><span class="lineNum">      20</span>              :  *    File contains definitions on how a connection to a peer can be defined.</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *</span>
+<span id="L22"><span class="lineNum">      22</span>              :  */</span>
+<span id="L23"><span class="lineNum">      23</span>              : </span>
+<span id="L24"><span class="lineNum">      24</span>              : #pragma once</span>
+<span id="L25"><span class="lineNum">      25</span>              : </span>
+<span id="L26"><span class="lineNum">      26</span>              : #include &lt;inet/IPAddress.h&gt;</span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;inet/InetInterface.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/core/CHIPConfig.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;lib/core/DataModelTypes.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;lib/support/CHIPMemString.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : </span>
+<span id="L32"><span class="lineNum">      32</span>              : namespace chip {</span>
+<span id="L33"><span class="lineNum">      33</span>              : namespace Transport {</span>
+<span id="L34"><span class="lineNum">      34</span>              : </span>
+<span id="L35"><span class="lineNum">      35</span>              : /**</span>
+<span id="L36"><span class="lineNum">      36</span>              :  * Communication path defines how two peers communicate.</span>
+<span id="L37"><span class="lineNum">      37</span>              :  *</span>
+<span id="L38"><span class="lineNum">      38</span>              :  * When a peer contacts another peer, it defines how the peers communicate.</span>
+<span id="L39"><span class="lineNum">      39</span>              :  *</span>
+<span id="L40"><span class="lineNum">      40</span>              :  * Once communication between two peers is established, the same transport</span>
+<span id="L41"><span class="lineNum">      41</span>              :  * path should be used: a peer contacting another peer over UDP will receive</span>
+<span id="L42"><span class="lineNum">      42</span>              :  * messages back over UDP. A communication channel established over TCP</span>
+<span id="L43"><span class="lineNum">      43</span>              :  * will keep the same TCP channel.</span>
+<span id="L44"><span class="lineNum">      44</span>              :  *</span>
+<span id="L45"><span class="lineNum">      45</span>              :  */</span>
+<span id="L46"><span class="lineNum">      46</span>              : </span>
+<span id="L47"><span class="lineNum">      47</span>              : /**</span>
+<span id="L48"><span class="lineNum">      48</span>              :  * Here we specified Type to be uint8_t, so the PeerAddress can be serialized easily.</span>
+<span id="L49"><span class="lineNum">      49</span>              :  */</span>
+<span id="L50"><span class="lineNum">      50</span>              : enum class Type : uint8_t</span>
+<span id="L51"><span class="lineNum">      51</span>              : {</span>
+<span id="L52"><span class="lineNum">      52</span>              :     kUndefined,</span>
+<span id="L53"><span class="lineNum">      53</span>              :     kUdp,</span>
+<span id="L54"><span class="lineNum">      54</span>              :     kBle,</span>
+<span id="L55"><span class="lineNum">      55</span>              :     kTcp,</span>
+<span id="L56"><span class="lineNum">      56</span>              :     kWiFiPAF,</span>
+<span id="L57"><span class="lineNum">      57</span>              :     kNfc,</span>
+<span id="L58"><span class="lineNum">      58</span>              :     kLast = kNfc, // This is not an actual transport type, it just refers to the last transport type</span>
+<span id="L59"><span class="lineNum">      59</span>              : };</span>
+<span id="L60"><span class="lineNum">      60</span>              : </span>
+<span id="L61"><span class="lineNum">      61</span>              : /**</span>
+<span id="L62"><span class="lineNum">      62</span>              :  * Describes how a peer on a CHIP network can be addressed.</span>
+<span id="L63"><span class="lineNum">      63</span>              :  */</span>
+<span id="L64"><span class="lineNum">      64</span>              : class PeerAddress</span>
+<span id="L65"><span class="lineNum">      65</span>              : {</span>
+<span id="L66"><span class="lineNum">      66</span>              : public:</span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC tlaBgGNC">      820336 :     constexpr PeerAddress() : mTransportType(Type::kUndefined), mId{ .mRemoteId = kUndefinedNodeId } {}</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         582 :     constexpr PeerAddress(const Inet::IPAddress &amp; addr, Type type) :</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">         582 :         mIPAddress(addr), mTransportType(type), mId{ .mRemoteId = kUndefinedNodeId }</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">         582 :     {}</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">        1520 :     constexpr PeerAddress(Type type) : mTransportType(type), mId{ .mRemoteId = kUndefinedNodeId } {}</span></span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaUNC tlaBgUNC">           0 :     constexpr PeerAddress(Type type, NodeId remoteId) : mTransportType(type), mId{ .mRemoteId = remoteId } {}</span></span>
+<span id="L73"><span class="lineNum">      73</span>              : </span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaUNC">           0 :     constexpr PeerAddress(PeerAddress &amp;&amp;)        = default;</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">       90997 :     constexpr PeerAddress(const PeerAddress &amp;)   = default;</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">       17105 :     PeerAddress &amp; operator=(const PeerAddress &amp;) = default;</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">         204 :     PeerAddress &amp; operator=(PeerAddress &amp;&amp;)      = default;</span></span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaGNC">       15285 :     const Inet::IPAddress &amp; GetIPAddress() const { return mIPAddress; }</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">           1 :     PeerAddress &amp; SetIPAddress(const Inet::IPAddress &amp; addr)</span></span>
+<span id="L81"><span class="lineNum">      81</span>              :     {</span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">           1 :         mIPAddress = addr;</span></span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">           1 :         return *this;</span></span>
+<span id="L84"><span class="lineNum">      84</span>              :     }</span>
+<span id="L85"><span class="lineNum">      85</span>              : </span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaUNC tlaBgUNC">           0 :     NodeId GetRemoteId() const { return mId.mRemoteId; }</span></span>
+<span id="L87"><span class="lineNum">      87</span>              : </span>
+<span id="L88"><span class="lineNum">      88</span>              :     // NB: 0xFFFF is not allowed for NFC ShortId.</span>
+<span id="L89"><span class="lineNum">      89</span>              :     uint16_t GetNFCShortId() const { return mId.mNFCShortId; }</span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC tlaBgGNC">      134393 :     Type GetTransportType() const { return mTransportType; }</span></span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaUNC tlaBgUNC">           0 :     PeerAddress &amp; SetTransportType(Type type)</span></span>
+<span id="L93"><span class="lineNum">      93</span>              :     {</span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaUNC">           0 :         mTransportType = type;</span></span>
+<span id="L95"><span class="lineNum">      95</span> <span class="tlaUNC">           0 :         return *this;</span></span>
+<span id="L96"><span class="lineNum">      96</span>              :     }</span>
+<span id="L97"><span class="lineNum">      97</span>              : </span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC tlaBgGNC">       15404 :     uint16_t GetPort() const { return mPort; }</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC">       15921 :     PeerAddress &amp; SetPort(uint16_t port)</span></span>
+<span id="L100"><span class="lineNum">     100</span>              :     {</span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC">       15921 :         mPort = port;</span></span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaGNC">       15921 :         return *this;</span></span>
+<span id="L103"><span class="lineNum">     103</span>              :     }</span>
+<span id="L104"><span class="lineNum">     104</span>              : </span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">         180 :     Inet::InterfaceId GetInterface() const { return mInterface; }</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">       15198 :     PeerAddress &amp; SetInterface(Inet::InterfaceId interface)</span></span>
+<span id="L107"><span class="lineNum">     107</span>              :     {</span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">       15198 :         mInterface = interface;</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">       15198 :         return *this;</span></span>
+<span id="L110"><span class="lineNum">     110</span>              :     }</span>
+<span id="L111"><span class="lineNum">     111</span>              : </span>
+<span id="L112"><span class="lineNum">     112</span>              :     bool IsInitialized() const { return mTransportType != Type::kUndefined; }</span>
+<span id="L113"><span class="lineNum">     113</span>              : </span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC">           1 :     bool IsMulticast() { return Type::kUdp == mTransportType &amp;&amp; mIPAddress.IsIPv6Multicast(); }</span></span>
+<span id="L115"><span class="lineNum">     115</span>              : </span>
+<span id="L116"><span class="lineNum">     116</span>              :     bool operator==(const PeerAddress &amp; other) const;</span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC">       14894 :     bool operator!=(const PeerAddress &amp; other) const { return !(*this == other); }</span></span>
+<span id="L118"><span class="lineNum">     118</span>              : </span>
+<span id="L119"><span class="lineNum">     119</span>              :     /// Maximum size of the string outputes by ToString. Format is of the form:</span>
+<span id="L120"><span class="lineNum">     120</span>              :     /// &quot;UDP:&lt;ip&gt;:&lt;port&gt;&quot;</span>
+<span id="L121"><span class="lineNum">     121</span>              :     static constexpr size_t kMaxToStringSize = 3 // type: UDP/TCP/BLE</span>
+<span id="L122"><span class="lineNum">     122</span>              :         + 1                                      // splitter :</span>
+<span id="L123"><span class="lineNum">     123</span>              :         + 2                                      // brackets around address</span>
+<span id="L124"><span class="lineNum">     124</span>              :         + Inet::IPAddress::kMaxStringLength      // address</span>
+<span id="L125"><span class="lineNum">     125</span>              :         + 1                                      // splitter %</span>
+<span id="L126"><span class="lineNum">     126</span>              :         + Inet::InterfaceId::kMaxIfNameLength    // interface</span>
+<span id="L127"><span class="lineNum">     127</span>              :         + 1                                      // splitter :</span>
+<span id="L128"><span class="lineNum">     128</span>              :         + 5                                      // port: 16 bit interger</span>
+<span id="L129"><span class="lineNum">     129</span>              :         + 1;                                     // NullTerminator</span>
+<span id="L130"><span class="lineNum">     130</span>              : </span>
+<span id="L131"><span class="lineNum">     131</span>              :     template &lt;size_t N&gt;</span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">       15160 :     inline void ToString(char (&amp;buf)[N]) const</span></span>
+<span id="L133"><span class="lineNum">     133</span>              :     {</span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">       15160 :         ToString(buf, N);</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC">       15160 :     }</span></span>
+<span id="L136"><span class="lineNum">     136</span>              : </span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       15160 :     void ToString(char * buf, size_t bufSize) const</span></span>
+<span id="L138"><span class="lineNum">     138</span>              :     {</span>
+<span id="L139"><span class="lineNum">     139</span>              :         char ip_addr[Inet::IPAddress::kMaxStringLength];</span>
+<span id="L140"><span class="lineNum">     140</span>              : </span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">       15160 :         char interface[Inet::InterfaceId::kMaxIfNameLength + 1] = {}; // +1 to prepend '%'</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">       15160 :         if (mInterface.IsPresent())</span></span>
+<span id="L143"><span class="lineNum">     143</span>              :         {</span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaUNC tlaBgUNC">           0 :             interface[0]   = '%';</span></span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC">           0 :             interface[1]   = 0;</span></span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 :             CHIP_ERROR err = mInterface.GetInterfaceName(interface + 1, sizeof(interface) - 1);</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC">           0 :             if (err != CHIP_NO_ERROR)</span></span>
+<span id="L148"><span class="lineNum">     148</span>              :             {</span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :                 Platform::CopyString(interface, sizeof(interface), &quot;%(err)&quot;);</span></span>
+<span id="L150"><span class="lineNum">     150</span>              :             }</span>
+<span id="L151"><span class="lineNum">     151</span>              :         }</span>
+<span id="L152"><span class="lineNum">     152</span>              : </span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC tlaBgGNC">       15160 :         switch (mTransportType)</span></span>
+<span id="L154"><span class="lineNum">     154</span>              :         {</span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">          47 :         case Type::kUndefined:</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">          47 :             snprintf(buf, bufSize, &quot;UNDEFINED&quot;);</span></span>
+<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">          47 :             break;</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">       15059 :         case Type::kUdp:</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">       15059 :             mIPAddress.ToString(ip_addr);</span></span>
+<span id="L160"><span class="lineNum">     160</span>              : #if INET_CONFIG_ENABLE_IPV4</span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">       15059 :             if (mIPAddress.IsIPv4())</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaUNC tlaBgUNC">           0 :                 snprintf(buf, bufSize, &quot;UDP:%s%s:%d&quot;, ip_addr, interface, mPort);</span></span>
+<span id="L163"><span class="lineNum">     163</span>              :             else</span>
+<span id="L164"><span class="lineNum">     164</span>              : #endif</span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC tlaBgGNC">       15059 :                 snprintf(buf, bufSize, &quot;UDP:[%s%s]:%d&quot;, ip_addr, interface, mPort);</span></span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC">       15059 :             break;</span></span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">          53 :         case Type::kTcp:</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">          53 :             mIPAddress.ToString(ip_addr);</span></span>
+<span id="L169"><span class="lineNum">     169</span>              : #if INET_CONFIG_ENABLE_IPV4</span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">          53 :             if (mIPAddress.IsIPv4())</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">          22 :                 snprintf(buf, bufSize, &quot;TCP:%s%s:%d&quot;, ip_addr, interface, mPort);</span></span>
+<span id="L172"><span class="lineNum">     172</span>              :             else</span>
+<span id="L173"><span class="lineNum">     173</span>              : #endif</span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">          31 :                 snprintf(buf, bufSize, &quot;TCP:[%s%s]:%d&quot;, ip_addr, interface, mPort);</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">          53 :             break;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC tlaBgUNC">           0 :         case Type::kWiFiPAF:</span></span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaUNC">           0 :             snprintf(buf, bufSize, &quot;Wi-Fi PAF&quot;);</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaUNC">           0 :             break;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC tlaBgGNC">           1 :         case Type::kBle:</span></span>
+<span id="L180"><span class="lineNum">     180</span>              :             // Note that BLE does not currently use any specific address.</span>
+<span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC">           1 :             snprintf(buf, bufSize, &quot;BLE&quot;);</span></span>
+<span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC">           1 :             break;</span></span>
+<span id="L183"><span class="lineNum">     183</span> <span class="tlaUNC tlaBgUNC">           0 :         case Type::kNfc:</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaUNC">           0 :             snprintf(buf, bufSize, &quot;NFC:%d&quot;, mId.mNFCShortId);</span></span>
+<span id="L185"><span class="lineNum">     185</span> <span class="tlaUNC">           0 :             break;</span></span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC">           0 :         default:</span></span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaUNC">           0 :             snprintf(buf, bufSize, &quot;ERROR&quot;);</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaUNC">           0 :             break;</span></span>
+<span id="L189"><span class="lineNum">     189</span>              :         }</span>
+<span id="L190"><span class="lineNum">     190</span> <span class="tlaGNC tlaBgGNC">       15160 :     }</span></span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span>              :     /****** Factory methods for convenience ******/</span>
+<span id="L193"><span class="lineNum">     193</span>              : </span>
+<span id="L194"><span class="lineNum">     194</span> <span class="tlaGNC">         183 :     static constexpr PeerAddress Uninitialized() { return PeerAddress(Type::kUndefined); }</span></span>
+<span id="L195"><span class="lineNum">     195</span>              : </span>
+<span id="L196"><span class="lineNum">     196</span> <span class="tlaGNC">           1 :     static constexpr PeerAddress BLE() { return PeerAddress(Type::kBle); }</span></span>
+<span id="L197"><span class="lineNum">     197</span>              : </span>
+<span id="L198"><span class="lineNum">     198</span>              :     // NB: 0xFFFF is not allowed for NFC ShortId.</span>
+<span id="L199"><span class="lineNum">     199</span>              :     static constexpr PeerAddress NFC() { return PeerAddress(kUndefinedNFCShortId()); }</span>
+<span id="L200"><span class="lineNum">     200</span>              :     static constexpr PeerAddress NFC(const uint16_t shortId) { return PeerAddress(shortId); }</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span> <span class="tlaGNC">         532 :     static PeerAddress UDP(const Inet::IPAddress &amp; addr) { return PeerAddress(addr, Type::kUdp); }</span></span>
+<span id="L203"><span class="lineNum">     203</span> <span class="tlaGNC">         405 :     static PeerAddress UDP(const Inet::IPAddress &amp; addr, uint16_t port) { return UDP(addr).SetPort(port); }</span></span>
+<span id="L204"><span class="lineNum">     204</span>              : </span>
+<span id="L205"><span class="lineNum">     205</span>              :     /**</span>
+<span id="L206"><span class="lineNum">     206</span>              :      * Parses a PeerAddress from the given IP address string with UDP type. For example,</span>
+<span id="L207"><span class="lineNum">     207</span>              :      * &quot;192.168.1.4&quot;, &quot;fe80::2&quot;, &quot;fe80::1%wlan0&quot;. Notably this will also include the network scope</span>
+<span id="L208"><span class="lineNum">     208</span>              :      * ID in either index or name form (e.g. %wlan0, %14).</span>
+<span id="L209"><span class="lineNum">     209</span>              :      */</span>
+<span id="L210"><span class="lineNum">     210</span>              :     static PeerAddress UDP(char * addrStr, uint16_t port) { return PeerAddress::FromString(addrStr, port, Type::kUdp); }</span>
+<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">         109 :     static PeerAddress UDP(const Inet::IPAddress &amp; addr, uint16_t port, Inet::InterfaceId interface)</span></span>
+<span id="L212"><span class="lineNum">     212</span>              :     {</span>
+<span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">         109 :         return UDP(addr).SetPort(port).SetInterface(interface);</span></span>
+<span id="L214"><span class="lineNum">     214</span>              :     }</span>
+<span id="L215"><span class="lineNum">     215</span> <span class="tlaGNC">          50 :     static PeerAddress TCP(const Inet::IPAddress &amp; addr) { return PeerAddress(addr, Type::kTcp); }</span></span>
+<span id="L216"><span class="lineNum">     216</span> <span class="tlaGNC">          29 :     static PeerAddress TCP(const Inet::IPAddress &amp; addr, uint16_t port) { return TCP(addr).SetPort(port); }</span></span>
+<span id="L217"><span class="lineNum">     217</span>              : </span>
+<span id="L218"><span class="lineNum">     218</span>              :     /**</span>
+<span id="L219"><span class="lineNum">     219</span>              :      * Parses a PeerAddress from the given IP address string with TCP type. For example,</span>
+<span id="L220"><span class="lineNum">     220</span>              :      * &quot;192.168.1.4&quot;, &quot;fe80::2&quot;, &quot;fe80::1%wlan0&quot;. Notably this will also include the network scope</span>
+<span id="L221"><span class="lineNum">     221</span>              :      * ID in either index or name form (e.g. %wlan0, %14).</span>
+<span id="L222"><span class="lineNum">     222</span>              :      */</span>
+<span id="L223"><span class="lineNum">     223</span>              :     static PeerAddress TCP(char * addrStr, uint16_t port) { return PeerAddress::FromString(addrStr, port, Type::kTcp); }</span>
+<span id="L224"><span class="lineNum">     224</span> <span class="tlaGNC">          21 :     static PeerAddress TCP(const Inet::IPAddress &amp; addr, uint16_t port, Inet::InterfaceId interface)</span></span>
+<span id="L225"><span class="lineNum">     225</span>              :     {</span>
+<span id="L226"><span class="lineNum">     226</span> <span class="tlaGNC">          21 :         return TCP(addr).SetPort(port).SetInterface(interface);</span></span>
+<span id="L227"><span class="lineNum">     227</span>              :     }</span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaUNC tlaBgUNC">           0 :     static constexpr PeerAddress WiFiPAF(NodeId remoteId) { return PeerAddress(Type::kWiFiPAF, remoteId); }</span></span>
+<span id="L230"><span class="lineNum">     230</span>              : </span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC tlaBgGNC">           5 :     static PeerAddress Multicast(chip::FabricId fabric, chip::GroupId group)</span></span>
+<span id="L232"><span class="lineNum">     232</span>              :     {</span>
+<span id="L233"><span class="lineNum">     233</span> <span class="tlaGNC">           5 :         constexpr uint8_t scope        = 0x05; // Site-Local</span></span>
+<span id="L234"><span class="lineNum">     234</span> <span class="tlaGNC">           5 :         constexpr uint8_t prefixLength = 0x40; // 64-bit long network prefix field</span></span>
+<span id="L235"><span class="lineNum">     235</span>              :         // The network prefix portion of the Multicast Address is the 64-bit bitstring formed by concatenating:</span>
+<span id="L236"><span class="lineNum">     236</span>              :         // * 0xFD to designate a locally assigned ULA prefix</span>
+<span id="L237"><span class="lineNum">     237</span>              :         // * The upper 56-bits of the Fabric ID for the network in big-endian order</span>
+<span id="L238"><span class="lineNum">     238</span> <span class="tlaGNC">           5 :         const uint64_t prefix = 0xfd00000000000000 | ((fabric &gt;&gt; 8) &amp; 0x00ffffffffffffff);</span></span>
+<span id="L239"><span class="lineNum">     239</span>              :         // The 32-bit group identifier portion of the Multicast Address is the 32-bits formed by:</span>
+<span id="L240"><span class="lineNum">     240</span>              :         // * The lower 8-bits of the Fabric ID</span>
+<span id="L241"><span class="lineNum">     241</span>              :         // * 0x00</span>
+<span id="L242"><span class="lineNum">     242</span>              :         // * The 16-bits Group Identifier in big-endian order</span>
+<span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">           5 :         uint32_t groupId = static_cast&lt;uint32_t&gt;((fabric &lt;&lt; 24) &amp; 0xff000000) | group;</span></span>
+<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">           5 :         return UDP(Inet::IPAddress::MakeIPv6PrefixMulticast(scope, prefixLength, prefix, groupId));</span></span>
+<span id="L245"><span class="lineNum">     245</span>              :     }</span>
+<span id="L246"><span class="lineNum">     246</span>              : </span>
+<span id="L247"><span class="lineNum">     247</span>              : private:</span>
+<span id="L248"><span class="lineNum">     248</span>              :     constexpr PeerAddress(uint16_t shortId) : mTransportType(Type::kNfc), mId{ .mNFCShortId = shortId } {}</span>
+<span id="L249"><span class="lineNum">     249</span>              : </span>
+<span id="L250"><span class="lineNum">     250</span>              :     static PeerAddress FromString(char * addrStr, uint16_t port, Type type)</span>
+<span id="L251"><span class="lineNum">     251</span>              :     {</span>
+<span id="L252"><span class="lineNum">     252</span>              :         Inet::IPAddress addr;</span>
+<span id="L253"><span class="lineNum">     253</span>              :         Inet::InterfaceId interfaceId;</span>
+<span id="L254"><span class="lineNum">     254</span>              :         Inet::IPAddress::FromString(addrStr, addr, interfaceId);</span>
+<span id="L255"><span class="lineNum">     255</span>              :         return PeerAddress(addr, type).SetPort(port).SetInterface(interfaceId);</span>
+<span id="L256"><span class="lineNum">     256</span>              :     }</span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span>              :     static constexpr uint16_t kUndefinedNFCShortId() { return 0xFFFF; }</span>
+<span id="L259"><span class="lineNum">     259</span>              : </span>
+<span id="L260"><span class="lineNum">     260</span>              :     Inet::IPAddress mIPAddress   = {};</span>
+<span id="L261"><span class="lineNum">     261</span>              :     Type mTransportType          = Type::kUndefined;</span>
+<span id="L262"><span class="lineNum">     262</span>              :     uint16_t mPort               = CHIP_PORT; ///&lt; Relevant for UDP data sending.</span>
+<span id="L263"><span class="lineNum">     263</span>              :     Inet::InterfaceId mInterface = Inet::InterfaceId::Null();</span>
+<span id="L264"><span class="lineNum">     264</span>              : </span>
+<span id="L265"><span class="lineNum">     265</span>              :     union Id</span>
+<span id="L266"><span class="lineNum">     266</span>              :     {</span>
+<span id="L267"><span class="lineNum">     267</span>              :         NodeId mRemoteId;</span>
+<span id="L268"><span class="lineNum">     268</span>              :         uint16_t mNFCShortId;</span>
+<span id="L269"><span class="lineNum">     269</span>              :     } mId;</span>
+<span id="L270"><span class="lineNum">     270</span>              : };</span>
+<span id="L271"><span class="lineNum">     271</span>              : </span>
+<span id="L272"><span class="lineNum">     272</span>              : } // namespace Transport</span>
+<span id="L273"><span class="lineNum">     273</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

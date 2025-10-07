@@ -1,0 +1,386 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - system/SystemClock.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">system</a> - SystemClock.cpp<span style="font-size: 80%;"> (source / <a href="SystemClock.cpp.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryLo">50.0&nbsp;%</td>
+            <td class="headerCovTableEntry">26</td>
+            <td class="headerCovTableEntry">13</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">50.0&nbsp;%</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">2</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2020 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    Copyright (c) 2018 Nest Labs, Inc.</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L16"><span class="lineNum">      16</span>              :  *    limitations under the License.</span>
+<span id="L17"><span class="lineNum">      17</span>              :  */</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : /**</span>
+<span id="L20"><span class="lineNum">      20</span>              :  *    @file</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *      Provides default implementations for the platform Get/SetClock_ functions</span>
+<span id="L22"><span class="lineNum">      22</span>              :  *      for POSIX and LwIP platforms.</span>
+<span id="L23"><span class="lineNum">      23</span>              :  */</span>
+<span id="L24"><span class="lineNum">      24</span>              : </span>
+<span id="L25"><span class="lineNum">      25</span>              : #include &lt;system/SystemClock.h&gt;</span>
+<span id="L26"><span class="lineNum">      26</span>              : </span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;lib/support/CodeUtils.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/support/TimeUtils.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;system/SystemError.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : </span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;limits&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;stdint.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;stdlib.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : </span>
+<span id="L35"><span class="lineNum">      35</span>              : #if !CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L36"><span class="lineNum">      36</span>              : </span>
+<span id="L37"><span class="lineNum">      37</span>              : #if CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS || CHIP_SYSTEM_CONFIG_USE_SOCKETS</span>
+<span id="L38"><span class="lineNum">      38</span>              : #include &lt;errno.h&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              : #include &lt;time.h&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS || CHIP_SYSTEM_CONFIG_USE_SOCKETS</span>
+<span id="L41"><span class="lineNum">      41</span>              : </span>
+<span id="L42"><span class="lineNum">      42</span>              : #if CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L43"><span class="lineNum">      43</span>              : #include &lt;lwip/sys.h&gt;</span>
+<span id="L44"><span class="lineNum">      44</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L45"><span class="lineNum">      45</span>              : </span>
+<span id="L46"><span class="lineNum">      46</span>              : #endif // !CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              : namespace chip {</span>
+<span id="L49"><span class="lineNum">      49</span>              : namespace System {</span>
+<span id="L50"><span class="lineNum">      50</span>              : namespace Clock {</span>
+<span id="L51"><span class="lineNum">      51</span>              : </span>
+<span id="L52"><span class="lineNum">      52</span>              : namespace Internal {</span>
+<span id="L53"><span class="lineNum">      53</span>              : </span>
+<span id="L54"><span class="lineNum">      54</span>              : #if CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L55"><span class="lineNum">      55</span>              : extern ClockImpl gClockImpl;</span>
+<span id="L56"><span class="lineNum">      56</span>              : #else  // CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L57"><span class="lineNum">      57</span>              : ClockImpl gClockImpl;</span>
+<span id="L58"><span class="lineNum">      58</span>              : #endif // CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L59"><span class="lineNum">      59</span>              : </span>
+<span id="L60"><span class="lineNum">      60</span>              : ClockBase * gClockBase = &amp;gClockImpl;</span>
+<span id="L61"><span class="lineNum">      61</span>              : </span>
+<span id="L62"><span class="lineNum">      62</span>              : } // namespace Internal</span>
+<span id="L63"><span class="lineNum">      63</span>              : </span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">    75166223 : Timestamp ClockBase::GetMonotonicTimestamp()</span></span>
+<span id="L65"><span class="lineNum">      65</span>              : {</span>
+<span id="L66"><span class="lineNum">      66</span>              :     // Below implementation uses `__atomic_*` API which has wider support than</span>
+<span id="L67"><span class="lineNum">      67</span>              :     // &lt;atomic&gt; on embedded platforms, so that embedded platforms can use</span>
+<span id="L68"><span class="lineNum">      68</span>              :     // it by widening the #ifdefs later.</span>
+<span id="L69"><span class="lineNum">      69</span>              : #if CHIP_DEVICE_LAYER_USE_ATOMICS_FOR_CLOCK</span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">    75166223 :     uint64_t prevTimestamp = __atomic_load_n(&amp;mLastTimestamp, __ATOMIC_SEQ_CST);</span></span>
+<span id="L71"><span class="lineNum">      71</span>              :     static_assert(sizeof(prevTimestamp) == sizeof(Timestamp), &quot;Must have scalar match between timestamp and uint64_t for atomics.&quot;);</span>
+<span id="L72"><span class="lineNum">      72</span>              : </span>
+<span id="L73"><span class="lineNum">      73</span>              :     // Force a reorder barrier to prevent GetMonotonicMilliseconds64() from being</span>
+<span id="L74"><span class="lineNum">      74</span>              :     // optimizer-called before prevTimestamp loading, so that newTimestamp acquisition happens-after</span>
+<span id="L75"><span class="lineNum">      75</span>              :     // the prevTimestamp load.</span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">    75166223 :     __atomic_signal_fence(__ATOMIC_SEQ_CST);</span></span>
+<span id="L77"><span class="lineNum">      77</span>              : #else</span>
+<span id="L78"><span class="lineNum">      78</span>              :     uint64_t prevTimestamp = mLastTimestamp;</span>
+<span id="L79"><span class="lineNum">      79</span>              : #endif // CHIP_DEVICE_LAYER_USE_ATOMICS_FOR_CLOCK</span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">    75166223 :     Timestamp newTimestamp = GetMonotonicMilliseconds64();</span></span>
+<span id="L82"><span class="lineNum">      82</span>              : </span>
+<span id="L83"><span class="lineNum">      83</span>              :     // Need to guarantee the invariant that monotonic clock never goes backwards, which would break multiple system</span>
+<span id="L84"><span class="lineNum">      84</span>              :     // assumptions which use these clocks.</span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">    75166223 :     VerifyOrDie(newTimestamp.count() &gt;= prevTimestamp);</span></span>
+<span id="L86"><span class="lineNum">      86</span>              : </span>
+<span id="L87"><span class="lineNum">      87</span>              : #if CHIP_DEVICE_LAYER_USE_ATOMICS_FOR_CLOCK</span>
+<span id="L88"><span class="lineNum">      88</span>              :     // newTimestamp guaranteed to never be &lt; the last timestamp.</span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">    75166223 :     __atomic_store_n(&amp;mLastTimestamp, newTimestamp.count(), __ATOMIC_SEQ_CST);</span></span>
+<span id="L90"><span class="lineNum">      90</span>              : #else</span>
+<span id="L91"><span class="lineNum">      91</span>              :     mLastTimestamp         = newTimestamp.count();</span>
+<span id="L92"><span class="lineNum">      92</span>              : #endif // CHIP_DEVICE_LAYER_USE_ATOMICS_FOR_CLOCK</span>
+<span id="L93"><span class="lineNum">      93</span>              : </span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">    75166223 :     return newTimestamp;</span></span>
+<span id="L95"><span class="lineNum">      95</span>              : }</span>
+<span id="L96"><span class="lineNum">      96</span>              : </span>
+<span id="L97"><span class="lineNum">      97</span>              : #if !CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L98"><span class="lineNum">      98</span>              : </span>
+<span id="L99"><span class="lineNum">      99</span>              : #if CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS</span>
+<span id="L100"><span class="lineNum">     100</span>              : </span>
+<span id="L101"><span class="lineNum">     101</span>              : // -------------------- Default Get/SetClock Functions for POSIX Systems --------------------</span>
+<span id="L102"><span class="lineNum">     102</span>              : </span>
+<span id="L103"><span class="lineNum">     103</span>              : #if !HAVE_CLOCK_GETTIME &amp;&amp; !HAVE_GETTIMEOFDAY</span>
+<span id="L104"><span class="lineNum">     104</span>              : #error &quot;CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS requires either clock_gettime() or gettimeofday()&quot;</span>
+<span id="L105"><span class="lineNum">     105</span>              : #endif</span>
+<span id="L106"><span class="lineNum">     106</span>              : </span>
+<span id="L107"><span class="lineNum">     107</span>              : #if HAVE_CLOCK_GETTIME</span>
+<span id="L108"><span class="lineNum">     108</span>              : </span>
+<span id="L109"><span class="lineNum">     109</span>              : #if defined(HAVE_DECL_CLOCK_BOOTTIME) &amp;&amp; HAVE_DECL_CLOCK_BOOTTIME</span>
+<span id="L110"><span class="lineNum">     110</span>              : // CLOCK_BOOTTIME is a Linux-specific option to clock_gettime for a clock which compensates for system sleep.</span>
+<span id="L111"><span class="lineNum">     111</span>              : #define MONOTONIC_CLOCK_ID CLOCK_BOOTTIME</span>
+<span id="L112"><span class="lineNum">     112</span>              : #define MONOTONIC_RAW_CLOCK_ID CLOCK_MONOTONIC_RAW</span>
+<span id="L113"><span class="lineNum">     113</span>              : #else // HAVE_DECL_CLOCK_BOOTTIME</span>
+<span id="L114"><span class="lineNum">     114</span>              : // CLOCK_MONOTONIC is defined in POSIX and hence is the default choice</span>
+<span id="L115"><span class="lineNum">     115</span>              : #define MONOTONIC_CLOCK_ID CLOCK_MONOTONIC</span>
+<span id="L116"><span class="lineNum">     116</span>              : #endif</span>
+<span id="L117"><span class="lineNum">     117</span>              : </span>
+<span id="L118"><span class="lineNum">     118</span>              : CHIP_ERROR ClockImpl::GetClock_RealTime(Microseconds64 &amp; aCurTime)</span>
+<span id="L119"><span class="lineNum">     119</span>              : {</span>
+<span id="L120"><span class="lineNum">     120</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L121"><span class="lineNum">     121</span>              : }</span>
+<span id="L122"><span class="lineNum">     122</span>              : </span>
+<span id="L123"><span class="lineNum">     123</span>              : CHIP_ERROR ClockImpl::GetClock_RealTimeMS(Milliseconds64 &amp; aCurTime)</span>
+<span id="L124"><span class="lineNum">     124</span>              : {</span>
+<span id="L125"><span class="lineNum">     125</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L126"><span class="lineNum">     126</span>              : }</span>
+<span id="L127"><span class="lineNum">     127</span>              : </span>
+<span id="L128"><span class="lineNum">     128</span>              : CHIP_ERROR ClockImpl::SetClock_RealTime(Microseconds64 aNewCurTime)</span>
+<span id="L129"><span class="lineNum">     129</span>              : {</span>
+<span id="L130"><span class="lineNum">     130</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L131"><span class="lineNum">     131</span>              : }</span>
+<span id="L132"><span class="lineNum">     132</span>              : </span>
+<span id="L133"><span class="lineNum">     133</span>              : Microseconds64 ClockImpl::GetMonotonicMicroseconds64()</span>
+<span id="L134"><span class="lineNum">     134</span>              : {</span>
+<span id="L135"><span class="lineNum">     135</span>              :     struct timespec ts;</span>
+<span id="L136"><span class="lineNum">     136</span>              :     int res = clock_gettime(MONOTONIC_CLOCK_ID, &amp;ts);</span>
+<span id="L137"><span class="lineNum">     137</span>              :     VerifyOrDie(res == 0);</span>
+<span id="L138"><span class="lineNum">     138</span>              :     return Seconds64(ts.tv_sec) +</span>
+<span id="L139"><span class="lineNum">     139</span>              :         std::chrono::duration_cast&lt;Microseconds64&gt;(std::chrono::duration&lt;uint64_t, std::nano&gt;(ts.tv_nsec));</span>
+<span id="L140"><span class="lineNum">     140</span>              : }</span>
+<span id="L141"><span class="lineNum">     141</span>              : </span>
+<span id="L142"><span class="lineNum">     142</span>              : Milliseconds64 ClockImpl::GetMonotonicMilliseconds64()</span>
+<span id="L143"><span class="lineNum">     143</span>              : {</span>
+<span id="L144"><span class="lineNum">     144</span>              :     return std::chrono::duration_cast&lt;Milliseconds64&gt;(GetMonotonicMicroseconds64());</span>
+<span id="L145"><span class="lineNum">     145</span>              : }</span>
+<span id="L146"><span class="lineNum">     146</span>              : </span>
+<span id="L147"><span class="lineNum">     147</span>              : #endif // HAVE_CLOCK_GETTIME</span>
+<span id="L148"><span class="lineNum">     148</span>              : </span>
+<span id="L149"><span class="lineNum">     149</span>              : #if HAVE_GETTIMEOFDAY</span>
+<span id="L150"><span class="lineNum">     150</span>              : </span>
+<span id="L151"><span class="lineNum">     151</span>              : CHIP_ERROR ClockImpl::GetClock_RealTime(Microseconds64 &amp; aCurTime)</span>
+<span id="L152"><span class="lineNum">     152</span>              : {</span>
+<span id="L153"><span class="lineNum">     153</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L154"><span class="lineNum">     154</span>              : }</span>
+<span id="L155"><span class="lineNum">     155</span>              : </span>
+<span id="L156"><span class="lineNum">     156</span>              : CHIP_ERROR ClockImpl::GetClock_RealTimeMS(Milliseconds64 &amp; aCurTime)</span>
+<span id="L157"><span class="lineNum">     157</span>              : {</span>
+<span id="L158"><span class="lineNum">     158</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L159"><span class="lineNum">     159</span>              : }</span>
+<span id="L160"><span class="lineNum">     160</span>              : </span>
+<span id="L161"><span class="lineNum">     161</span>              : CHIP_ERROR ClockImpl::SetClock_RealTime(Microseconds64 aNewCurTime)</span>
+<span id="L162"><span class="lineNum">     162</span>              : {</span>
+<span id="L163"><span class="lineNum">     163</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L164"><span class="lineNum">     164</span>              : }</span>
+<span id="L165"><span class="lineNum">     165</span>              : </span>
+<span id="L166"><span class="lineNum">     166</span>              : Microseconds64 ClockImpl::GetMonotonicMicroseconds64()</span>
+<span id="L167"><span class="lineNum">     167</span>              : {</span>
+<span id="L168"><span class="lineNum">     168</span>              :     struct timeval tv;</span>
+<span id="L169"><span class="lineNum">     169</span>              :     int res = gettimeofday(&amp;tv, NULL);</span>
+<span id="L170"><span class="lineNum">     170</span>              :     VerifyOrDie(res == 0);</span>
+<span id="L171"><span class="lineNum">     171</span>              :     return TimevalToMicroseconds(tv);</span>
+<span id="L172"><span class="lineNum">     172</span>              : }</span>
+<span id="L173"><span class="lineNum">     173</span>              : </span>
+<span id="L174"><span class="lineNum">     174</span>              : Milliseconds64 ClockImpl::GetMonotonicMilliseconds64()</span>
+<span id="L175"><span class="lineNum">     175</span>              : {</span>
+<span id="L176"><span class="lineNum">     176</span>              :     return std::chrono::duration_cast&lt;Milliseconds64&gt;(GetMonotonicMicroseconds64());</span>
+<span id="L177"><span class="lineNum">     177</span>              : }</span>
+<span id="L178"><span class="lineNum">     178</span>              : </span>
+<span id="L179"><span class="lineNum">     179</span>              : #endif // HAVE_GETTIMEOFDAY</span>
+<span id="L180"><span class="lineNum">     180</span>              : </span>
+<span id="L181"><span class="lineNum">     181</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS</span>
+<span id="L182"><span class="lineNum">     182</span>              : </span>
+<span id="L183"><span class="lineNum">     183</span>              : #if CHIP_SYSTEM_CONFIG_USE_LWIP_MONOTONIC_TIME</span>
+<span id="L184"><span class="lineNum">     184</span>              : </span>
+<span id="L185"><span class="lineNum">     185</span>              : // -------------------- Default Get/SetClock Functions for LwIP Systems --------------------</span>
+<span id="L186"><span class="lineNum">     186</span>              : </span>
+<span id="L187"><span class="lineNum">     187</span>              : CHIP_ERROR ClockImpl::GetClock_RealTime(Microseconds64 &amp; aCurTime)</span>
+<span id="L188"><span class="lineNum">     188</span>              : {</span>
+<span id="L189"><span class="lineNum">     189</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L190"><span class="lineNum">     190</span>              : }</span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span>              : CHIP_ERROR ClockImpl::GetClock_RealTimeMS(Milliseconds64 &amp; aCurTime)</span>
+<span id="L193"><span class="lineNum">     193</span>              : {</span>
+<span id="L194"><span class="lineNum">     194</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L195"><span class="lineNum">     195</span>              : }</span>
+<span id="L196"><span class="lineNum">     196</span>              : </span>
+<span id="L197"><span class="lineNum">     197</span>              : CHIP_ERROR ClockImpl::SetClock_RealTime(Microseconds64 aNewCurTime)</span>
+<span id="L198"><span class="lineNum">     198</span>              : {</span>
+<span id="L199"><span class="lineNum">     199</span>              :     return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;</span>
+<span id="L200"><span class="lineNum">     200</span>              : }</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span>              : Microseconds64 ClockImpl::GetMonotonicMicroseconds64()</span>
+<span id="L203"><span class="lineNum">     203</span>              : {</span>
+<span id="L204"><span class="lineNum">     204</span>              :     return GetMonotonicMilliseconds64();</span>
+<span id="L205"><span class="lineNum">     205</span>              : }</span>
+<span id="L206"><span class="lineNum">     206</span>              : </span>
+<span id="L207"><span class="lineNum">     207</span>              : Milliseconds64 ClockImpl::GetMonotonicMilliseconds64()</span>
+<span id="L208"><span class="lineNum">     208</span>              : {</span>
+<span id="L209"><span class="lineNum">     209</span>              :     static volatile uint64_t overflow        = 0;</span>
+<span id="L210"><span class="lineNum">     210</span>              :     static volatile u32_t lastSample         = 0;</span>
+<span id="L211"><span class="lineNum">     211</span>              :     static volatile uint8_t lock             = 0;</span>
+<span id="L212"><span class="lineNum">     212</span>              :     static const uint64_t kOverflowIncrement = static_cast&lt;uint64_t&gt;(0x100000000);</span>
+<span id="L213"><span class="lineNum">     213</span>              : </span>
+<span id="L214"><span class="lineNum">     214</span>              :     uint64_t overflowSample;</span>
+<span id="L215"><span class="lineNum">     215</span>              :     u32_t sample;</span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span>              :     // Tracking timer wrap assumes that this function gets called with</span>
+<span id="L218"><span class="lineNum">     218</span>              :     // a period that is less than 1/2 the timer range.</span>
+<span id="L219"><span class="lineNum">     219</span>              :     if (__sync_bool_compare_and_swap(&amp;lock, 0, 1))</span>
+<span id="L220"><span class="lineNum">     220</span>              :     {</span>
+<span id="L221"><span class="lineNum">     221</span>              :         sample = sys_now();</span>
+<span id="L222"><span class="lineNum">     222</span>              : </span>
+<span id="L223"><span class="lineNum">     223</span>              :         if (lastSample &gt; sample)</span>
+<span id="L224"><span class="lineNum">     224</span>              :         {</span>
+<span id="L225"><span class="lineNum">     225</span>              :             overflow += kOverflowIncrement;</span>
+<span id="L226"><span class="lineNum">     226</span>              :         }</span>
+<span id="L227"><span class="lineNum">     227</span>              : </span>
+<span id="L228"><span class="lineNum">     228</span>              :         lastSample     = sample;</span>
+<span id="L229"><span class="lineNum">     229</span>              :         overflowSample = overflow;</span>
+<span id="L230"><span class="lineNum">     230</span>              : </span>
+<span id="L231"><span class="lineNum">     231</span>              :         __sync_bool_compare_and_swap(&amp;lock, 1, 0);</span>
+<span id="L232"><span class="lineNum">     232</span>              :     }</span>
+<span id="L233"><span class="lineNum">     233</span>              :     else</span>
+<span id="L234"><span class="lineNum">     234</span>              :     {</span>
+<span id="L235"><span class="lineNum">     235</span>              :         // a lower priority task is in the block above. Depending where that</span>
+<span id="L236"><span class="lineNum">     236</span>              :         // lower task is blocked can spell trouble in a timer wrap condition.</span>
+<span id="L237"><span class="lineNum">     237</span>              :         // the question here is what this task should use as an overflow value.</span>
+<span id="L238"><span class="lineNum">     238</span>              :         // To fix this race requires a platform api that can be used to</span>
+<span id="L239"><span class="lineNum">     239</span>              :         // protect critical sections.</span>
+<span id="L240"><span class="lineNum">     240</span>              :         overflowSample = overflow;</span>
+<span id="L241"><span class="lineNum">     241</span>              :         sample         = sys_now();</span>
+<span id="L242"><span class="lineNum">     242</span>              :     }</span>
+<span id="L243"><span class="lineNum">     243</span>              : </span>
+<span id="L244"><span class="lineNum">     244</span>              :     return Milliseconds64(overflowSample | static_cast&lt;uint64_t&gt;(sample));</span>
+<span id="L245"><span class="lineNum">     245</span>              : }</span>
+<span id="L246"><span class="lineNum">     246</span>              : </span>
+<span id="L247"><span class="lineNum">     247</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_LWIP_MONOTONIC_TIME</span>
+<span id="L248"><span class="lineNum">     248</span>              : </span>
+<span id="L249"><span class="lineNum">     249</span>              : #endif // CHIP_SYSTEM_CONFIG_PLATFORM_PROVIDES_TIME</span>
+<span id="L250"><span class="lineNum">     250</span>              : </span>
+<span id="L251"><span class="lineNum">     251</span>              : #if CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS || CHIP_SYSTEM_CONFIG_USE_SOCKETS</span>
+<span id="L252"><span class="lineNum">     252</span>              : </span>
+<span id="L253"><span class="lineNum">     253</span> <span class="tlaUNC tlaBgUNC">           0 : Microseconds64 TimevalToMicroseconds(const timeval &amp; tv)</span></span>
+<span id="L254"><span class="lineNum">     254</span>              : {</span>
+<span id="L255"><span class="lineNum">     255</span> <span class="tlaUNC">           0 :     return Seconds64(tv.tv_sec) + Microseconds64(tv.tv_usec);</span></span>
+<span id="L256"><span class="lineNum">     256</span>              : }</span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC tlaBgGNC">    18663053 : void ToTimeval(Microseconds64 in, timeval &amp; out)</span></span>
+<span id="L259"><span class="lineNum">     259</span>              : {</span>
+<span id="L260"><span class="lineNum">     260</span> <span class="tlaGNC">    18663053 :     Seconds32 seconds = std::chrono::duration_cast&lt;Seconds32&gt;(in);</span></span>
+<span id="L261"><span class="lineNum">     261</span> <span class="tlaGNC">    18663053 :     in -= seconds;</span></span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">    18663053 :     out.tv_sec  = static_cast&lt;time_t&gt;(seconds.count());</span></span>
+<span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">    18663053 :     out.tv_usec = static_cast&lt;suseconds_t&gt;(in.count());</span></span>
+<span id="L264"><span class="lineNum">     264</span> <span class="tlaGNC">    18663053 : }</span></span>
+<span id="L265"><span class="lineNum">     265</span>              : </span>
+<span id="L266"><span class="lineNum">     266</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_POSIX_TIME_FUNCTS || CHIP_SYSTEM_CONFIG_USE_SOCKETS</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span>              : static_assert(std::numeric_limits&lt;Microseconds64::rep&gt;::is_integer, &quot;Microseconds64 must be an integer type&quot;);</span>
+<span id="L269"><span class="lineNum">     269</span>              : static_assert(std::numeric_limits&lt;Microseconds32::rep&gt;::is_integer, &quot;Microseconds32 must be an integer type&quot;);</span>
+<span id="L270"><span class="lineNum">     270</span>              : static_assert(std::numeric_limits&lt;Milliseconds64::rep&gt;::is_integer, &quot;Milliseconds64 must be an integer type&quot;);</span>
+<span id="L271"><span class="lineNum">     271</span>              : static_assert(std::numeric_limits&lt;Milliseconds32::rep&gt;::is_integer, &quot;Milliseconds32 must be an integer type&quot;);</span>
+<span id="L272"><span class="lineNum">     272</span>              : static_assert(std::numeric_limits&lt;Seconds64::rep&gt;::is_integer, &quot;Seconds64 must be an integer type&quot;);</span>
+<span id="L273"><span class="lineNum">     273</span>              : static_assert(std::numeric_limits&lt;Seconds32::rep&gt;::is_integer, &quot;Seconds32 must be an integer type&quot;);</span>
+<span id="L274"><span class="lineNum">     274</span>              : static_assert(std::numeric_limits&lt;Seconds16::rep&gt;::is_integer, &quot;Seconds16 must be an integer type&quot;);</span>
+<span id="L275"><span class="lineNum">     275</span>              : </span>
+<span id="L276"><span class="lineNum">     276</span>              : static_assert(std::numeric_limits&lt;Microseconds64::rep&gt;::digits &gt;= 64, &quot;Microseconds64 must be at least 64 bits&quot;);</span>
+<span id="L277"><span class="lineNum">     277</span>              : static_assert(std::numeric_limits&lt;Microseconds32::rep&gt;::digits &gt;= 32, &quot;Microseconds32 must be at least 32 bits&quot;);</span>
+<span id="L278"><span class="lineNum">     278</span>              : static_assert(std::numeric_limits&lt;Milliseconds64::rep&gt;::digits &gt;= 64, &quot;Milliseconds64 must be at least 64 bits&quot;);</span>
+<span id="L279"><span class="lineNum">     279</span>              : static_assert(std::numeric_limits&lt;Milliseconds32::rep&gt;::digits &gt;= 32, &quot;Milliseconds32 must be at least 32 bits&quot;);</span>
+<span id="L280"><span class="lineNum">     280</span>              : static_assert(std::numeric_limits&lt;Seconds64::rep&gt;::digits &gt;= 64, &quot;Seconds64 must be at least 64 bits&quot;);</span>
+<span id="L281"><span class="lineNum">     281</span>              : static_assert(std::numeric_limits&lt;Seconds32::rep&gt;::digits &gt;= 32, &quot;Seconds32 must be at least 32 bits&quot;);</span>
+<span id="L282"><span class="lineNum">     282</span>              : static_assert(std::numeric_limits&lt;Seconds16::rep&gt;::digits &gt;= 16, &quot;Seconds16 must be at least 16 bits&quot;);</span>
+<span id="L283"><span class="lineNum">     283</span>              : </span>
+<span id="L284"><span class="lineNum">     284</span> <span class="tlaUNC tlaBgUNC">           0 : CHIP_ERROR GetClock_MatterEpochS(uint32_t &amp; aMatterEpoch)</span></span>
+<span id="L285"><span class="lineNum">     285</span>              : {</span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaUNC">           0 :     aMatterEpoch = 0;</span></span>
+<span id="L287"><span class="lineNum">     287</span>              : </span>
+<span id="L288"><span class="lineNum">     288</span>              :     Milliseconds64 cTMs;</span>
+<span id="L289"><span class="lineNum">     289</span> <span class="tlaUNC">           0 :     CHIP_ERROR err = System::SystemClock().GetClock_RealTimeMS(cTMs);</span></span>
+<span id="L290"><span class="lineNum">     290</span>              : </span>
+<span id="L291"><span class="lineNum">     291</span> <span class="tlaUNC">           0 :     if (err != CHIP_NO_ERROR)</span></span>
+<span id="L292"><span class="lineNum">     292</span>              :     {</span>
+<span id="L293"><span class="lineNum">     293</span> <span class="tlaUNC">           0 :         ChipLogError(DeviceLayer, &quot;Unable to get current time - err:%&quot; CHIP_ERROR_FORMAT, err.Format());</span></span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaUNC">           0 :         return err;</span></span>
+<span id="L295"><span class="lineNum">     295</span>              :     }</span>
+<span id="L296"><span class="lineNum">     296</span>              : </span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaUNC">           0 :     auto unixEpoch = std::chrono::duration_cast&lt;Seconds32&gt;(cTMs).count();</span></span>
+<span id="L298"><span class="lineNum">     298</span> <span class="tlaUNC">           0 :     if (!UnixEpochToChipEpochTime(unixEpoch, aMatterEpoch))</span></span>
+<span id="L299"><span class="lineNum">     299</span>              :     {</span>
+<span id="L300"><span class="lineNum">     300</span> <span class="tlaUNC">           0 :         ChipLogError(DeviceLayer, &quot;Unable to convert Unix Epoch time to Matter Epoch Time: unixEpoch (%u)&quot;,</span></span>
+<span id="L301"><span class="lineNum">     301</span>              :                      static_cast&lt;unsigned int&gt;(unixEpoch));</span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaUNC">           0 :         return CHIP_ERROR_INCORRECT_STATE;</span></span>
+<span id="L303"><span class="lineNum">     303</span>              :     }</span>
+<span id="L304"><span class="lineNum">     304</span>              : </span>
+<span id="L305"><span class="lineNum">     305</span> <span class="tlaUNC">           0 :     return CHIP_NO_ERROR;</span></span>
+<span id="L306"><span class="lineNum">     306</span>              : }</span>
+<span id="L307"><span class="lineNum">     307</span>              : </span>
+<span id="L308"><span class="lineNum">     308</span>              : } // namespace Clock</span>
+<span id="L309"><span class="lineNum">     309</span>              : } // namespace System</span>
+<span id="L310"><span class="lineNum">     310</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

@@ -1,0 +1,1245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - controller/CHIPDeviceController.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">controller</a> - CHIPDeviceController.h<span style="font-size: 80%;"> (source / <a href="CHIPDeviceController.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryLo">2.4&nbsp;%</td>
+            <td class="headerCovTableEntry">41</td>
+            <td class="headerCovTableEntry">1</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">4.5&nbsp;%</td>
+            <td class="headerCovTableEntry">22</td>
+            <td class="headerCovTableEntry">1</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2020-2024 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    Copyright (c) 2013-2017 Nest Labs, Inc.</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    All rights reserved.</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L17"><span class="lineNum">      17</span>              :  *    limitations under the License.</span>
+<span id="L18"><span class="lineNum">      18</span>              :  */</span>
+<span id="L19"><span class="lineNum">      19</span>              : </span>
+<span id="L20"><span class="lineNum">      20</span>              : /**</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *    @file</span>
+<span id="L22"><span class="lineNum">      22</span>              :  *      Declaration of CHIP Device Controller, a common class</span>
+<span id="L23"><span class="lineNum">      23</span>              :  *      that implements connecting and messaging and will later</span>
+<span id="L24"><span class="lineNum">      24</span>              :  *      be expanded to support discovery, pairing and</span>
+<span id="L25"><span class="lineNum">      25</span>              :  *      provisioning of CHIP  devices.</span>
+<span id="L26"><span class="lineNum">      26</span>              :  *</span>
+<span id="L27"><span class="lineNum">      27</span>              :  */</span>
+<span id="L28"><span class="lineNum">      28</span>              : </span>
+<span id="L29"><span class="lineNum">      29</span>              : #pragma once</span>
+<span id="L30"><span class="lineNum">      30</span>              : </span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;app/AppConfig.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;app/CASEClientPool.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;app/CASESessionManager.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : #include &lt;app/ClusterStateCache.h&gt;</span>
+<span id="L35"><span class="lineNum">      35</span>              : #include &lt;app/OperationalSessionSetup.h&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              : #include &lt;app/OperationalSessionSetupPool.h&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : #include &lt;controller/AbstractDnssdDiscoveryController.h&gt;</span>
+<span id="L38"><span class="lineNum">      38</span>              : #include &lt;controller/AutoCommissioner.h&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              : #include &lt;controller/CHIPCluster.h&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : #include &lt;controller/CHIPDeviceControllerSystemState.h&gt;</span>
+<span id="L41"><span class="lineNum">      41</span>              : #include &lt;controller/CommissioneeDeviceProxy.h&gt;</span>
+<span id="L42"><span class="lineNum">      42</span>              : #include &lt;controller/CommissioningDelegate.h&gt;</span>
+<span id="L43"><span class="lineNum">      43</span>              : #include &lt;controller/DevicePairingDelegate.h&gt;</span>
+<span id="L44"><span class="lineNum">      44</span>              : #include &lt;controller/OperationalCredentialsDelegate.h&gt;</span>
+<span id="L45"><span class="lineNum">      45</span>              : #include &lt;controller/SetUpCodePairer.h&gt;</span>
+<span id="L46"><span class="lineNum">      46</span>              : #include &lt;credentials/FabricTable.h&gt;</span>
+<span id="L47"><span class="lineNum">      47</span>              : #include &lt;credentials/attestation_verifier/DeviceAttestationDelegate.h&gt;</span>
+<span id="L48"><span class="lineNum">      48</span>              : #include &lt;credentials/attestation_verifier/DeviceAttestationVerifier.h&gt;</span>
+<span id="L49"><span class="lineNum">      49</span>              : #include &lt;crypto/CHIPCryptoPAL.h&gt;</span>
+<span id="L50"><span class="lineNum">      50</span>              : #include &lt;inet/InetInterface.h&gt;</span>
+<span id="L51"><span class="lineNum">      51</span>              : #include &lt;lib/core/CHIPConfig.h&gt;</span>
+<span id="L52"><span class="lineNum">      52</span>              : #include &lt;lib/core/CHIPCore.h&gt;</span>
+<span id="L53"><span class="lineNum">      53</span>              : #include &lt;lib/core/CHIPPersistentStorageDelegate.h&gt;</span>
+<span id="L54"><span class="lineNum">      54</span>              : #include &lt;lib/core/DataModelTypes.h&gt;</span>
+<span id="L55"><span class="lineNum">      55</span>              : #include &lt;lib/core/TLV.h&gt;</span>
+<span id="L56"><span class="lineNum">      56</span>              : #include &lt;lib/support/DLLUtil.h&gt;</span>
+<span id="L57"><span class="lineNum">      57</span>              : #include &lt;lib/support/Pool.h&gt;</span>
+<span id="L58"><span class="lineNum">      58</span>              : #include &lt;lib/support/SafeInt.h&gt;</span>
+<span id="L59"><span class="lineNum">      59</span>              : #include &lt;lib/support/Span.h&gt;</span>
+<span id="L60"><span class="lineNum">      60</span>              : #include &lt;lib/support/ThreadOperationalDataset.h&gt;</span>
+<span id="L61"><span class="lineNum">      61</span>              : #include &lt;messaging/ExchangeMgr.h&gt;</span>
+<span id="L62"><span class="lineNum">      62</span>              : #include &lt;protocols/secure_channel/MessageCounterManager.h&gt;</span>
+<span id="L63"><span class="lineNum">      63</span>              : #include &lt;protocols/secure_channel/RendezvousParameters.h&gt;</span>
+<span id="L64"><span class="lineNum">      64</span>              : #include &lt;protocols/user_directed_commissioning/UserDirectedCommissioning.h&gt;</span>
+<span id="L65"><span class="lineNum">      65</span>              : #include &lt;system/SystemClock.h&gt;</span>
+<span id="L66"><span class="lineNum">      66</span>              : #include &lt;transport/SessionManager.h&gt;</span>
+<span id="L67"><span class="lineNum">      67</span>              : #include &lt;transport/TransportMgr.h&gt;</span>
+<span id="L68"><span class="lineNum">      68</span>              : #include &lt;transport/raw/UDP.h&gt;</span>
+<span id="L69"><span class="lineNum">      69</span>              : </span>
+<span id="L70"><span class="lineNum">      70</span>              : #if CONFIG_DEVICE_LAYER</span>
+<span id="L71"><span class="lineNum">      71</span>              : #include &lt;platform/CHIPDeviceLayer.h&gt;</span>
+<span id="L72"><span class="lineNum">      72</span>              : #endif</span>
+<span id="L73"><span class="lineNum">      73</span>              : </span>
+<span id="L74"><span class="lineNum">      74</span>              : #if CONFIG_NETWORK_LAYER_BLE</span>
+<span id="L75"><span class="lineNum">      75</span>              : #include &lt;ble/Ble.h&gt;</span>
+<span id="L76"><span class="lineNum">      76</span>              : #endif</span>
+<span id="L77"><span class="lineNum">      77</span>              : #include &lt;controller/DeviceDiscoveryDelegate.h&gt;</span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span>              : namespace chip {</span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span>              : namespace Controller {</span>
+<span id="L82"><span class="lineNum">      82</span>              : </span>
+<span id="L83"><span class="lineNum">      83</span>              : inline constexpr uint16_t kNumMaxActiveDevices = CHIP_CONFIG_CONTROLLER_MAX_ACTIVE_DEVICES;</span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span>              : struct ControllerInitParams</span>
+<span id="L86"><span class="lineNum">      86</span>              : {</span>
+<span id="L87"><span class="lineNum">      87</span>              :     DeviceControllerSystemState * systemState                       = nullptr;</span>
+<span id="L88"><span class="lineNum">      88</span>              :     DeviceDiscoveryDelegate * deviceDiscoveryDelegate               = nullptr;</span>
+<span id="L89"><span class="lineNum">      89</span>              :     OperationalCredentialsDelegate * operationalCredentialsDelegate = nullptr;</span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span>              :     /* The following keypair must correspond to the public key used for generating</span>
+<span id="L92"><span class="lineNum">      92</span>              :        controllerNOC. It's used by controller to establish CASE sessions with devices */</span>
+<span id="L93"><span class="lineNum">      93</span>              :     Crypto::P256Keypair * operationalKeypair = nullptr;</span>
+<span id="L94"><span class="lineNum">      94</span>              : </span>
+<span id="L95"><span class="lineNum">      95</span>              :     /**</span>
+<span id="L96"><span class="lineNum">      96</span>              :      * Controls whether or not the operationalKeypair should be owned by the caller.</span>
+<span id="L97"><span class="lineNum">      97</span>              :      * By default, this is false, but if the keypair cannot be serialized, then</span>
+<span id="L98"><span class="lineNum">      98</span>              :      * setting this to true will allow the caller to manage this keypair's lifecycle.</span>
+<span id="L99"><span class="lineNum">      99</span>              :      */</span>
+<span id="L100"><span class="lineNum">     100</span>              :     bool hasExternallyOwnedOperationalKeypair = false;</span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span>              :     /* The following certificates must be in x509 DER format */</span>
+<span id="L103"><span class="lineNum">     103</span>              :     ByteSpan controllerNOC;</span>
+<span id="L104"><span class="lineNum">     104</span>              :     ByteSpan controllerICAC;</span>
+<span id="L105"><span class="lineNum">     105</span>              :     ByteSpan controllerRCAC;</span>
+<span id="L106"><span class="lineNum">     106</span>              : </span>
+<span id="L107"><span class="lineNum">     107</span>              :     /**</span>
+<span id="L108"><span class="lineNum">     108</span>              :      * Controls whether we permit multiple DeviceController instances to exist</span>
+<span id="L109"><span class="lineNum">     109</span>              :      * on the same logical fabric (identified by the tuple of the fabric's</span>
+<span id="L110"><span class="lineNum">     110</span>              :      * root public key + fabric id).</span>
+<span id="L111"><span class="lineNum">     111</span>              :      *</span>
+<span id="L112"><span class="lineNum">     112</span>              :      * Each controller instance will be associated with its own FabricIndex.</span>
+<span id="L113"><span class="lineNum">     113</span>              :      * This pivots the FabricTable to tracking identities instead of fabrics,</span>
+<span id="L114"><span class="lineNum">     114</span>              :      * represented by FabricInfo instances that can have colliding logical fabrics.</span>
+<span id="L115"><span class="lineNum">     115</span>              :      *</span>
+<span id="L116"><span class="lineNum">     116</span>              :      */</span>
+<span id="L117"><span class="lineNum">     117</span>              :     bool permitMultiControllerFabrics = false;</span>
+<span id="L118"><span class="lineNum">     118</span>              : </span>
+<span id="L119"><span class="lineNum">     119</span>              :     //</span>
+<span id="L120"><span class="lineNum">     120</span>              :     // Controls enabling server cluster interactions on a controller. This in turn</span>
+<span id="L121"><span class="lineNum">     121</span>              :     // causes the following to get enabled:</span>
+<span id="L122"><span class="lineNum">     122</span>              :     //</span>
+<span id="L123"><span class="lineNum">     123</span>              :     //  - Advertisement of active controller operational identities.</span>
+<span id="L124"><span class="lineNum">     124</span>              :     //</span>
+<span id="L125"><span class="lineNum">     125</span>              :     bool enableServerInteractions = false;</span>
+<span id="L126"><span class="lineNum">     126</span>              : </span>
+<span id="L127"><span class="lineNum">     127</span>              :     /**</span>
+<span id="L128"><span class="lineNum">     128</span>              :      * Controls whether shutdown of the controller removes the corresponding</span>
+<span id="L129"><span class="lineNum">     129</span>              :      * entry from the in-memory fabric table, but NOT from storage.</span>
+<span id="L130"><span class="lineNum">     130</span>              :      *</span>
+<span id="L131"><span class="lineNum">     131</span>              :      * Note that this means that after controller shutdown the storage and</span>
+<span id="L132"><span class="lineNum">     132</span>              :      * in-memory versions of the fabric table will be out of sync.</span>
+<span id="L133"><span class="lineNum">     133</span>              :      * For compatibility reasons this is the default behavior.</span>
+<span id="L134"><span class="lineNum">     134</span>              :      *</span>
+<span id="L135"><span class="lineNum">     135</span>              :      * @see deleteFromFabricTableOnShutdown</span>
+<span id="L136"><span class="lineNum">     136</span>              :      */</span>
+<span id="L137"><span class="lineNum">     137</span>              :     bool removeFromFabricTableOnShutdown = true;</span>
+<span id="L138"><span class="lineNum">     138</span>              : </span>
+<span id="L139"><span class="lineNum">     139</span>              :     /**</span>
+<span id="L140"><span class="lineNum">     140</span>              :      * Controls whether shutdown of the controller deletes the corresponding</span>
+<span id="L141"><span class="lineNum">     141</span>              :      * entry from the fabric table (both in-memory and storage).</span>
+<span id="L142"><span class="lineNum">     142</span>              :      *</span>
+<span id="L143"><span class="lineNum">     143</span>              :      * If both `removeFromFabricTableOnShutdown` and this setting are true,</span>
+<span id="L144"><span class="lineNum">     144</span>              :      * this setting will take precedence.</span>
+<span id="L145"><span class="lineNum">     145</span>              :      *</span>
+<span id="L146"><span class="lineNum">     146</span>              :      * @see removeFromFabricTableOnShutdown</span>
+<span id="L147"><span class="lineNum">     147</span>              :      */</span>
+<span id="L148"><span class="lineNum">     148</span>              :     bool deleteFromFabricTableOnShutdown = false;</span>
+<span id="L149"><span class="lineNum">     149</span>              : </span>
+<span id="L150"><span class="lineNum">     150</span>              :     /**</span>
+<span id="L151"><span class="lineNum">     151</span>              :      * Specifies whether to utilize the fabric table entry for the given FabricIndex</span>
+<span id="L152"><span class="lineNum">     152</span>              :      * for initialization. If provided and neither the operational key pair nor the NOC</span>
+<span id="L153"><span class="lineNum">     153</span>              :      * chain are provided, then attempt to locate a fabric corresponding to the given FabricIndex.</span>
+<span id="L154"><span class="lineNum">     154</span>              :      */</span>
+<span id="L155"><span class="lineNum">     155</span>              :     chip::Optional&lt;FabricIndex&gt; fabricIndex;</span>
+<span id="L156"><span class="lineNum">     156</span>              : </span>
+<span id="L157"><span class="lineNum">     157</span>              :     chip::VendorId controllerVendorId;</span>
+<span id="L158"><span class="lineNum">     158</span>              : };</span>
+<span id="L159"><span class="lineNum">     159</span>              : </span>
+<span id="L160"><span class="lineNum">     160</span>              : struct CommissionerInitParams : public ControllerInitParams</span>
+<span id="L161"><span class="lineNum">     161</span>              : {</span>
+<span id="L162"><span class="lineNum">     162</span>              :     DevicePairingDelegate * pairingDelegate     = nullptr;</span>
+<span id="L163"><span class="lineNum">     163</span>              :     CommissioningDelegate * defaultCommissioner = nullptr;</span>
+<span id="L164"><span class="lineNum">     164</span>              :     // Device attestation verifier instance for the commissioning.</span>
+<span id="L165"><span class="lineNum">     165</span>              :     // If null, the globally set attestation verifier (e.g. from GetDeviceAttestationVerifier()</span>
+<span id="L166"><span class="lineNum">     166</span>              :     // singleton) will be used.</span>
+<span id="L167"><span class="lineNum">     167</span>              :     Credentials::DeviceAttestationVerifier * deviceAttestationVerifier = nullptr;</span>
+<span id="L168"><span class="lineNum">     168</span>              : };</span>
+<span id="L169"><span class="lineNum">     169</span>              : </span>
+<span id="L170"><span class="lineNum">     170</span>              : /**</span>
+<span id="L171"><span class="lineNum">     171</span>              :  * @brief</span>
+<span id="L172"><span class="lineNum">     172</span>              :  *   Controller applications can use this class to communicate with already paired CHIP devices. The</span>
+<span id="L173"><span class="lineNum">     173</span>              :  *   application is required to provide access to the persistent storage, where the paired device information</span>
+<span id="L174"><span class="lineNum">     174</span>              :  *   is stored. This object of this class can be initialized with the data from the storage (List of devices,</span>
+<span id="L175"><span class="lineNum">     175</span>              :  *   and device pairing information for individual devices). Alternatively, this class can retrieve the</span>
+<span id="L176"><span class="lineNum">     176</span>              :  *   relevant information when the application tries to communicate with the device</span>
+<span id="L177"><span class="lineNum">     177</span>              :  */</span>
+<span id="L178"><span class="lineNum">     178</span>              : class DLL_EXPORT DeviceController : public AbstractDnssdDiscoveryController</span>
+<span id="L179"><span class="lineNum">     179</span>              : {</span>
+<span id="L180"><span class="lineNum">     180</span>              : public:</span>
+<span id="L181"><span class="lineNum">     181</span>              :     DeviceController();</span>
+<span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC tlaBgGNC">           8 :     ~DeviceController() override {}</span></span>
+<span id="L183"><span class="lineNum">     183</span>              : </span>
+<span id="L184"><span class="lineNum">     184</span>              :     virtual CHIP_ERROR Init(ControllerInitParams params);</span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span>              :     /**</span>
+<span id="L187"><span class="lineNum">     187</span>              :      * @brief</span>
+<span id="L188"><span class="lineNum">     188</span>              :      *  Tears down the entirety of the stack, including destructing key objects in the system.</span>
+<span id="L189"><span class="lineNum">     189</span>              :      *  This expects to be called with external thread synchronization, and will not internally</span>
+<span id="L190"><span class="lineNum">     190</span>              :      *  grab the CHIP stack lock.</span>
+<span id="L191"><span class="lineNum">     191</span>              :      *</span>
+<span id="L192"><span class="lineNum">     192</span>              :      *  This will also not stop the CHIP event queue / thread (if one exists).  Consumers are expected to</span>
+<span id="L193"><span class="lineNum">     193</span>              :      *  ensure this happened before calling this method.</span>
+<span id="L194"><span class="lineNum">     194</span>              :      */</span>
+<span id="L195"><span class="lineNum">     195</span>              :     virtual void Shutdown();</span>
+<span id="L196"><span class="lineNum">     196</span>              : </span>
+<span id="L197"><span class="lineNum">     197</span> <span class="tlaUNC tlaBgUNC">           0 :     SessionManager * SessionMgr()</span></span>
+<span id="L198"><span class="lineNum">     198</span>              :     {</span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaUNC">           0 :         if (mSystemState)</span></span>
+<span id="L200"><span class="lineNum">     200</span>              :         {</span>
+<span id="L201"><span class="lineNum">     201</span> <span class="tlaUNC">           0 :             return mSystemState-&gt;SessionMgr();</span></span>
+<span id="L202"><span class="lineNum">     202</span>              :         }</span>
+<span id="L203"><span class="lineNum">     203</span>              : </span>
+<span id="L204"><span class="lineNum">     204</span> <span class="tlaUNC">           0 :         return nullptr;</span></span>
+<span id="L205"><span class="lineNum">     205</span>              :     }</span>
+<span id="L206"><span class="lineNum">     206</span>              : </span>
+<span id="L207"><span class="lineNum">     207</span>              :     CASESessionManager * CASESessionMgr()</span>
+<span id="L208"><span class="lineNum">     208</span>              :     {</span>
+<span id="L209"><span class="lineNum">     209</span>              :         if (mSystemState)</span>
+<span id="L210"><span class="lineNum">     210</span>              :         {</span>
+<span id="L211"><span class="lineNum">     211</span>              :             return mSystemState-&gt;CASESessionMgr();</span>
+<span id="L212"><span class="lineNum">     212</span>              :         }</span>
+<span id="L213"><span class="lineNum">     213</span>              : </span>
+<span id="L214"><span class="lineNum">     214</span>              :         return nullptr;</span>
+<span id="L215"><span class="lineNum">     215</span>              :     }</span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span>              :     Messaging::ExchangeManager * ExchangeMgr()</span>
+<span id="L218"><span class="lineNum">     218</span>              :     {</span>
+<span id="L219"><span class="lineNum">     219</span>              :         if (mSystemState != nullptr)</span>
+<span id="L220"><span class="lineNum">     220</span>              :         {</span>
+<span id="L221"><span class="lineNum">     221</span>              :             return mSystemState-&gt;ExchangeMgr();</span>
+<span id="L222"><span class="lineNum">     222</span>              :         }</span>
+<span id="L223"><span class="lineNum">     223</span>              : </span>
+<span id="L224"><span class="lineNum">     224</span>              :         return nullptr;</span>
+<span id="L225"><span class="lineNum">     225</span>              :     }</span>
+<span id="L226"><span class="lineNum">     226</span>              : </span>
+<span id="L227"><span class="lineNum">     227</span>              :     CHIP_ERROR GetPeerAddressAndPort(NodeId peerId, Inet::IPAddress &amp; addr, uint16_t &amp; port);</span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span>              :     /**</span>
+<span id="L230"><span class="lineNum">     230</span>              :      * @brief</span>
+<span id="L231"><span class="lineNum">     231</span>              :      *   Looks up the PeerAddress for an established CASE session.</span>
+<span id="L232"><span class="lineNum">     232</span>              :      *</span>
+<span id="L233"><span class="lineNum">     233</span>              :      * @param[in] nodeId the NodeId of the target.</span>
+<span id="L234"><span class="lineNum">     234</span>              :      * @param[out] addr the PeerAddress to be filled on success</span>
+<span id="L235"><span class="lineNum">     235</span>              :      *</span>
+<span id="L236"><span class="lineNum">     236</span>              :      * @return CHIP_ERROR CHIP_ERROR_NOT_CONNECTED if no CASE session exists for the device</span>
+<span id="L237"><span class="lineNum">     237</span>              :      */</span>
+<span id="L238"><span class="lineNum">     238</span>              :     CHIP_ERROR GetPeerAddress(NodeId nodeId, Transport::PeerAddress &amp; addr);</span>
+<span id="L239"><span class="lineNum">     239</span>              : </span>
+<span id="L240"><span class="lineNum">     240</span> <span class="tlaUNC">           0 :     ScopedNodeId GetPeerScopedId(NodeId nodeId) { return ScopedNodeId(nodeId, GetFabricIndex()); }</span></span>
+<span id="L241"><span class="lineNum">     241</span>              : </span>
+<span id="L242"><span class="lineNum">     242</span>              :     /**</span>
+<span id="L243"><span class="lineNum">     243</span>              :      * This function finds the device corresponding to deviceId, and establishes</span>
+<span id="L244"><span class="lineNum">     244</span>              :      * a CASE session with it.</span>
+<span id="L245"><span class="lineNum">     245</span>              :      *</span>
+<span id="L246"><span class="lineNum">     246</span>              :      * Once the CASE session is successfully established the `onConnection`</span>
+<span id="L247"><span class="lineNum">     247</span>              :      * callback is called. This can happen before GetConnectedDevice returns if</span>
+<span id="L248"><span class="lineNum">     248</span>              :      * there is an existing CASE session.</span>
+<span id="L249"><span class="lineNum">     249</span>              :      *</span>
+<span id="L250"><span class="lineNum">     250</span>              :      * If a CASE sessions fails to be established, the `onFailure` callback will</span>
+<span id="L251"><span class="lineNum">     251</span>              :      * be called.  This can also happen before GetConnectedDevice returns.</span>
+<span id="L252"><span class="lineNum">     252</span>              :      *</span>
+<span id="L253"><span class="lineNum">     253</span>              :      * An error return from this function means that neither callback has been</span>
+<span id="L254"><span class="lineNum">     254</span>              :      * called yet, and neither callback will be called in the future.</span>
+<span id="L255"><span class="lineNum">     255</span>              :      */</span>
+<span id="L256"><span class="lineNum">     256</span>              :     virtual CHIP_ERROR</span>
+<span id="L257"><span class="lineNum">     257</span> <span class="tlaUNC">           0 :     GetConnectedDevice(NodeId peerNodeId, Callback::Callback&lt;OnDeviceConnected&gt; * onConnection,</span></span>
+<span id="L258"><span class="lineNum">     258</span>              :                        Callback::Callback&lt;OnDeviceConnectionFailure&gt; * onFailure,</span>
+<span id="L259"><span class="lineNum">     259</span>              :                        TransportPayloadCapability transportPayloadCapability = TransportPayloadCapability::kMRPPayload)</span>
+<span id="L260"><span class="lineNum">     260</span>              :     {</span>
+<span id="L261"><span class="lineNum">     261</span> <span class="tlaUNC">           0 :         VerifyOrReturnError(mState == State::Initialized, CHIP_ERROR_INCORRECT_STATE);</span></span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaUNC">           0 :         mSystemState-&gt;CASESessionMgr()-&gt;FindOrEstablishSession(ScopedNodeId(peerNodeId, GetFabricIndex()), onConnection, onFailure,</span></span>
+<span id="L263"><span class="lineNum">     263</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L264"><span class="lineNum">     264</span>              :                                                                1, nullptr,</span>
+<span id="L265"><span class="lineNum">     265</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L266"><span class="lineNum">     266</span>              :                                                                transportPayloadCapability);</span>
+<span id="L267"><span class="lineNum">     267</span> <span class="tlaUNC">           0 :         return CHIP_NO_ERROR;</span></span>
+<span id="L268"><span class="lineNum">     268</span>              :     }</span>
+<span id="L269"><span class="lineNum">     269</span>              : </span>
+<span id="L270"><span class="lineNum">     270</span>              :     /**</span>
+<span id="L271"><span class="lineNum">     271</span>              :      * This function finds the device corresponding to deviceId, and establishes</span>
+<span id="L272"><span class="lineNum">     272</span>              :      * a CASE session with it.</span>
+<span id="L273"><span class="lineNum">     273</span>              :      *</span>
+<span id="L274"><span class="lineNum">     274</span>              :      * Once the CASE session is successfully established the `onConnection`</span>
+<span id="L275"><span class="lineNum">     275</span>              :      * callback is called. This can happen before GetConnectedDevice returns if</span>
+<span id="L276"><span class="lineNum">     276</span>              :      * there is an existing CASE session.</span>
+<span id="L277"><span class="lineNum">     277</span>              :      *</span>
+<span id="L278"><span class="lineNum">     278</span>              :      * If a CASE sessions fails to be established, the `onSetupFailure` callback will</span>
+<span id="L279"><span class="lineNum">     279</span>              :      * be called.  This can also happen before GetConnectedDevice returns.</span>
+<span id="L280"><span class="lineNum">     280</span>              :      *</span>
+<span id="L281"><span class="lineNum">     281</span>              :      * An error return from this function means that neither callback has been</span>
+<span id="L282"><span class="lineNum">     282</span>              :      * called yet, and neither callback will be called in the future.</span>
+<span id="L283"><span class="lineNum">     283</span>              :      */</span>
+<span id="L284"><span class="lineNum">     284</span>              :     CHIP_ERROR</span>
+<span id="L285"><span class="lineNum">     285</span>              :     GetConnectedDevice(NodeId peerNodeId, Callback::Callback&lt;OnDeviceConnected&gt; * onConnection,</span>
+<span id="L286"><span class="lineNum">     286</span>              :                        chip::Callback::Callback&lt;OperationalSessionSetup::OnSetupFailure&gt; * onSetupFailure,</span>
+<span id="L287"><span class="lineNum">     287</span>              :                        TransportPayloadCapability transportPayloadCapability = TransportPayloadCapability::kMRPPayload)</span>
+<span id="L288"><span class="lineNum">     288</span>              :     {</span>
+<span id="L289"><span class="lineNum">     289</span>              :         VerifyOrReturnError(mState == State::Initialized, CHIP_ERROR_INCORRECT_STATE);</span>
+<span id="L290"><span class="lineNum">     290</span>              :         mSystemState-&gt;CASESessionMgr()-&gt;FindOrEstablishSession(ScopedNodeId(peerNodeId, GetFabricIndex()), onConnection,</span>
+<span id="L291"><span class="lineNum">     291</span>              :                                                                onSetupFailure,</span>
+<span id="L292"><span class="lineNum">     292</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L293"><span class="lineNum">     293</span>              :                                                                1, nullptr,</span>
+<span id="L294"><span class="lineNum">     294</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L295"><span class="lineNum">     295</span>              :                                                                transportPayloadCapability);</span>
+<span id="L296"><span class="lineNum">     296</span>              :         return CHIP_NO_ERROR;</span>
+<span id="L297"><span class="lineNum">     297</span>              :     }</span>
+<span id="L298"><span class="lineNum">     298</span>              : </span>
+<span id="L299"><span class="lineNum">     299</span>              :     /**</span>
+<span id="L300"><span class="lineNum">     300</span>              :      * @brief</span>
+<span id="L301"><span class="lineNum">     301</span>              :      *   Compute a PASE verifier and passcode ID for the desired setup pincode.</span>
+<span id="L302"><span class="lineNum">     302</span>              :      *</span>
+<span id="L303"><span class="lineNum">     303</span>              :      *   This can be used to open a commissioning window on the device for</span>
+<span id="L304"><span class="lineNum">     304</span>              :      *   additional administrator commissioning.</span>
+<span id="L305"><span class="lineNum">     305</span>              :      *</span>
+<span id="L306"><span class="lineNum">     306</span>              :      * @param[in] iterations      The number of iterations to use when generating the verifier</span>
+<span id="L307"><span class="lineNum">     307</span>              :      * @param[in] setupPincode    The desired PIN code to use</span>
+<span id="L308"><span class="lineNum">     308</span>              :      * @param[in] salt            The 16-byte salt for verifier computation</span>
+<span id="L309"><span class="lineNum">     309</span>              :      * @param[out] outVerifier    The Spake2pVerifier to be populated on success</span>
+<span id="L310"><span class="lineNum">     310</span>              :      *</span>
+<span id="L311"><span class="lineNum">     311</span>              :      * @return CHIP_ERROR         CHIP_NO_ERROR on success, or corresponding error</span>
+<span id="L312"><span class="lineNum">     312</span>              :      */</span>
+<span id="L313"><span class="lineNum">     313</span>              :     CHIP_ERROR ComputePASEVerifier(uint32_t iterations, uint32_t setupPincode, const ByteSpan &amp; salt,</span>
+<span id="L314"><span class="lineNum">     314</span>              :                                    Crypto::Spake2pVerifier &amp; outVerifier);</span>
+<span id="L315"><span class="lineNum">     315</span>              : </span>
+<span id="L316"><span class="lineNum">     316</span> <span class="tlaUNC">           0 :     void RegisterDeviceDiscoveryDelegate(DeviceDiscoveryDelegate * delegate) { mDeviceDiscoveryDelegate = delegate; }</span></span>
+<span id="L317"><span class="lineNum">     317</span>              : </span>
+<span id="L318"><span class="lineNum">     318</span>              :     /**</span>
+<span id="L319"><span class="lineNum">     319</span>              :      * @brief Get the Compressed Fabric ID assigned to the device.</span>
+<span id="L320"><span class="lineNum">     320</span>              :      */</span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaUNC">           0 :     uint64_t GetCompressedFabricId() const</span></span>
+<span id="L322"><span class="lineNum">     322</span>              :     {</span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaUNC">           0 :         const auto * fabricInfo = GetFabricInfo();</span></span>
+<span id="L324"><span class="lineNum">     324</span> <span class="tlaUNC">           0 :         return (fabricInfo != nullptr) ? static_cast&lt;uint64_t&gt;(fabricInfo-&gt;GetCompressedFabricId()) : kUndefinedCompressedFabricId;</span></span>
+<span id="L325"><span class="lineNum">     325</span>              :     }</span>
+<span id="L326"><span class="lineNum">     326</span>              : </span>
+<span id="L327"><span class="lineNum">     327</span>              :     /**</span>
+<span id="L328"><span class="lineNum">     328</span>              :      * @brief Get the Compressed Fabric Id as a big-endian 64 bit octet string.</span>
+<span id="L329"><span class="lineNum">     329</span>              :      *</span>
+<span id="L330"><span class="lineNum">     330</span>              :      * Output span is resized to 8 bytes on success if it was larger.</span>
+<span id="L331"><span class="lineNum">     331</span>              :      *</span>
+<span id="L332"><span class="lineNum">     332</span>              :      * @param outBytes span to contain the compressed fabric ID, must be at least 8 bytes long</span>
+<span id="L333"><span class="lineNum">     333</span>              :      * @return CHIP_ERROR_BUFFER_TOO_SMALL if `outBytes` is too small, CHIP_ERROR_INVALID_FABRIC_INDEX</span>
+<span id="L334"><span class="lineNum">     334</span>              :      *         if the controller is somehow not associated with a fabric (internal error!) or</span>
+<span id="L335"><span class="lineNum">     335</span>              :      *         CHIP_NO_ERROR on success.</span>
+<span id="L336"><span class="lineNum">     336</span>              :      */</span>
+<span id="L337"><span class="lineNum">     337</span>              :     CHIP_ERROR GetCompressedFabricIdBytes(MutableByteSpan &amp; outBytes) const;</span>
+<span id="L338"><span class="lineNum">     338</span>              : </span>
+<span id="L339"><span class="lineNum">     339</span>              :     /**</span>
+<span id="L340"><span class="lineNum">     340</span>              :      * @brief Get the raw Fabric ID assigned to the device.</span>
+<span id="L341"><span class="lineNum">     341</span>              :      */</span>
+<span id="L342"><span class="lineNum">     342</span> <span class="tlaUNC">           0 :     uint64_t GetFabricId() const</span></span>
+<span id="L343"><span class="lineNum">     343</span>              :     {</span>
+<span id="L344"><span class="lineNum">     344</span> <span class="tlaUNC">           0 :         const auto * fabricInfo = GetFabricInfo();</span></span>
+<span id="L345"><span class="lineNum">     345</span> <span class="tlaUNC">           0 :         return (fabricInfo != nullptr) ? static_cast&lt;uint64_t&gt;(fabricInfo-&gt;GetFabricId()) : kUndefinedFabricId;</span></span>
+<span id="L346"><span class="lineNum">     346</span>              :     }</span>
+<span id="L347"><span class="lineNum">     347</span>              : </span>
+<span id="L348"><span class="lineNum">     348</span>              :     /**</span>
+<span id="L349"><span class="lineNum">     349</span>              :      * @brief Get the Node ID of this instance.</span>
+<span id="L350"><span class="lineNum">     350</span>              :      */</span>
+<span id="L351"><span class="lineNum">     351</span> <span class="tlaUNC">           0 :     NodeId GetNodeId() const</span></span>
+<span id="L352"><span class="lineNum">     352</span>              :     {</span>
+<span id="L353"><span class="lineNum">     353</span> <span class="tlaUNC">           0 :         const auto * fabricInfo = GetFabricInfo();</span></span>
+<span id="L354"><span class="lineNum">     354</span> <span class="tlaUNC">           0 :         return (fabricInfo != nullptr) ? static_cast&lt;uint64_t&gt;(fabricInfo-&gt;GetNodeId()) : kUndefinedNodeId;</span></span>
+<span id="L355"><span class="lineNum">     355</span>              :     }</span>
+<span id="L356"><span class="lineNum">     356</span>              : </span>
+<span id="L357"><span class="lineNum">     357</span>              :     /**</span>
+<span id="L358"><span class="lineNum">     358</span>              :      * @brief Get the root public key for the fabric</span>
+<span id="L359"><span class="lineNum">     359</span>              :      *</span>
+<span id="L360"><span class="lineNum">     360</span>              :      * @param outRootPublicKey reference to public key object that gets updated on success.</span>
+<span id="L361"><span class="lineNum">     361</span>              :      *</span>
+<span id="L362"><span class="lineNum">     362</span>              :      * @return CHIP_NO_ERROR on success, CHIP_ERROR_INCORRECT_STATE if fabric table is unset, or another internal error</span>
+<span id="L363"><span class="lineNum">     363</span>              :      *         on storage access failure.</span>
+<span id="L364"><span class="lineNum">     364</span>              :      */</span>
+<span id="L365"><span class="lineNum">     365</span>              :     CHIP_ERROR GetRootPublicKey(Crypto::P256PublicKey &amp; outRootPublicKey) const;</span>
+<span id="L366"><span class="lineNum">     366</span>              : </span>
+<span id="L367"><span class="lineNum">     367</span> <span class="tlaUNC">           0 :     FabricIndex GetFabricIndex() const { return mFabricIndex; }</span></span>
+<span id="L368"><span class="lineNum">     368</span>              : </span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaUNC">           0 :     const FabricTable * GetFabricTable() const</span></span>
+<span id="L370"><span class="lineNum">     370</span>              :     {</span>
+<span id="L371"><span class="lineNum">     371</span> <span class="tlaUNC">           0 :         if (mSystemState == nullptr)</span></span>
+<span id="L372"><span class="lineNum">     372</span>              :         {</span>
+<span id="L373"><span class="lineNum">     373</span> <span class="tlaUNC">           0 :             return nullptr;</span></span>
+<span id="L374"><span class="lineNum">     374</span>              :         }</span>
+<span id="L375"><span class="lineNum">     375</span> <span class="tlaUNC">           0 :         return mSystemState-&gt;Fabrics();</span></span>
+<span id="L376"><span class="lineNum">     376</span>              :     }</span>
+<span id="L377"><span class="lineNum">     377</span>              : </span>
+<span id="L378"><span class="lineNum">     378</span>              :     OperationalCredentialsDelegate * GetOperationalCredentialsDelegate() { return mOperationalCredentialsDelegate; }</span>
+<span id="L379"><span class="lineNum">     379</span>              : </span>
+<span id="L380"><span class="lineNum">     380</span>              :     /**</span>
+<span id="L381"><span class="lineNum">     381</span>              :      * @brief</span>
+<span id="L382"><span class="lineNum">     382</span>              :      *   Reconfigures a new set of operational credentials to be used with this</span>
+<span id="L383"><span class="lineNum">     383</span>              :      *   controller given ControllerInitParams state.</span>
+<span id="L384"><span class="lineNum">     384</span>              :      *</span>
+<span id="L385"><span class="lineNum">     385</span>              :      * WARNING: This is a low-level method that should only be called directly</span>
+<span id="L386"><span class="lineNum">     386</span>              :      *          if you know exactly how this will interact with controller state,</span>
+<span id="L387"><span class="lineNum">     387</span>              :      *          since there are several integrations that do this call for you.</span>
+<span id="L388"><span class="lineNum">     388</span>              :      *          It can be used for fine-grained dependency injection of a controller's</span>
+<span id="L389"><span class="lineNum">     389</span>              :      *          NOC and operational keypair.</span>
+<span id="L390"><span class="lineNum">     390</span>              :      */</span>
+<span id="L391"><span class="lineNum">     391</span>              :     CHIP_ERROR InitControllerNOCChain(const ControllerInitParams &amp; params);</span>
+<span id="L392"><span class="lineNum">     392</span>              : </span>
+<span id="L393"><span class="lineNum">     393</span>              :     /**</span>
+<span id="L394"><span class="lineNum">     394</span>              :      * @brief Update the NOC chain of controller.</span>
+<span id="L395"><span class="lineNum">     395</span>              :      *</span>
+<span id="L396"><span class="lineNum">     396</span>              :      * @param[in] noc                                NOC in CHIP certificate format.</span>
+<span id="L397"><span class="lineNum">     397</span>              :      * @param[in] icac                               ICAC in CHIP certificate format. If no icac is present, an empty</span>
+<span id="L398"><span class="lineNum">     398</span>              :      *                                               ByteSpan should be passed.</span>
+<span id="L399"><span class="lineNum">     399</span>              :      * @param[in] operationalKeypair                 External operational keypair. If null, use keypair in OperationalKeystore.</span>
+<span id="L400"><span class="lineNum">     400</span>              :      * @param[in] operationalKeypairExternalOwned    If true, external operational keypair must outlive the fabric.</span>
+<span id="L401"><span class="lineNum">     401</span>              :      *                                               If false, the keypair is copied and owned in heap of a FabricInfo.</span>
+<span id="L402"><span class="lineNum">     402</span>              :      *</span>
+<span id="L403"><span class="lineNum">     403</span>              :      * @return CHIP_ERROR                            CHIP_NO_ERROR on success.</span>
+<span id="L404"><span class="lineNum">     404</span>              :      */</span>
+<span id="L405"><span class="lineNum">     405</span>              :     CHIP_ERROR UpdateControllerNOCChain(const ByteSpan &amp; noc, const ByteSpan &amp; icac, Crypto::P256Keypair * operationalKeypair,</span>
+<span id="L406"><span class="lineNum">     406</span>              :                                         bool operationalKeypairExternalOwned);</span>
+<span id="L407"><span class="lineNum">     407</span>              : </span>
+<span id="L408"><span class="lineNum">     408</span>              : protected:</span>
+<span id="L409"><span class="lineNum">     409</span>              :     enum class State</span>
+<span id="L410"><span class="lineNum">     410</span>              :     {</span>
+<span id="L411"><span class="lineNum">     411</span>              :         NotInitialized,</span>
+<span id="L412"><span class="lineNum">     412</span>              :         Initialized</span>
+<span id="L413"><span class="lineNum">     413</span>              :     };</span>
+<span id="L414"><span class="lineNum">     414</span>              : </span>
+<span id="L415"><span class="lineNum">     415</span>              :     // This is not public to avoid users of DeviceController relying on &quot;innards&quot; access to</span>
+<span id="L416"><span class="lineNum">     416</span>              :     // the raw fabric table. Everything needed should be available with getters on DeviceController.</span>
+<span id="L417"><span class="lineNum">     417</span> <span class="tlaUNC">           0 :     const FabricInfo * GetFabricInfo() const</span></span>
+<span id="L418"><span class="lineNum">     418</span>              :     {</span>
+<span id="L419"><span class="lineNum">     419</span> <span class="tlaUNC">           0 :         VerifyOrReturnError((mState == State::Initialized) &amp;&amp; (mFabricIndex != kUndefinedFabricIndex), nullptr);</span></span>
+<span id="L420"><span class="lineNum">     420</span> <span class="tlaUNC">           0 :         VerifyOrReturnError(GetFabricTable() != nullptr, nullptr);</span></span>
+<span id="L421"><span class="lineNum">     421</span>              : </span>
+<span id="L422"><span class="lineNum">     422</span> <span class="tlaUNC">           0 :         return GetFabricTable()-&gt;FindFabricWithIndex(mFabricIndex);</span></span>
+<span id="L423"><span class="lineNum">     423</span>              :     }</span>
+<span id="L424"><span class="lineNum">     424</span>              : </span>
+<span id="L425"><span class="lineNum">     425</span>              :     State mState;</span>
+<span id="L426"><span class="lineNum">     426</span>              : </span>
+<span id="L427"><span class="lineNum">     427</span>              :     FabricIndex mFabricIndex = kUndefinedFabricIndex;</span>
+<span id="L428"><span class="lineNum">     428</span>              : </span>
+<span id="L429"><span class="lineNum">     429</span>              :     bool mRemoveFromFabricTableOnShutdown = true;</span>
+<span id="L430"><span class="lineNum">     430</span>              :     bool mDeleteFromFabricTableOnShutdown = false;</span>
+<span id="L431"><span class="lineNum">     431</span>              : </span>
+<span id="L432"><span class="lineNum">     432</span>              :     FabricTable::AdvertiseIdentity mAdvertiseIdentity = FabricTable::AdvertiseIdentity::Yes;</span>
+<span id="L433"><span class="lineNum">     433</span>              : </span>
+<span id="L434"><span class="lineNum">     434</span>              :     // TODO(cecille): Make this configuarable.</span>
+<span id="L435"><span class="lineNum">     435</span>              :     static constexpr int kMaxCommissionableNodes = 10;</span>
+<span id="L436"><span class="lineNum">     436</span>              :     Dnssd::CommissionNodeData mCommissionableNodes[kMaxCommissionableNodes];</span>
+<span id="L437"><span class="lineNum">     437</span>              :     DeviceControllerSystemState * mSystemState = nullptr;</span>
+<span id="L438"><span class="lineNum">     438</span>              : </span>
+<span id="L439"><span class="lineNum">     439</span>              :     ControllerDeviceInitParams GetControllerDeviceInitParams();</span>
+<span id="L440"><span class="lineNum">     440</span>              : </span>
+<span id="L441"><span class="lineNum">     441</span>              :     OperationalCredentialsDelegate * mOperationalCredentialsDelegate;</span>
+<span id="L442"><span class="lineNum">     442</span>              : </span>
+<span id="L443"><span class="lineNum">     443</span>              :     chip::VendorId mVendorId;</span>
+<span id="L444"><span class="lineNum">     444</span>              : </span>
+<span id="L445"><span class="lineNum">     445</span> <span class="tlaUNC">           0 :     DiscoveredNodeList GetDiscoveredNodes() override { return DiscoveredNodeList(mCommissionableNodes); }</span></span>
+<span id="L446"><span class="lineNum">     446</span>              : };</span>
+<span id="L447"><span class="lineNum">     447</span>              : </span>
+<span id="L448"><span class="lineNum">     448</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY</span>
+<span id="L449"><span class="lineNum">     449</span>              : using UdcTransportMgr = TransportMgr&lt;Transport::UDP /* IPv6 */</span>
+<span id="L450"><span class="lineNum">     450</span>              : #if INET_CONFIG_ENABLE_IPV4</span>
+<span id="L451"><span class="lineNum">     451</span>              :                                      ,</span>
+<span id="L452"><span class="lineNum">     452</span>              :                                      Transport::UDP /* IPv4 */</span>
+<span id="L453"><span class="lineNum">     453</span>              : #endif</span>
+<span id="L454"><span class="lineNum">     454</span>              :                                      &gt;;</span>
+<span id="L455"><span class="lineNum">     455</span>              : #endif</span>
+<span id="L456"><span class="lineNum">     456</span>              : </span>
+<span id="L457"><span class="lineNum">     457</span>              : /**</span>
+<span id="L458"><span class="lineNum">     458</span>              :  * @brief Callback prototype for ExtendArmFailSafe command.</span>
+<span id="L459"><span class="lineNum">     459</span>              :  */</span>
+<span id="L460"><span class="lineNum">     460</span>              : typedef void (*OnExtendFailsafeSuccess)(</span>
+<span id="L461"><span class="lineNum">     461</span>              :     void * context, const app::Clusters::GeneralCommissioning::Commands::ArmFailSafeResponse::DecodableType &amp; data);</span>
+<span id="L462"><span class="lineNum">     462</span>              : typedef void (*OnExtendFailsafeFailure)(void * context, CHIP_ERROR error);</span>
+<span id="L463"><span class="lineNum">     463</span>              : </span>
+<span id="L464"><span class="lineNum">     464</span>              : /**</span>
+<span id="L465"><span class="lineNum">     465</span>              :  * @brief</span>
+<span id="L466"><span class="lineNum">     466</span>              :  *   The commissioner applications can use this class to pair new/unpaired CHIP devices. The application is</span>
+<span id="L467"><span class="lineNum">     467</span>              :  *   required to provide write access to the persistent storage, where the paired device information</span>
+<span id="L468"><span class="lineNum">     468</span>              :  *   will be stored.</span>
+<span id="L469"><span class="lineNum">     469</span>              :  */</span>
+<span id="L470"><span class="lineNum">     470</span>              : class DLL_EXPORT DeviceCommissioner : public DeviceController,</span>
+<span id="L471"><span class="lineNum">     471</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY // make this commissioner discoverable</span>
+<span id="L472"><span class="lineNum">     472</span>              :                                       public Protocols::UserDirectedCommissioning::InstanceNameResolver,</span>
+<span id="L473"><span class="lineNum">     473</span>              : #endif</span>
+<span id="L474"><span class="lineNum">     474</span>              : #if CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L475"><span class="lineNum">     475</span>              :                                       public app::ClusterStateCache::Callback,</span>
+<span id="L476"><span class="lineNum">     476</span>              : #endif</span>
+<span id="L477"><span class="lineNum">     477</span>              :                                       public SessionEstablishmentDelegate</span>
+<span id="L478"><span class="lineNum">     478</span>              : {</span>
+<span id="L479"><span class="lineNum">     479</span>              : public:</span>
+<span id="L480"><span class="lineNum">     480</span>              :     DeviceCommissioner();</span>
+<span id="L481"><span class="lineNum">     481</span> <span class="tlaUNC">           0 :     ~DeviceCommissioner() override {}</span></span>
+<span id="L482"><span class="lineNum">     482</span>              : </span>
+<span id="L483"><span class="lineNum">     483</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY // make this commissioner discoverable</span>
+<span id="L484"><span class="lineNum">     484</span>              :     /**</span>
+<span id="L485"><span class="lineNum">     485</span>              :      * Set port for User Directed Commissioning</span>
+<span id="L486"><span class="lineNum">     486</span>              :      */</span>
+<span id="L487"><span class="lineNum">     487</span>              :     CHIP_ERROR SetUdcListenPort(uint16_t listenPort);</span>
+<span id="L488"><span class="lineNum">     488</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY</span>
+<span id="L489"><span class="lineNum">     489</span>              : </span>
+<span id="L490"><span class="lineNum">     490</span>              :     using DeviceController::Init;</span>
+<span id="L491"><span class="lineNum">     491</span>              : </span>
+<span id="L492"><span class="lineNum">     492</span>              :     /**</span>
+<span id="L493"><span class="lineNum">     493</span>              :      * Commissioner-specific initialization, includes parameters such as the pairing delegate.</span>
+<span id="L494"><span class="lineNum">     494</span>              :      */</span>
+<span id="L495"><span class="lineNum">     495</span>              :     CHIP_ERROR Init(CommissionerInitParams params);</span>
+<span id="L496"><span class="lineNum">     496</span>              : </span>
+<span id="L497"><span class="lineNum">     497</span>              :     /**</span>
+<span id="L498"><span class="lineNum">     498</span>              :      * @brief</span>
+<span id="L499"><span class="lineNum">     499</span>              :      *  Tears down the entirety of the stack, including destructing key objects in the system.</span>
+<span id="L500"><span class="lineNum">     500</span>              :      *  This is not a thread-safe API, and should be called with external synchronization.</span>
+<span id="L501"><span class="lineNum">     501</span>              :      *</span>
+<span id="L502"><span class="lineNum">     502</span>              :      *  Please see implementation for more details.</span>
+<span id="L503"><span class="lineNum">     503</span>              :      */</span>
+<span id="L504"><span class="lineNum">     504</span>              :     void Shutdown() override;</span>
+<span id="L505"><span class="lineNum">     505</span>              : </span>
+<span id="L506"><span class="lineNum">     506</span>              :     // ----- Connection Management -----</span>
+<span id="L507"><span class="lineNum">     507</span>              :     /**</span>
+<span id="L508"><span class="lineNum">     508</span>              :      * @brief</span>
+<span id="L509"><span class="lineNum">     509</span>              :      *   Pair a CHIP device with the provided code. The code can be either a QRCode</span>
+<span id="L510"><span class="lineNum">     510</span>              :      *   or a Manual Setup Code.</span>
+<span id="L511"><span class="lineNum">     511</span>              :      *   Use registered DevicePairingDelegate object to receive notifications on</span>
+<span id="L512"><span class="lineNum">     512</span>              :      *   pairing status updates.</span>
+<span id="L513"><span class="lineNum">     513</span>              :      *</span>
+<span id="L514"><span class="lineNum">     514</span>              :      *   Note: Pairing process requires that the caller has registered PersistentStorageDelegate</span>
+<span id="L515"><span class="lineNum">     515</span>              :      *         in the Init() call.</span>
+<span id="L516"><span class="lineNum">     516</span>              :      *</span>
+<span id="L517"><span class="lineNum">     517</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L518"><span class="lineNum">     518</span>              :      * @param[in] setUpCode             The setup code for connecting to the device</span>
+<span id="L519"><span class="lineNum">     519</span>              :      * @param[in] discoveryType         The network discovery type, defaults to DiscoveryType::kAll.</span>
+<span id="L520"><span class="lineNum">     520</span>              :      * @param[in] resolutionData        Optional resolution data previously discovered on the network for the target device.</span>
+<span id="L521"><span class="lineNum">     521</span>              :      */</span>
+<span id="L522"><span class="lineNum">     522</span>              :     CHIP_ERROR PairDevice(NodeId remoteDeviceId, const char * setUpCode, DiscoveryType discoveryType = DiscoveryType::kAll,</span>
+<span id="L523"><span class="lineNum">     523</span>              :                           Optional&lt;Dnssd::CommonResolutionData&gt; resolutionData = NullOptional);</span>
+<span id="L524"><span class="lineNum">     524</span>              :     CHIP_ERROR PairDevice(NodeId remoteDeviceId, const char * setUpCode, const CommissioningParameters &amp; CommissioningParameters,</span>
+<span id="L525"><span class="lineNum">     525</span>              :                           DiscoveryType discoveryType                          = DiscoveryType::kAll,</span>
+<span id="L526"><span class="lineNum">     526</span>              :                           Optional&lt;Dnssd::CommonResolutionData&gt; resolutionData = NullOptional);</span>
+<span id="L527"><span class="lineNum">     527</span>              : </span>
+<span id="L528"><span class="lineNum">     528</span>              :     /**</span>
+<span id="L529"><span class="lineNum">     529</span>              :      * @brief</span>
+<span id="L530"><span class="lineNum">     530</span>              :      *   Pair a CHIP device with the provided Rendezvous connection parameters.</span>
+<span id="L531"><span class="lineNum">     531</span>              :      *   Use registered DevicePairingDelegate object to receive notifications on</span>
+<span id="L532"><span class="lineNum">     532</span>              :      *   pairing status updates.</span>
+<span id="L533"><span class="lineNum">     533</span>              :      *</span>
+<span id="L534"><span class="lineNum">     534</span>              :      *   Note: Pairing process requires that the caller has registered PersistentStorageDelegate</span>
+<span id="L535"><span class="lineNum">     535</span>              :      *         in the Init() call.</span>
+<span id="L536"><span class="lineNum">     536</span>              :      *</span>
+<span id="L537"><span class="lineNum">     537</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L538"><span class="lineNum">     538</span>              :      * @param[in] rendezvousParams      The Rendezvous connection parameters</span>
+<span id="L539"><span class="lineNum">     539</span>              :      */</span>
+<span id="L540"><span class="lineNum">     540</span>              :     CHIP_ERROR PairDevice(NodeId remoteDeviceId, RendezvousParameters &amp; rendezvousParams);</span>
+<span id="L541"><span class="lineNum">     541</span>              : </span>
+<span id="L542"><span class="lineNum">     542</span>              :     /**</span>
+<span id="L543"><span class="lineNum">     543</span>              :      * @overload</span>
+<span id="L544"><span class="lineNum">     544</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L545"><span class="lineNum">     545</span>              :      * @param[in] rendezvousParams      The Rendezvous connection parameters</span>
+<span id="L546"><span class="lineNum">     546</span>              :      * @param[in] commissioningParams    The commissioning parameters (uses default if not supplied)</span>
+<span id="L547"><span class="lineNum">     547</span>              :      */</span>
+<span id="L548"><span class="lineNum">     548</span>              :     CHIP_ERROR PairDevice(NodeId remoteDeviceId, RendezvousParameters &amp; rendezvousParams,</span>
+<span id="L549"><span class="lineNum">     549</span>              :                           CommissioningParameters &amp; commissioningParams);</span>
+<span id="L550"><span class="lineNum">     550</span>              : </span>
+<span id="L551"><span class="lineNum">     551</span>              :     /**</span>
+<span id="L552"><span class="lineNum">     552</span>              :      * @brief</span>
+<span id="L553"><span class="lineNum">     553</span>              :      *   Start establishing a PASE connection with a node for the purposes of commissioning.</span>
+<span id="L554"><span class="lineNum">     554</span>              :      *   Commissioners that wish to use the auto-commissioning functions should use the</span>
+<span id="L555"><span class="lineNum">     555</span>              :      *   supplied &quot;PairDevice&quot; functions above to automatically establish a connection then</span>
+<span id="L556"><span class="lineNum">     556</span>              :      *   perform commissioning. This function is intended to be use by commissioners that</span>
+<span id="L557"><span class="lineNum">     557</span>              :      *   are not using the supplied auto-commissioner.</span>
+<span id="L558"><span class="lineNum">     558</span>              :      *</span>
+<span id="L559"><span class="lineNum">     559</span>              :      *   This function is non-blocking. PASE is established once the DevicePairingDelegate</span>
+<span id="L560"><span class="lineNum">     560</span>              :      *   receives the OnPairingComplete call.</span>
+<span id="L561"><span class="lineNum">     561</span>              :      *</span>
+<span id="L562"><span class="lineNum">     562</span>              :      *   PASE connections can only be established with nodes that have their commissioning</span>
+<span id="L563"><span class="lineNum">     563</span>              :      *   window open. The PASE connection will fail if this window is not open and the</span>
+<span id="L564"><span class="lineNum">     564</span>              :      *   OnPairingComplete will be called with an error.</span>
+<span id="L565"><span class="lineNum">     565</span>              :      *</span>
+<span id="L566"><span class="lineNum">     566</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L567"><span class="lineNum">     567</span>              :      * @param[in] params                The Rendezvous connection parameters</span>
+<span id="L568"><span class="lineNum">     568</span>              :      */</span>
+<span id="L569"><span class="lineNum">     569</span>              :     CHIP_ERROR EstablishPASEConnection(NodeId remoteDeviceId, RendezvousParameters &amp; params);</span>
+<span id="L570"><span class="lineNum">     570</span>              : </span>
+<span id="L571"><span class="lineNum">     571</span>              :     /**</span>
+<span id="L572"><span class="lineNum">     572</span>              :      * @brief</span>
+<span id="L573"><span class="lineNum">     573</span>              :      *   Start establishing a PASE connection with a node for the purposes of commissioning.</span>
+<span id="L574"><span class="lineNum">     574</span>              :      *   Commissioners that wish to use the auto-commissioning functions should use the</span>
+<span id="L575"><span class="lineNum">     575</span>              :      *   supplied &quot;PairDevice&quot; functions above to automatically establish a connection then</span>
+<span id="L576"><span class="lineNum">     576</span>              :      *   perform commissioning. This function is intended to be used by commissioners that</span>
+<span id="L577"><span class="lineNum">     577</span>              :      *   are not using the supplied auto-commissioner.</span>
+<span id="L578"><span class="lineNum">     578</span>              :      *</span>
+<span id="L579"><span class="lineNum">     579</span>              :      *   This function is non-blocking. PASE is established once the DevicePairingDelegate</span>
+<span id="L580"><span class="lineNum">     580</span>              :      *   receives the OnPairingComplete call.</span>
+<span id="L581"><span class="lineNum">     581</span>              :      *</span>
+<span id="L582"><span class="lineNum">     582</span>              :      *   PASE connections can only be established with nodes that have their commissioning</span>
+<span id="L583"><span class="lineNum">     583</span>              :      *   window open. The PASE connection will fail if this window is not open and in that case</span>
+<span id="L584"><span class="lineNum">     584</span>              :      *   OnPairingComplete will be called with an error.</span>
+<span id="L585"><span class="lineNum">     585</span>              :      *</span>
+<span id="L586"><span class="lineNum">     586</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L587"><span class="lineNum">     587</span>              :      * @param[in] setUpCode             The setup code for connecting to the device</span>
+<span id="L588"><span class="lineNum">     588</span>              :      * @param[in] discoveryType         The network discovery type, defaults to DiscoveryType::kAll.</span>
+<span id="L589"><span class="lineNum">     589</span>              :      * @param[in] resolutionData        Optional resolution data previously discovered on the network for the target device.</span>
+<span id="L590"><span class="lineNum">     590</span>              :      */</span>
+<span id="L591"><span class="lineNum">     591</span>              :     CHIP_ERROR EstablishPASEConnection(NodeId remoteDeviceId, const char * setUpCode,</span>
+<span id="L592"><span class="lineNum">     592</span>              :                                        DiscoveryType discoveryType                          = DiscoveryType::kAll,</span>
+<span id="L593"><span class="lineNum">     593</span>              :                                        Optional&lt;Dnssd::CommonResolutionData&gt; resolutionData = NullOptional);</span>
+<span id="L594"><span class="lineNum">     594</span>              : </span>
+<span id="L595"><span class="lineNum">     595</span>              :     /**</span>
+<span id="L596"><span class="lineNum">     596</span>              :      * @brief</span>
+<span id="L597"><span class="lineNum">     597</span>              :      *   Start the auto-commissioning process on a node after establishing a PASE connection.</span>
+<span id="L598"><span class="lineNum">     598</span>              :      *   This function is intended to be used in conjunction with the EstablishPASEConnection</span>
+<span id="L599"><span class="lineNum">     599</span>              :      *   function. It can be called either before or after the DevicePairingDelegate receives</span>
+<span id="L600"><span class="lineNum">     600</span>              :      *   the OnPairingComplete call. Commissioners that want to perform simple auto-commissioning</span>
+<span id="L601"><span class="lineNum">     601</span>              :      *   should use the supplied &quot;PairDevice&quot; functions above, which will establish the PASE</span>
+<span id="L602"><span class="lineNum">     602</span>              :      *   connection and commission automatically.</span>
+<span id="L603"><span class="lineNum">     603</span>              :      *</span>
+<span id="L604"><span class="lineNum">     604</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L605"><span class="lineNum">     605</span>              :      * @param[in] params                The commissioning parameters</span>
+<span id="L606"><span class="lineNum">     606</span>              :      */</span>
+<span id="L607"><span class="lineNum">     607</span>              :     virtual CHIP_ERROR Commission(NodeId remoteDeviceId, CommissioningParameters &amp; params);</span>
+<span id="L608"><span class="lineNum">     608</span>              :     CHIP_ERROR Commission(NodeId remoteDeviceId);</span>
+<span id="L609"><span class="lineNum">     609</span>              : </span>
+<span id="L610"><span class="lineNum">     610</span>              :     /**</span>
+<span id="L611"><span class="lineNum">     611</span>              :      * @brief</span>
+<span id="L612"><span class="lineNum">     612</span>              :      *   This function instructs the commissioner to proceed to the next stage of commissioning after</span>
+<span id="L613"><span class="lineNum">     613</span>              :      *   attestation is reported to an installed attestation delegate.</span>
+<span id="L614"><span class="lineNum">     614</span>              :      *</span>
+<span id="L615"><span class="lineNum">     615</span>              :      * @param[in] device                The device being commissioned.</span>
+<span id="L616"><span class="lineNum">     616</span>              :      * @param[in] attestationResult     The attestation result to use instead of whatever the device</span>
+<span id="L617"><span class="lineNum">     617</span>              :      *                                  attestation verifier came up with. May be a success or an error result.</span>
+<span id="L618"><span class="lineNum">     618</span>              :      */</span>
+<span id="L619"><span class="lineNum">     619</span>              :     CHIP_ERROR</span>
+<span id="L620"><span class="lineNum">     620</span>              :     ContinueCommissioningAfterDeviceAttestation(DeviceProxy * device, Credentials::AttestationVerificationResult attestationResult);</span>
+<span id="L621"><span class="lineNum">     621</span>              : </span>
+<span id="L622"><span class="lineNum">     622</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_NFC_BASED_COMMISSIONING</span>
+<span id="L623"><span class="lineNum">     623</span>              :     /**</span>
+<span id="L624"><span class="lineNum">     624</span>              :      * @brief</span>
+<span id="L625"><span class="lineNum">     625</span>              :      *   This method instructs the commissioner to proceed to the commissioning complete stage for a device</span>
+<span id="L626"><span class="lineNum">     626</span>              :      *   that had previously being commissioned until request to connect to network.</span>
+<span id="L627"><span class="lineNum">     627</span>              :      *</span>
+<span id="L628"><span class="lineNum">     628</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L629"><span class="lineNum">     629</span>              :      */</span>
+<span id="L630"><span class="lineNum">     630</span>              :     CHIP_ERROR ContinueCommissioningAfterConnectNetworkRequest(NodeId remoteDeviceId);</span>
+<span id="L631"><span class="lineNum">     631</span>              : #endif</span>
+<span id="L632"><span class="lineNum">     632</span>              : </span>
+<span id="L633"><span class="lineNum">     633</span>              :     CHIP_ERROR GetDeviceBeingCommissioned(NodeId deviceId, CommissioneeDeviceProxy ** device);</span>
+<span id="L634"><span class="lineNum">     634</span>              : </span>
+<span id="L635"><span class="lineNum">     635</span>              :     /**</span>
+<span id="L636"><span class="lineNum">     636</span>              :      * @brief</span>
+<span id="L637"><span class="lineNum">     637</span>              :      *   This function stops a pairing or commissioning process that is in progress.</span>
+<span id="L638"><span class="lineNum">     638</span>              :      *   It does not delete the pairing of a previously paired device.</span>
+<span id="L639"><span class="lineNum">     639</span>              :      *</span>
+<span id="L640"><span class="lineNum">     640</span>              :      *   Note that cancelling an ongoing commissioning process is an asynchronous operation.</span>
+<span id="L641"><span class="lineNum">     641</span>              :      *   The pairing delegate (if any) will receive OnCommissioningComplete and OnCommissioningFailure</span>
+<span id="L642"><span class="lineNum">     642</span>              :      *   failure callbacks with a status code of CHIP_ERROR_CANCELLED once cancellation is complete.</span>
+<span id="L643"><span class="lineNum">     643</span>              :      *</span>
+<span id="L644"><span class="lineNum">     644</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L645"><span class="lineNum">     645</span>              :      *</span>
+<span id="L646"><span class="lineNum">     646</span>              :      * @return CHIP_ERROR               CHIP_NO_ERROR on success, or corresponding error</span>
+<span id="L647"><span class="lineNum">     647</span>              :      */</span>
+<span id="L648"><span class="lineNum">     648</span>              :     CHIP_ERROR StopPairing(NodeId remoteDeviceId);</span>
+<span id="L649"><span class="lineNum">     649</span>              : </span>
+<span id="L650"><span class="lineNum">     650</span>              :     /**</span>
+<span id="L651"><span class="lineNum">     651</span>              :      * @brief</span>
+<span id="L652"><span class="lineNum">     652</span>              :      *   Remove pairing for a paired device. If the device is currently being paired, it'll stop the pairing process.</span>
+<span id="L653"><span class="lineNum">     653</span>              :      *</span>
+<span id="L654"><span class="lineNum">     654</span>              :      * @param[in] remoteDeviceId        The remote device Id.</span>
+<span id="L655"><span class="lineNum">     655</span>              :      *</span>
+<span id="L656"><span class="lineNum">     656</span>              :      * @return CHIP_ERROR               CHIP_NO_ERROR on success, or corresponding error</span>
+<span id="L657"><span class="lineNum">     657</span>              :      */</span>
+<span id="L658"><span class="lineNum">     658</span>              :     CHIP_ERROR UnpairDevice(NodeId remoteDeviceId);</span>
+<span id="L659"><span class="lineNum">     659</span>              : </span>
+<span id="L660"><span class="lineNum">     660</span>              :     //////////// SessionEstablishmentDelegate Implementation ///////////////</span>
+<span id="L661"><span class="lineNum">     661</span>              :     void OnSessionEstablishmentError(CHIP_ERROR error) override;</span>
+<span id="L662"><span class="lineNum">     662</span>              :     void OnSessionEstablished(const SessionHandle &amp; session) override;</span>
+<span id="L663"><span class="lineNum">     663</span>              : </span>
+<span id="L664"><span class="lineNum">     664</span>              :     void RendezvousCleanup(CHIP_ERROR status);</span>
+<span id="L665"><span class="lineNum">     665</span>              : </span>
+<span id="L666"><span class="lineNum">     666</span>              :     void PerformCommissioningStep(DeviceProxy * device, CommissioningStage step, CommissioningParameters &amp; params,</span>
+<span id="L667"><span class="lineNum">     667</span>              :                                   CommissioningDelegate * delegate, EndpointId endpoint, Optional&lt;System::Clock::Timeout&gt; timeout);</span>
+<span id="L668"><span class="lineNum">     668</span>              : </span>
+<span id="L669"><span class="lineNum">     669</span>              :     /**</span>
+<span id="L670"><span class="lineNum">     670</span>              :      * @brief</span>
+<span id="L671"><span class="lineNum">     671</span>              :      *   This function validates the Attestation Information sent by the device.</span>
+<span id="L672"><span class="lineNum">     672</span>              :      *</span>
+<span id="L673"><span class="lineNum">     673</span>              :      * @param[in] info Structure containing all the required information for validating the device attestation.</span>
+<span id="L674"><span class="lineNum">     674</span>              :      */</span>
+<span id="L675"><span class="lineNum">     675</span>              :     CHIP_ERROR ValidateAttestationInfo(const Credentials::DeviceAttestationVerifier::AttestationInfo &amp; info);</span>
+<span id="L676"><span class="lineNum">     676</span>              : </span>
+<span id="L677"><span class="lineNum">     677</span>              :     /**</span>
+<span id="L678"><span class="lineNum">     678</span>              :      * @brief</span>
+<span id="L679"><span class="lineNum">     679</span>              :      * Sends CommissioningStepComplete report to the commissioning delegate. Function will fill in current step.</span>
+<span id="L680"><span class="lineNum">     680</span>              :      * @params[in] err      error from the current step</span>
+<span id="L681"><span class="lineNum">     681</span>              :      * @params[in] report   report to send. Current step will be filled in automatically</span>
+<span id="L682"><span class="lineNum">     682</span>              :      */</span>
+<span id="L683"><span class="lineNum">     683</span>              :     void</span>
+<span id="L684"><span class="lineNum">     684</span>              :     CommissioningStageComplete(CHIP_ERROR err,</span>
+<span id="L685"><span class="lineNum">     685</span>              :                                CommissioningDelegate::CommissioningReport report = CommissioningDelegate::CommissioningReport());</span>
+<span id="L686"><span class="lineNum">     686</span>              : </span>
+<span id="L687"><span class="lineNum">     687</span>              :     /**</span>
+<span id="L688"><span class="lineNum">     688</span>              :      * @brief</span>
+<span id="L689"><span class="lineNum">     689</span>              :      *   This function is called by the DevicePairingDelegate to indicate that network credentials have been set</span>
+<span id="L690"><span class="lineNum">     690</span>              :      * on the CommissioningParameters of the CommissioningDelegate using CommissioningDelegate.SetCommissioningParameters().</span>
+<span id="L691"><span class="lineNum">     691</span>              :      * As a result, commissioning can advance to the next stage.</span>
+<span id="L692"><span class="lineNum">     692</span>              :      *</span>
+<span id="L693"><span class="lineNum">     693</span>              :      * The DevicePairingDelegate may call this method from the OnScanNetworksSuccess and OnScanNetworksFailure callbacks,</span>
+<span id="L694"><span class="lineNum">     694</span>              :      * or it may call this method after obtaining network credentials using asynchronous methods (prompting user, cloud API call,</span>
+<span id="L695"><span class="lineNum">     695</span>              :      * etc).</span>
+<span id="L696"><span class="lineNum">     696</span>              :      *</span>
+<span id="L697"><span class="lineNum">     697</span>              :      * If an error happens in the subsequent network commissioning step (either NetworkConfig or ConnectNetwork commands)</span>
+<span id="L698"><span class="lineNum">     698</span>              :      * then the DevicePairingDelegate will receive the error in completionStatus.networkCommissioningStatus and the</span>
+<span id="L699"><span class="lineNum">     699</span>              :      * commissioning stage will return to kNeedsNetworkCreds so that the DevicePairingDelegate can re-attempt with new</span>
+<span id="L700"><span class="lineNum">     700</span>              :      * network information. The DevicePairingDelegate can exit the commissioning process by calling StopPairing.</span>
+<span id="L701"><span class="lineNum">     701</span>              :      *</span>
+<span id="L702"><span class="lineNum">     702</span>              :      * @return CHIP_ERROR   The return status. Returns CHIP_ERROR_INCORRECT_STATE if not in the correct state (kNeedsNetworkCreds).</span>
+<span id="L703"><span class="lineNum">     703</span>              :      */</span>
+<span id="L704"><span class="lineNum">     704</span>              :     CHIP_ERROR NetworkCredentialsReady();</span>
+<span id="L705"><span class="lineNum">     705</span>              : </span>
+<span id="L706"><span class="lineNum">     706</span>              :     /**</span>
+<span id="L707"><span class="lineNum">     707</span>              :      * @brief</span>
+<span id="L708"><span class="lineNum">     708</span>              :      *   This function is called by the DevicePairingDelegate to indicate that ICD registration info (ICDSymmetricKey,</span>
+<span id="L709"><span class="lineNum">     709</span>              :      * ICDCheckInNodeId and ICDMonitoredSubject) have been set on the CommissioningParameters of the CommissioningDelegate</span>
+<span id="L710"><span class="lineNum">     710</span>              :      * using CommissioningDelegate.SetCommissioningParameters(). As a result, commissioning can advance to the next stage.</span>
+<span id="L711"><span class="lineNum">     711</span>              :      *</span>
+<span id="L712"><span class="lineNum">     712</span>              :      * The DevicePairingDelegate may call this method from the OnICDRegistrationInfoRequired callback, or it may call this</span>
+<span id="L713"><span class="lineNum">     713</span>              :      * method after obtaining required parameters for ICD registration using asynchronous methods (like RPC call etc).</span>
+<span id="L714"><span class="lineNum">     714</span>              :      *</span>
+<span id="L715"><span class="lineNum">     715</span>              :      * When the ICD Registration completes, OnICDRegistrationComplete will be called.</span>
+<span id="L716"><span class="lineNum">     716</span>              :      *</span>
+<span id="L717"><span class="lineNum">     717</span>              :      * @return CHIP_ERROR   The return status. Returns CHIP_ERROR_INCORRECT_STATE if not in the correct state</span>
+<span id="L718"><span class="lineNum">     718</span>              :      * (kICDGetRegistrationInfo).</span>
+<span id="L719"><span class="lineNum">     719</span>              :      */</span>
+<span id="L720"><span class="lineNum">     720</span>              :     CHIP_ERROR ICDRegistrationInfoReady();</span>
+<span id="L721"><span class="lineNum">     721</span>              : </span>
+<span id="L722"><span class="lineNum">     722</span>              :     /**</span>
+<span id="L723"><span class="lineNum">     723</span>              :      * @brief</span>
+<span id="L724"><span class="lineNum">     724</span>              :      *  This function returns the current CommissioningStage for this commissioner.</span>
+<span id="L725"><span class="lineNum">     725</span>              :      */</span>
+<span id="L726"><span class="lineNum">     726</span> <span class="tlaUNC">           0 :     CommissioningStage GetCommissioningStage() { return mCommissioningStage; }</span></span>
+<span id="L727"><span class="lineNum">     727</span>              : </span>
+<span id="L728"><span class="lineNum">     728</span>              : #if CONFIG_NETWORK_LAYER_BLE</span>
+<span id="L729"><span class="lineNum">     729</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_BOTH_COMMISSIONER_AND_COMMISSIONEE</span>
+<span id="L730"><span class="lineNum">     730</span>              :     /**</span>
+<span id="L731"><span class="lineNum">     731</span>              :      * @brief</span>
+<span id="L732"><span class="lineNum">     732</span>              :      *   Prior to commissioning, the Controller should make sure the BleLayer transport</span>
+<span id="L733"><span class="lineNum">     733</span>              :      *   is set to the Commissioner transport and not the Server transport.</span>
+<span id="L734"><span class="lineNum">     734</span>              :      */</span>
+<span id="L735"><span class="lineNum">     735</span>              :     void ConnectBleTransportToSelf();</span>
+<span id="L736"><span class="lineNum">     736</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_BOTH_COMMISSIONER_AND_COMMISSIONEE</span>
+<span id="L737"><span class="lineNum">     737</span>              : </span>
+<span id="L738"><span class="lineNum">     738</span>              :     /**</span>
+<span id="L739"><span class="lineNum">     739</span>              :      * @brief</span>
+<span id="L740"><span class="lineNum">     740</span>              :      *   Once we have finished all commissioning work, the Controller should close the BLE</span>
+<span id="L741"><span class="lineNum">     741</span>              :      *   connection to the device and establish CASE session / another PASE session to the device</span>
+<span id="L742"><span class="lineNum">     742</span>              :      *   if needed.</span>
+<span id="L743"><span class="lineNum">     743</span>              :      */</span>
+<span id="L744"><span class="lineNum">     744</span>              :     void CloseBleConnection();</span>
+<span id="L745"><span class="lineNum">     745</span>              : #endif</span>
+<span id="L746"><span class="lineNum">     746</span>              : </span>
+<span id="L747"><span class="lineNum">     747</span>              :     /**</span>
+<span id="L748"><span class="lineNum">     748</span>              :      * @brief</span>
+<span id="L749"><span class="lineNum">     749</span>              :      *   Discover all devices advertising as commissionable.</span>
+<span id="L750"><span class="lineNum">     750</span>              :      *   Should be called on main loop thread.</span>
+<span id="L751"><span class="lineNum">     751</span>              :      * * @param[in] filter  Browse filter - controller will look for only the specified subtype.</span>
+<span id="L752"><span class="lineNum">     752</span>              :      * @return CHIP_ERROR   The return status</span>
+<span id="L753"><span class="lineNum">     753</span>              :      */</span>
+<span id="L754"><span class="lineNum">     754</span>              :     CHIP_ERROR DiscoverCommissionableNodes(Dnssd::DiscoveryFilter filter);</span>
+<span id="L755"><span class="lineNum">     755</span>              : </span>
+<span id="L756"><span class="lineNum">     756</span>              :     /**</span>
+<span id="L757"><span class="lineNum">     757</span>              :      * Stop commissionable discovery triggered by a previous</span>
+<span id="L758"><span class="lineNum">     758</span>              :      * DiscoverCommissionableNodes call.</span>
+<span id="L759"><span class="lineNum">     759</span>              :      */</span>
+<span id="L760"><span class="lineNum">     760</span>              :     CHIP_ERROR StopCommissionableDiscovery();</span>
+<span id="L761"><span class="lineNum">     761</span>              : </span>
+<span id="L762"><span class="lineNum">     762</span>              :     /**</span>
+<span id="L763"><span class="lineNum">     763</span>              :      * @brief</span>
+<span id="L764"><span class="lineNum">     764</span>              :      *   Returns information about discovered devices.</span>
+<span id="L765"><span class="lineNum">     765</span>              :      *   Should be called on main loop thread.</span>
+<span id="L766"><span class="lineNum">     766</span>              :      * @return const DiscoveredNodeData* info about the selected device. May be nullptr if no information has been returned yet.</span>
+<span id="L767"><span class="lineNum">     767</span>              :      */</span>
+<span id="L768"><span class="lineNum">     768</span>              :     const Dnssd::CommissionNodeData * GetDiscoveredDevice(int idx);</span>
+<span id="L769"><span class="lineNum">     769</span>              : </span>
+<span id="L770"><span class="lineNum">     770</span>              :     /**</span>
+<span id="L771"><span class="lineNum">     771</span>              :      * @brief</span>
+<span id="L772"><span class="lineNum">     772</span>              :      *   Returns the max number of commissionable nodes this commissioner can track mdns information for.</span>
+<span id="L773"><span class="lineNum">     773</span>              :      * @return int  The max number of commissionable nodes supported</span>
+<span id="L774"><span class="lineNum">     774</span>              :      */</span>
+<span id="L775"><span class="lineNum">     775</span> <span class="tlaUNC">           0 :     int GetMaxCommissionableNodesSupported() { return kMaxCommissionableNodes; }</span></span>
+<span id="L776"><span class="lineNum">     776</span>              : </span>
+<span id="L777"><span class="lineNum">     777</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY // make this commissioner discoverable</span>
+<span id="L778"><span class="lineNum">     778</span>              :     /**</span>
+<span id="L779"><span class="lineNum">     779</span>              :      * @brief</span>
+<span id="L780"><span class="lineNum">     780</span>              :      *   Called when a UDC message is received specifying the given instanceName</span>
+<span id="L781"><span class="lineNum">     781</span>              :      * This method indicates that UDC Server needs the Commissionable Node corresponding to</span>
+<span id="L782"><span class="lineNum">     782</span>              :      * the given instance name to be found. UDC Server will wait for OnCommissionableNodeFound.</span>
+<span id="L783"><span class="lineNum">     783</span>              :      *</span>
+<span id="L784"><span class="lineNum">     784</span>              :      * @param instanceName DNS-SD instance name for the client requesting commissioning</span>
+<span id="L785"><span class="lineNum">     785</span>              :      *</span>
+<span id="L786"><span class="lineNum">     786</span>              :      */</span>
+<span id="L787"><span class="lineNum">     787</span>              :     void FindCommissionableNode(char * instanceName) override;</span>
+<span id="L788"><span class="lineNum">     788</span>              : </span>
+<span id="L789"><span class="lineNum">     789</span>              :     /**</span>
+<span id="L790"><span class="lineNum">     790</span>              :      * @brief</span>
+<span id="L791"><span class="lineNum">     791</span>              :      *   Return the UDC Server instance</span>
+<span id="L792"><span class="lineNum">     792</span>              :      *</span>
+<span id="L793"><span class="lineNum">     793</span>              :      */</span>
+<span id="L794"><span class="lineNum">     794</span>              :     Protocols::UserDirectedCommissioning::UserDirectedCommissioningServer * GetUserDirectedCommissioningServer()</span>
+<span id="L795"><span class="lineNum">     795</span>              :     {</span>
+<span id="L796"><span class="lineNum">     796</span>              :         return mUdcServer;</span>
+<span id="L797"><span class="lineNum">     797</span>              :     }</span>
+<span id="L798"><span class="lineNum">     798</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY</span>
+<span id="L799"><span class="lineNum">     799</span>              : </span>
+<span id="L800"><span class="lineNum">     800</span>              :     /**</span>
+<span id="L801"><span class="lineNum">     801</span>              :      * @brief</span>
+<span id="L802"><span class="lineNum">     802</span>              :      *   Overrides method from AbstractDnssdDiscoveryController</span>
+<span id="L803"><span class="lineNum">     803</span>              :      *</span>
+<span id="L804"><span class="lineNum">     804</span>              :      * @param nodeData DNS-SD node information</span>
+<span id="L805"><span class="lineNum">     805</span>              :      *</span>
+<span id="L806"><span class="lineNum">     806</span>              :      */</span>
+<span id="L807"><span class="lineNum">     807</span>              :     void OnNodeDiscovered(const chip::Dnssd::DiscoveredNodeData &amp; nodeData) override;</span>
+<span id="L808"><span class="lineNum">     808</span>              : </span>
+<span id="L809"><span class="lineNum">     809</span> <span class="tlaUNC">           0 :     void RegisterPairingDelegate(DevicePairingDelegate * pairingDelegate) { mPairingDelegate = pairingDelegate; }</span></span>
+<span id="L810"><span class="lineNum">     810</span> <span class="tlaUNC">           0 :     DevicePairingDelegate * GetPairingDelegate() const { return mPairingDelegate; }</span></span>
+<span id="L811"><span class="lineNum">     811</span>              : </span>
+<span id="L812"><span class="lineNum">     812</span>              : #if CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L813"><span class="lineNum">     813</span>              :     // ClusterStateCache::Callback impl</span>
+<span id="L814"><span class="lineNum">     814</span>              :     void OnDone(app::ReadClient *) override;</span>
+<span id="L815"><span class="lineNum">     815</span>              : #endif // CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L816"><span class="lineNum">     816</span>              : </span>
+<span id="L817"><span class="lineNum">     817</span>              :     // Issue an NOC chain using the associated OperationalCredentialsDelegate. The NOC chain will</span>
+<span id="L818"><span class="lineNum">     818</span>              :     // be provided in X509 DER format.</span>
+<span id="L819"><span class="lineNum">     819</span>              :     // NOTE: This is only valid assuming that `mOperationalCredentialsDelegate` is what is desired</span>
+<span id="L820"><span class="lineNum">     820</span>              :     // to issue the NOC chain.</span>
+<span id="L821"><span class="lineNum">     821</span>              :     CHIP_ERROR IssueNOCChain(const ByteSpan &amp; NOCSRElements, NodeId nodeId,</span>
+<span id="L822"><span class="lineNum">     822</span>              :                              chip::Callback::Callback&lt;OnNOCChainGeneration&gt; * callback);</span>
+<span id="L823"><span class="lineNum">     823</span>              : </span>
+<span id="L824"><span class="lineNum">     824</span>              :     void SetDeviceAttestationVerifier(Credentials::DeviceAttestationVerifier * deviceAttestationVerifier)</span>
+<span id="L825"><span class="lineNum">     825</span>              :     {</span>
+<span id="L826"><span class="lineNum">     826</span>              :         mDeviceAttestationVerifier = deviceAttestationVerifier;</span>
+<span id="L827"><span class="lineNum">     827</span>              :     }</span>
+<span id="L828"><span class="lineNum">     828</span>              : </span>
+<span id="L829"><span class="lineNum">     829</span>              :     Credentials::DeviceAttestationVerifier * GetDeviceAttestationVerifier() const { return mDeviceAttestationVerifier; }</span>
+<span id="L830"><span class="lineNum">     830</span>              : </span>
+<span id="L831"><span class="lineNum">     831</span>              :     Optional&lt;CommissioningParameters&gt; GetCommissioningParameters()</span>
+<span id="L832"><span class="lineNum">     832</span>              :     {</span>
+<span id="L833"><span class="lineNum">     833</span>              :         // TODO: Return a non-optional const &amp; to avoid a copy, mDefaultCommissioner is never null</span>
+<span id="L834"><span class="lineNum">     834</span>              :         return mDefaultCommissioner == nullptr ? NullOptional : MakeOptional(mDefaultCommissioner-&gt;GetCommissioningParameters());</span>
+<span id="L835"><span class="lineNum">     835</span>              :     }</span>
+<span id="L836"><span class="lineNum">     836</span>              : </span>
+<span id="L837"><span class="lineNum">     837</span>              :     CHIP_ERROR UpdateCommissioningParameters(const CommissioningParameters &amp; newParameters)</span>
+<span id="L838"><span class="lineNum">     838</span>              :     {</span>
+<span id="L839"><span class="lineNum">     839</span>              :         return mDefaultCommissioner-&gt;SetCommissioningParameters(newParameters);</span>
+<span id="L840"><span class="lineNum">     840</span>              :     }</span>
+<span id="L841"><span class="lineNum">     841</span>              : </span>
+<span id="L842"><span class="lineNum">     842</span>              :     // Reset the arm failsafe timer during commissioning.  If this returns</span>
+<span id="L843"><span class="lineNum">     843</span>              :     // false, that means that the timer was already set for a longer time period</span>
+<span id="L844"><span class="lineNum">     844</span>              :     // than the new time we are trying to set.  In this case, neither</span>
+<span id="L845"><span class="lineNum">     845</span>              :     // onSuccess nor onFailure will be called.</span>
+<span id="L846"><span class="lineNum">     846</span> <span class="tlaUNC">           0 :     bool ExtendArmFailSafe(DeviceProxy * proxy, CommissioningStage step, uint16_t armFailSafeTimeout,</span></span>
+<span id="L847"><span class="lineNum">     847</span>              :                            Optional&lt;System::Clock::Timeout&gt; commandTimeout, OnExtendFailsafeSuccess onSuccess,</span>
+<span id="L848"><span class="lineNum">     848</span>              :                            OnExtendFailsafeFailure onFailure)</span>
+<span id="L849"><span class="lineNum">     849</span>              :     {</span>
+<span id="L850"><span class="lineNum">     850</span>              :         // If this method is called directly by a client, assume it's fire-and-forget (not a commissioning stage)</span>
+<span id="L851"><span class="lineNum">     851</span> <span class="tlaUNC">           0 :         return ExtendArmFailSafeInternal(proxy, step, armFailSafeTimeout, commandTimeout, onSuccess, onFailure,</span></span>
+<span id="L852"><span class="lineNum">     852</span> <span class="tlaUNC">           0 :                                          /* fireAndForget = */ true);</span></span>
+<span id="L853"><span class="lineNum">     853</span>              :     }</span>
+<span id="L854"><span class="lineNum">     854</span>              : </span>
+<span id="L855"><span class="lineNum">     855</span>              :     // Check if the commissioning mode is valid for the current commissioning parameters.</span>
+<span id="L856"><span class="lineNum">     856</span>              :     virtual bool HasValidCommissioningMode(const Dnssd::CommissionNodeData &amp; nodeData);</span>
+<span id="L857"><span class="lineNum">     857</span>              : </span>
+<span id="L858"><span class="lineNum">     858</span>              : protected:</span>
+<span id="L859"><span class="lineNum">     859</span>              :     // Cleans up and resets failsafe as appropriate depending on the error and the failed stage.</span>
+<span id="L860"><span class="lineNum">     860</span>              :     // For success, sends completion report with the CommissioningDelegate and sends callbacks to the PairingDelegate</span>
+<span id="L861"><span class="lineNum">     861</span>              :     // For failures after AddNOC succeeds, sends completion report with the CommissioningDelegate and sends callbacks to the</span>
+<span id="L862"><span class="lineNum">     862</span>              :     // PairingDelegate. In this case, it does not disarm the failsafe or close the pase connection. For failures up through AddNOC,</span>
+<span id="L863"><span class="lineNum">     863</span>              :     // sends a command to immediately expire the failsafe, then sends completion report with the CommissioningDelegate and callbacks</span>
+<span id="L864"><span class="lineNum">     864</span>              :     // to the PairingDelegate upon arm failsafe command completion.</span>
+<span id="L865"><span class="lineNum">     865</span>              :     virtual void CleanupCommissioning(DeviceProxy * proxy, NodeId nodeId, const CompletionStatus &amp; completionStatus);</span>
+<span id="L866"><span class="lineNum">     866</span>              : </span>
+<span id="L867"><span class="lineNum">     867</span>              :     /* This function start the JCM verification steps</span>
+<span id="L868"><span class="lineNum">     868</span>              :      */</span>
+<span id="L869"><span class="lineNum">     869</span> <span class="tlaUNC">           0 :     virtual CHIP_ERROR StartJCMTrustVerification() { return CHIP_ERROR_NOT_IMPLEMENTED; }</span></span>
+<span id="L870"><span class="lineNum">     870</span>              : </span>
+<span id="L871"><span class="lineNum">     871</span>              : #if CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L872"><span class="lineNum">     872</span> <span class="tlaUNC">           0 :     virtual CHIP_ERROR ParseExtraCommissioningInfo(ReadCommissioningInfo &amp; info, const CommissioningParameters &amp; params)</span></span>
+<span id="L873"><span class="lineNum">     873</span>              :     {</span>
+<span id="L874"><span class="lineNum">     874</span> <span class="tlaUNC">           0 :         return CHIP_NO_ERROR;</span></span>
+<span id="L875"><span class="lineNum">     875</span>              :     }</span>
+<span id="L876"><span class="lineNum">     876</span>              : #endif // CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L877"><span class="lineNum">     877</span>              : </span>
+<span id="L878"><span class="lineNum">     878</span>              : #if CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L879"><span class="lineNum">     879</span>              :     Platform::UniquePtr&lt;app::ClusterStateCache&gt; mAttributeCache;</span>
+<span id="L880"><span class="lineNum">     880</span>              :     Platform::UniquePtr&lt;app::ReadClient&gt; mReadClient;</span>
+<span id="L881"><span class="lineNum">     881</span>              : #endif // CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L882"><span class="lineNum">     882</span>              : </span>
+<span id="L883"><span class="lineNum">     883</span>              : private:</span>
+<span id="L884"><span class="lineNum">     884</span>              :     DevicePairingDelegate * mPairingDelegate = nullptr;</span>
+<span id="L885"><span class="lineNum">     885</span>              : </span>
+<span id="L886"><span class="lineNum">     886</span>              :     DeviceProxy * mDeviceBeingCommissioned               = nullptr;</span>
+<span id="L887"><span class="lineNum">     887</span>              :     CommissioneeDeviceProxy * mDeviceInPASEEstablishment = nullptr;</span>
+<span id="L888"><span class="lineNum">     888</span>              : </span>
+<span id="L889"><span class="lineNum">     889</span>              :     Optional&lt;System::Clock::Timeout&gt; mCommissioningStepTimeout; // Note: For multi-interaction steps this is per interaction</span>
+<span id="L890"><span class="lineNum">     890</span>              :     CommissioningStage mCommissioningStage = CommissioningStage::kSecurePairing;</span>
+<span id="L891"><span class="lineNum">     891</span>              :     uint8_t mReadCommissioningInfoProgress = 0; // see ContinueReadingCommissioningInfo()</span>
+<span id="L892"><span class="lineNum">     892</span>              : </span>
+<span id="L893"><span class="lineNum">     893</span>              :     bool mRunCommissioningAfterConnection = false;</span>
+<span id="L894"><span class="lineNum">     894</span>              :     Internal::InvokeCancelFn mInvokeCancelFn;</span>
+<span id="L895"><span class="lineNum">     895</span>              :     Internal::WriteCancelFn mWriteCancelFn;</span>
+<span id="L896"><span class="lineNum">     896</span>              : </span>
+<span id="L897"><span class="lineNum">     897</span>              :     ObjectPool&lt;CommissioneeDeviceProxy, kNumMaxActiveDevices&gt; mCommissioneeDevicePool;</span>
+<span id="L898"><span class="lineNum">     898</span>              : </span>
+<span id="L899"><span class="lineNum">     899</span>              :     // While we have an ongoing PASE attempt (i.e. after calling Pair() on the</span>
+<span id="L900"><span class="lineNum">     900</span>              :     // PASESession), track which RendezvousParameters we used for that attempt.</span>
+<span id="L901"><span class="lineNum">     901</span>              :     // This allows us to notify delegates about which thing it was we actually</span>
+<span id="L902"><span class="lineNum">     902</span>              :     // established PASE with, especially in the context of concatenated QR</span>
+<span id="L903"><span class="lineNum">     903</span>              :     // codes.</span>
+<span id="L904"><span class="lineNum">     904</span>              :     //</span>
+<span id="L905"><span class="lineNum">     905</span>              :     // This member only has a value while we are in the middle of session</span>
+<span id="L906"><span class="lineNum">     906</span>              :     // establishment.</span>
+<span id="L907"><span class="lineNum">     907</span>              :     std::optional&lt;RendezvousParameters&gt; mRendezvousParametersForPASEEstablishment;</span>
+<span id="L908"><span class="lineNum">     908</span>              : </span>
+<span id="L909"><span class="lineNum">     909</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY // make this commissioner discoverable</span>
+<span id="L910"><span class="lineNum">     910</span>              :     Protocols::UserDirectedCommissioning::UserDirectedCommissioningServer * mUdcServer = nullptr;</span>
+<span id="L911"><span class="lineNum">     911</span>              :     // mUdcTransportMgr is for insecure communication (ex. user directed commissioning)</span>
+<span id="L912"><span class="lineNum">     912</span>              :     UdcTransportMgr * mUdcTransportMgr = nullptr;</span>
+<span id="L913"><span class="lineNum">     913</span>              :     uint16_t mUdcListenPort            = CHIP_UDC_PORT;</span>
+<span id="L914"><span class="lineNum">     914</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_COMMISSIONER_DISCOVERY</span>
+<span id="L915"><span class="lineNum">     915</span>              : </span>
+<span id="L916"><span class="lineNum">     916</span>              : #if CONFIG_NETWORK_LAYER_BLE</span>
+<span id="L917"><span class="lineNum">     917</span>              :     static void OnDiscoveredDeviceOverBleSuccess(void * appState, BLE_CONNECTION_OBJECT connObj);</span>
+<span id="L918"><span class="lineNum">     918</span>              :     static void OnDiscoveredDeviceOverBleError(void * appState, CHIP_ERROR err);</span>
+<span id="L919"><span class="lineNum">     919</span>              :     RendezvousParameters mRendezvousParametersForDeviceDiscoveredOverBle;</span>
+<span id="L920"><span class="lineNum">     920</span>              : #endif</span>
+<span id="L921"><span class="lineNum">     921</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF</span>
+<span id="L922"><span class="lineNum">     922</span>              :     static void OnWiFiPAFSubscribeComplete(void * appState);</span>
+<span id="L923"><span class="lineNum">     923</span>              :     static void OnWiFiPAFSubscribeError(void * appState, CHIP_ERROR err);</span>
+<span id="L924"><span class="lineNum">     924</span>              :     RendezvousParameters mRendezvousParametersForDeviceDiscoveredOverWiFiPAF;</span>
+<span id="L925"><span class="lineNum">     925</span>              : #endif</span>
+<span id="L926"><span class="lineNum">     926</span>              : </span>
+<span id="L927"><span class="lineNum">     927</span>              :     static void OnBasicFailure(void * context, CHIP_ERROR err);</span>
+<span id="L928"><span class="lineNum">     928</span>              :     static void OnBasicSuccess(void * context, const chip::app::DataModel::NullObjectType &amp;);</span>
+<span id="L929"><span class="lineNum">     929</span>              : </span>
+<span id="L930"><span class="lineNum">     930</span>              :     /* This function sends a Device Attestation Certificate chain request to the device.</span>
+<span id="L931"><span class="lineNum">     931</span>              :        The function does not hold a reference to the device object.</span>
+<span id="L932"><span class="lineNum">     932</span>              :      */</span>
+<span id="L933"><span class="lineNum">     933</span>              :     CHIP_ERROR SendCertificateChainRequestCommand(DeviceProxy * device, Credentials::CertificateType certificateType,</span>
+<span id="L934"><span class="lineNum">     934</span>              :                                                   Optional&lt;System::Clock::Timeout&gt; timeout);</span>
+<span id="L935"><span class="lineNum">     935</span>              :     /* This function sends an Attestation request to the device.</span>
+<span id="L936"><span class="lineNum">     936</span>              :        The function does not hold a reference to the device object.</span>
+<span id="L937"><span class="lineNum">     937</span>              :      */</span>
+<span id="L938"><span class="lineNum">     938</span>              :     CHIP_ERROR SendAttestationRequestCommand(DeviceProxy * device, const ByteSpan &amp; attestationNonce,</span>
+<span id="L939"><span class="lineNum">     939</span>              :                                              Optional&lt;System::Clock::Timeout&gt; timeout);</span>
+<span id="L940"><span class="lineNum">     940</span>              :     /* This function sends an CSR request to the device.</span>
+<span id="L941"><span class="lineNum">     941</span>              :        The function does not hold a reference to the device object.</span>
+<span id="L942"><span class="lineNum">     942</span>              :      */</span>
+<span id="L943"><span class="lineNum">     943</span>              :     CHIP_ERROR SendOperationalCertificateSigningRequestCommand(DeviceProxy * device, const ByteSpan &amp; csrNonce,</span>
+<span id="L944"><span class="lineNum">     944</span>              :                                                                Optional&lt;System::Clock::Timeout&gt; timeout);</span>
+<span id="L945"><span class="lineNum">     945</span>              :     /* This function sends the operational credentials to the device.</span>
+<span id="L946"><span class="lineNum">     946</span>              :        The function does not hold a reference to the device object.</span>
+<span id="L947"><span class="lineNum">     947</span>              :      */</span>
+<span id="L948"><span class="lineNum">     948</span>              :     CHIP_ERROR SendOperationalCertificate(DeviceProxy * device, const ByteSpan &amp; nocCertBuf, const Optional&lt;ByteSpan&gt; &amp; icaCertBuf,</span>
+<span id="L949"><span class="lineNum">     949</span>              :                                           Crypto::IdentityProtectionKeySpan ipk, NodeId adminSubject,</span>
+<span id="L950"><span class="lineNum">     950</span>              :                                           Optional&lt;System::Clock::Timeout&gt; timeout);</span>
+<span id="L951"><span class="lineNum">     951</span>              :     /* This function sends the trusted root certificate to the device.</span>
+<span id="L952"><span class="lineNum">     952</span>              :        The function does not hold a reference to the device object.</span>
+<span id="L953"><span class="lineNum">     953</span>              :      */</span>
+<span id="L954"><span class="lineNum">     954</span>              :     CHIP_ERROR SendTrustedRootCertificate(DeviceProxy * device, const ByteSpan &amp; rcac, Optional&lt;System::Clock::Timeout&gt; timeout);</span>
+<span id="L955"><span class="lineNum">     955</span>              : </span>
+<span id="L956"><span class="lineNum">     956</span>              :     /* This function is called by the commissioner code when the device completes</span>
+<span id="L957"><span class="lineNum">     957</span>              :        the operational credential provisioning process.</span>
+<span id="L958"><span class="lineNum">     958</span>              :        The function does not hold a reference to the device object.</span>
+<span id="L959"><span class="lineNum">     959</span>              :        */</span>
+<span id="L960"><span class="lineNum">     960</span>              :     CHIP_ERROR OnOperationalCredentialsProvisioningCompletion(DeviceProxy * device);</span>
+<span id="L961"><span class="lineNum">     961</span>              : </span>
+<span id="L962"><span class="lineNum">     962</span>              :     /* Callback when the previously sent CSR request results in failure */</span>
+<span id="L963"><span class="lineNum">     963</span>              :     static void OnCSRFailureResponse(void * context, CHIP_ERROR error);</span>
+<span id="L964"><span class="lineNum">     964</span>              : </span>
+<span id="L965"><span class="lineNum">     965</span>              :     void ExtendArmFailSafeForDeviceAttestation(const Credentials::DeviceAttestationVerifier::AttestationInfo &amp; info,</span>
+<span id="L966"><span class="lineNum">     966</span>              :                                                Credentials::AttestationVerificationResult result);</span>
+<span id="L967"><span class="lineNum">     967</span>              :     static void OnCertificateChainFailureResponse(void * context, CHIP_ERROR error);</span>
+<span id="L968"><span class="lineNum">     968</span>              :     static void OnCertificateChainResponse(</span>
+<span id="L969"><span class="lineNum">     969</span>              :         void * context, const app::Clusters::OperationalCredentials::Commands::CertificateChainResponse::DecodableType &amp; response);</span>
+<span id="L970"><span class="lineNum">     970</span>              : </span>
+<span id="L971"><span class="lineNum">     971</span>              :     static void OnAttestationFailureResponse(void * context, CHIP_ERROR error);</span>
+<span id="L972"><span class="lineNum">     972</span>              :     static void</span>
+<span id="L973"><span class="lineNum">     973</span>              :     OnAttestationResponse(void * context,</span>
+<span id="L974"><span class="lineNum">     974</span>              :                           const app::Clusters::OperationalCredentials::Commands::AttestationResponse::DecodableType &amp; data);</span>
+<span id="L975"><span class="lineNum">     975</span>              : </span>
+<span id="L976"><span class="lineNum">     976</span>              :     /**</span>
+<span id="L977"><span class="lineNum">     977</span>              :      * @brief</span>
+<span id="L978"><span class="lineNum">     978</span>              :      *   This function is called by the IM layer when the commissioner receives the CSR from the device.</span>
+<span id="L979"><span class="lineNum">     979</span>              :      *   (Reference: Specifications section 11.18.5.6. NOCSR Elements)</span>
+<span id="L980"><span class="lineNum">     980</span>              :      *</span>
+<span id="L981"><span class="lineNum">     981</span>              :      * @param[in] context               The context provided while registering the callback.</span>
+<span id="L982"><span class="lineNum">     982</span>              :      * @param[in] data                  The response struct containing the following fields:</span>
+<span id="L983"><span class="lineNum">     983</span>              :      *                                    NOCSRElements: CSR elements as per specifications section 11.22.5.6. NOCSR Elements.</span>
+<span id="L984"><span class="lineNum">     984</span>              :      *                                    AttestationSignature: Cryptographic signature generated for the fields in the response</span>
+<span id="L985"><span class="lineNum">     985</span>              :      * message.</span>
+<span id="L986"><span class="lineNum">     986</span>              :      */</span>
+<span id="L987"><span class="lineNum">     987</span>              :     static void OnOperationalCertificateSigningRequest(</span>
+<span id="L988"><span class="lineNum">     988</span>              :         void * context, const app::Clusters::OperationalCredentials::Commands::CSRResponse::DecodableType &amp; data);</span>
+<span id="L989"><span class="lineNum">     989</span>              : </span>
+<span id="L990"><span class="lineNum">     990</span>              :     /* Callback when adding operational certs to device results in failure */</span>
+<span id="L991"><span class="lineNum">     991</span>              :     static void OnAddNOCFailureResponse(void * context, CHIP_ERROR errro);</span>
+<span id="L992"><span class="lineNum">     992</span>              :     /* Callback when the device confirms that it has added the operational certificates */</span>
+<span id="L993"><span class="lineNum">     993</span>              :     static void</span>
+<span id="L994"><span class="lineNum">     994</span>              :     OnOperationalCertificateAddResponse(void * context,</span>
+<span id="L995"><span class="lineNum">     995</span>              :                                         const app::Clusters::OperationalCredentials::Commands::NOCResponse::DecodableType &amp; data);</span>
+<span id="L996"><span class="lineNum">     996</span>              : </span>
+<span id="L997"><span class="lineNum">     997</span>              :     /* Callback when the device confirms that it has added the root certificate */</span>
+<span id="L998"><span class="lineNum">     998</span>              :     static void OnRootCertSuccessResponse(void * context, const chip::app::DataModel::NullObjectType &amp;);</span>
+<span id="L999"><span class="lineNum">     999</span>              :     /* Callback called when adding root cert to device results in failure */</span>
+<span id="L1000"><span class="lineNum">    1000</span>              :     static void OnRootCertFailureResponse(void * context, CHIP_ERROR error);</span>
+<span id="L1001"><span class="lineNum">    1001</span>              : </span>
+<span id="L1002"><span class="lineNum">    1002</span>              :     static void OnDeviceConnectedFn(void * context, Messaging::ExchangeManager &amp; exchangeMgr, const SessionHandle &amp; sessionHandle);</span>
+<span id="L1003"><span class="lineNum">    1003</span>              :     static void OnDeviceConnectionFailureFn(void * context, const ScopedNodeId &amp; peerId, CHIP_ERROR error);</span>
+<span id="L1004"><span class="lineNum">    1004</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L1005"><span class="lineNum">    1005</span>              :     static void OnDeviceConnectionRetryFn(void * context, const ScopedNodeId &amp; peerId, CHIP_ERROR error,</span>
+<span id="L1006"><span class="lineNum">    1006</span>              :                                           System::Clock::Seconds16 retryTimeout);</span>
+<span id="L1007"><span class="lineNum">    1007</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L1008"><span class="lineNum">    1008</span>              : </span>
+<span id="L1009"><span class="lineNum">    1009</span>              :     static void OnDeviceAttestationInformationVerification(void * context,</span>
+<span id="L1010"><span class="lineNum">    1010</span>              :                                                            const Credentials::DeviceAttestationVerifier::AttestationInfo &amp; info,</span>
+<span id="L1011"><span class="lineNum">    1011</span>              :                                                            Credentials::AttestationVerificationResult result);</span>
+<span id="L1012"><span class="lineNum">    1012</span>              : </span>
+<span id="L1013"><span class="lineNum">    1013</span>              :     static void OnDeviceNOCChainGeneration(void * context, CHIP_ERROR status, const ByteSpan &amp; noc, const ByteSpan &amp; icac,</span>
+<span id="L1014"><span class="lineNum">    1014</span>              :                                            const ByteSpan &amp; rcac, Optional&lt;Crypto::IdentityProtectionKeySpan&gt; ipk,</span>
+<span id="L1015"><span class="lineNum">    1015</span>              :                                            Optional&lt;NodeId&gt; adminSubject);</span>
+<span id="L1016"><span class="lineNum">    1016</span>              :     static void OnArmFailSafe(void * context,</span>
+<span id="L1017"><span class="lineNum">    1017</span>              :                               const chip::app::Clusters::GeneralCommissioning::Commands::ArmFailSafeResponse::DecodableType &amp; data);</span>
+<span id="L1018"><span class="lineNum">    1018</span>              :     static void OnSetRegulatoryConfigResponse(</span>
+<span id="L1019"><span class="lineNum">    1019</span>              :         void * context,</span>
+<span id="L1020"><span class="lineNum">    1020</span>              :         const chip::app::Clusters::GeneralCommissioning::Commands::SetRegulatoryConfigResponse::DecodableType &amp; data);</span>
+<span id="L1021"><span class="lineNum">    1021</span>              :     static void OnSetTCAcknowledgementsResponse(</span>
+<span id="L1022"><span class="lineNum">    1022</span>              :         void * context,</span>
+<span id="L1023"><span class="lineNum">    1023</span>              :         const chip::app::Clusters::GeneralCommissioning::Commands::SetTCAcknowledgementsResponse::DecodableType &amp; data);</span>
+<span id="L1024"><span class="lineNum">    1024</span>              :     static void OnSetUTCError(void * context, CHIP_ERROR error);</span>
+<span id="L1025"><span class="lineNum">    1025</span>              :     static void</span>
+<span id="L1026"><span class="lineNum">    1026</span>              :     OnSetTimeZoneResponse(void * context,</span>
+<span id="L1027"><span class="lineNum">    1027</span>              :                           const chip::app::Clusters::TimeSynchronization::Commands::SetTimeZoneResponse::DecodableType &amp; data);</span>
+<span id="L1028"><span class="lineNum">    1028</span>              : </span>
+<span id="L1029"><span class="lineNum">    1029</span>              :     static void</span>
+<span id="L1030"><span class="lineNum">    1030</span>              :     OnScanNetworksResponse(void * context,</span>
+<span id="L1031"><span class="lineNum">    1031</span>              :                            const app::Clusters::NetworkCommissioning::Commands::ScanNetworksResponse::DecodableType &amp; data);</span>
+<span id="L1032"><span class="lineNum">    1032</span>              :     static void OnScanNetworksFailure(void * context, CHIP_ERROR err);</span>
+<span id="L1033"><span class="lineNum">    1033</span>              :     static void</span>
+<span id="L1034"><span class="lineNum">    1034</span>              :     OnNetworkConfigResponse(void * context,</span>
+<span id="L1035"><span class="lineNum">    1035</span>              :                             const app::Clusters::NetworkCommissioning::Commands::NetworkConfigResponse::DecodableType &amp; data);</span>
+<span id="L1036"><span class="lineNum">    1036</span>              :     static void OnConnectNetworkResponse(</span>
+<span id="L1037"><span class="lineNum">    1037</span>              :         void * context, const chip::app::Clusters::NetworkCommissioning::Commands::ConnectNetworkResponse::DecodableType &amp; data);</span>
+<span id="L1038"><span class="lineNum">    1038</span>              :     static void OnCommissioningCompleteResponse(</span>
+<span id="L1039"><span class="lineNum">    1039</span>              :         void * context,</span>
+<span id="L1040"><span class="lineNum">    1040</span>              :         const chip::app::Clusters::GeneralCommissioning::Commands::CommissioningCompleteResponse::DecodableType &amp; data);</span>
+<span id="L1041"><span class="lineNum">    1041</span>              :     static void OnDisarmFailsafe(void * context,</span>
+<span id="L1042"><span class="lineNum">    1042</span>              :                                  const app::Clusters::GeneralCommissioning::Commands::ArmFailSafeResponse::DecodableType &amp; data);</span>
+<span id="L1043"><span class="lineNum">    1043</span>              :     static void OnDisarmFailsafeFailure(void * context, CHIP_ERROR error);</span>
+<span id="L1044"><span class="lineNum">    1044</span>              :     void CleanupDoneAfterError();</span>
+<span id="L1045"><span class="lineNum">    1045</span>              :     static void OnArmFailSafeExtendedForDeviceAttestation(</span>
+<span id="L1046"><span class="lineNum">    1046</span>              :         void * context, const chip::app::Clusters::GeneralCommissioning::Commands::ArmFailSafeResponse::DecodableType &amp; data);</span>
+<span id="L1047"><span class="lineNum">    1047</span>              :     static void OnFailedToExtendedArmFailSafeDeviceAttestation(void * context, CHIP_ERROR error);</span>
+<span id="L1048"><span class="lineNum">    1048</span>              :     void HandleDeviceAttestationCompleted();</span>
+<span id="L1049"><span class="lineNum">    1049</span>              : </span>
+<span id="L1050"><span class="lineNum">    1050</span>              :     static void OnICDManagementRegisterClientResponse(</span>
+<span id="L1051"><span class="lineNum">    1051</span>              :         void * context, const app::Clusters::IcdManagement::Commands::RegisterClientResponse::DecodableType &amp; data);</span>
+<span id="L1052"><span class="lineNum">    1052</span>              : </span>
+<span id="L1053"><span class="lineNum">    1053</span>              :     static void</span>
+<span id="L1054"><span class="lineNum">    1054</span>              :     OnICDManagementStayActiveResponse(void * context,</span>
+<span id="L1055"><span class="lineNum">    1055</span>              :                                       const app::Clusters::IcdManagement::Commands::StayActiveResponse::DecodableType &amp; data);</span>
+<span id="L1056"><span class="lineNum">    1056</span>              : </span>
+<span id="L1057"><span class="lineNum">    1057</span>              :     /**</span>
+<span id="L1058"><span class="lineNum">    1058</span>              :      * @brief</span>
+<span id="L1059"><span class="lineNum">    1059</span>              :      *   This function processes the CSR sent by the device.</span>
+<span id="L1060"><span class="lineNum">    1060</span>              :      *   (Reference: Specifications section 11.18.5.6. NOCSR Elements)</span>
+<span id="L1061"><span class="lineNum">    1061</span>              :      *</span>
+<span id="L1062"><span class="lineNum">    1062</span>              :      * @param[in] proxy           device proxy</span>
+<span id="L1063"><span class="lineNum">    1063</span>              :      * @param[in] NOCSRElements   CSR elements as per specifications section 11.22.5.6. NOCSR Elements.</span>
+<span id="L1064"><span class="lineNum">    1064</span>              :      * @param[in] AttestationSignature       Cryptographic signature generated for all the above fields.</span>
+<span id="L1065"><span class="lineNum">    1065</span>              :      * @param[in] dac               device attestation certificate</span>
+<span id="L1066"><span class="lineNum">    1066</span>              :      * @param[in] pai               Product Attestation Intermediate certificate</span>
+<span id="L1067"><span class="lineNum">    1067</span>              :      * @param[in] csrNonce          certificate signing request nonce</span>
+<span id="L1068"><span class="lineNum">    1068</span>              :      */</span>
+<span id="L1069"><span class="lineNum">    1069</span>              :     CHIP_ERROR ProcessCSR(DeviceProxy * proxy, const ByteSpan &amp; NOCSRElements, const ByteSpan &amp; AttestationSignature,</span>
+<span id="L1070"><span class="lineNum">    1070</span>              :                           const ByteSpan &amp; dac, const ByteSpan &amp; pai, const ByteSpan &amp; csrNonce);</span>
+<span id="L1071"><span class="lineNum">    1071</span>              : </span>
+<span id="L1072"><span class="lineNum">    1072</span>              :     /**</span>
+<span id="L1073"><span class="lineNum">    1073</span>              :      * @brief</span>
+<span id="L1074"><span class="lineNum">    1074</span>              :      *   This function validates the CSR information from the device.</span>
+<span id="L1075"><span class="lineNum">    1075</span>              :      *   (Reference: Specifications section 11.18.5.6. NOCSR Elements)</span>
+<span id="L1076"><span class="lineNum">    1076</span>              :      *</span>
+<span id="L1077"><span class="lineNum">    1077</span>              :      * @param[in] proxy           device proxy</span>
+<span id="L1078"><span class="lineNum">    1078</span>              :      * @param[in] NOCSRElements   CSR elements as per specifications section 11.22.5.6. NOCSR Elements.</span>
+<span id="L1079"><span class="lineNum">    1079</span>              :      * @param[in] AttestationSignature       Cryptographic signature generated for all the above fields.</span>
+<span id="L1080"><span class="lineNum">    1080</span>              :      * @param[in] dac               device attestation certificate</span>
+<span id="L1081"><span class="lineNum">    1081</span>              :      * @param[in] csrNonce          certificate signing request nonce</span>
+<span id="L1082"><span class="lineNum">    1082</span>              :      */</span>
+<span id="L1083"><span class="lineNum">    1083</span>              :     CHIP_ERROR ValidateCSR(DeviceProxy * proxy, const ByteSpan &amp; NOCSRElements, const ByteSpan &amp; AttestationSignature,</span>
+<span id="L1084"><span class="lineNum">    1084</span>              :                            const ByteSpan &amp; dac, const ByteSpan &amp; csrNonce);</span>
+<span id="L1085"><span class="lineNum">    1085</span>              : </span>
+<span id="L1086"><span class="lineNum">    1086</span>              :     /**</span>
+<span id="L1087"><span class="lineNum">    1087</span>              :      * @brief</span>
+<span id="L1088"><span class="lineNum">    1088</span>              :      *   This function validates the revocation status of the DAC Chain sent by the device.</span>
+<span id="L1089"><span class="lineNum">    1089</span>              :      *</span>
+<span id="L1090"><span class="lineNum">    1090</span>              :      * @param[in] info Structure containing all the required information for validating the device attestation.</span>
+<span id="L1091"><span class="lineNum">    1091</span>              :      */</span>
+<span id="L1092"><span class="lineNum">    1092</span>              :     CHIP_ERROR CheckForRevokedDACChain(const Credentials::DeviceAttestationVerifier::AttestationInfo &amp; info);</span>
+<span id="L1093"><span class="lineNum">    1093</span>              : </span>
+<span id="L1094"><span class="lineNum">    1094</span>              :     CommissioneeDeviceProxy * FindCommissioneeDevice(NodeId id);</span>
+<span id="L1095"><span class="lineNum">    1095</span>              :     CommissioneeDeviceProxy * FindCommissioneeDevice(const Transport::PeerAddress &amp; peerAddress);</span>
+<span id="L1096"><span class="lineNum">    1096</span>              :     void ReleaseCommissioneeDevice(CommissioneeDeviceProxy * device);</span>
+<span id="L1097"><span class="lineNum">    1097</span>              : </span>
+<span id="L1098"><span class="lineNum">    1098</span>              :     bool ExtendArmFailSafeInternal(DeviceProxy * proxy, CommissioningStage step, uint16_t armFailSafeTimeout,</span>
+<span id="L1099"><span class="lineNum">    1099</span>              :                                    Optional&lt;System::Clock::Timeout&gt; commandTimeout, OnExtendFailsafeSuccess onSuccess,</span>
+<span id="L1100"><span class="lineNum">    1100</span>              :                                    OnExtendFailsafeFailure onFailure, bool fireAndForget);</span>
+<span id="L1101"><span class="lineNum">    1101</span>              :     template &lt;typename RequestObjectT&gt;</span>
+<span id="L1102"><span class="lineNum">    1102</span>              :     CHIP_ERROR SendCommissioningCommand(DeviceProxy * device, const RequestObjectT &amp; request,</span>
+<span id="L1103"><span class="lineNum">    1103</span>              :                                         CommandResponseSuccessCallback&lt;typename RequestObjectT::ResponseType&gt; successCb,</span>
+<span id="L1104"><span class="lineNum">    1104</span>              :                                         CommandResponseFailureCallback failureCb, EndpointId endpoint,</span>
+<span id="L1105"><span class="lineNum">    1105</span>              :                                         Optional&lt;System::Clock::Timeout&gt; timeout = NullOptional, bool fireAndForget = false);</span>
+<span id="L1106"><span class="lineNum">    1106</span>              :     void SendCommissioningReadRequest(DeviceProxy * proxy, Optional&lt;System::Clock::Timeout&gt; timeout,</span>
+<span id="L1107"><span class="lineNum">    1107</span>              :                                       app::AttributePathParams * readPaths, size_t readPathsSize);</span>
+<span id="L1108"><span class="lineNum">    1108</span>              :     template &lt;typename AttrType&gt;</span>
+<span id="L1109"><span class="lineNum">    1109</span>              :     CHIP_ERROR SendCommissioningWriteRequest(DeviceProxy * device, EndpointId endpoint, ClusterId cluster, AttributeId attribute,</span>
+<span id="L1110"><span class="lineNum">    1110</span>              :                                              const AttrType &amp; requestData, WriteResponseSuccessCallback successCb,</span>
+<span id="L1111"><span class="lineNum">    1111</span>              :                                              WriteResponseFailureCallback failureCb);</span>
+<span id="L1112"><span class="lineNum">    1112</span>              :     void CancelCommissioningInteractions();</span>
+<span id="L1113"><span class="lineNum">    1113</span>              :     void CancelCASECallbacks();</span>
+<span id="L1114"><span class="lineNum">    1114</span>              : </span>
+<span id="L1115"><span class="lineNum">    1115</span>              : #if CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L1116"><span class="lineNum">    1116</span>              :     void ContinueReadingCommissioningInfo(const CommissioningParameters &amp; params);</span>
+<span id="L1117"><span class="lineNum">    1117</span>              :     void FinishReadingCommissioningInfo(const CommissioningParameters &amp; params);</span>
+<span id="L1118"><span class="lineNum">    1118</span>              :     CHIP_ERROR ParseGeneralCommissioningInfo(ReadCommissioningInfo &amp; info);</span>
+<span id="L1119"><span class="lineNum">    1119</span>              :     CHIP_ERROR ParseBasicInformation(ReadCommissioningInfo &amp; info);</span>
+<span id="L1120"><span class="lineNum">    1120</span>              :     CHIP_ERROR ParseNetworkCommissioningInfo(ReadCommissioningInfo &amp; info);</span>
+<span id="L1121"><span class="lineNum">    1121</span>              :     CHIP_ERROR ParseNetworkCommissioningTimeouts(NetworkClusterInfo &amp; networkInfo, const char * networkType);</span>
+<span id="L1122"><span class="lineNum">    1122</span>              :     CHIP_ERROR ParseFabrics(ReadCommissioningInfo &amp; info);</span>
+<span id="L1123"><span class="lineNum">    1123</span>              :     CHIP_ERROR ParseICDInfo(ReadCommissioningInfo &amp; info);</span>
+<span id="L1124"><span class="lineNum">    1124</span>              :     CHIP_ERROR ParseTimeSyncInfo(ReadCommissioningInfo &amp; info);</span>
+<span id="L1125"><span class="lineNum">    1125</span>              : #endif // CHIP_CONFIG_ENABLE_READ_CLIENT</span>
+<span id="L1126"><span class="lineNum">    1126</span>              : </span>
+<span id="L1127"><span class="lineNum">    1127</span>              :     static CHIP_ERROR</span>
+<span id="L1128"><span class="lineNum">    1128</span>              :     ConvertFromOperationalCertStatus(chip::app::Clusters::OperationalCredentials::NodeOperationalCertStatusEnum err);</span>
+<span id="L1129"><span class="lineNum">    1129</span>              : </span>
+<span id="L1130"><span class="lineNum">    1130</span>              :     // Sends commissioning complete callbacks to the delegate depending on the status. Sends</span>
+<span id="L1131"><span class="lineNum">    1131</span>              :     // OnCommissioningComplete and either OnCommissioningSuccess or OnCommissioningFailure depending on the given completion status.</span>
+<span id="L1132"><span class="lineNum">    1132</span>              :     void SendCommissioningCompleteCallbacks(NodeId nodeId, const CompletionStatus &amp; completionStatus);</span>
+<span id="L1133"><span class="lineNum">    1133</span>              : </span>
+<span id="L1134"><span class="lineNum">    1134</span>              :     // Extend the fail-safe before trying to do network-enable (since after that</span>
+<span id="L1135"><span class="lineNum">    1135</span>              :     // point, for non-concurrent-commissioning devices, we may not have a way to</span>
+<span id="L1136"><span class="lineNum">    1136</span>              :     // extend it).</span>
+<span id="L1137"><span class="lineNum">    1137</span>              :     void ExtendFailsafeBeforeNetworkEnable(DeviceProxy * device, CommissioningParameters &amp; params, CommissioningStage step);</span>
+<span id="L1138"><span class="lineNum">    1138</span>              : </span>
+<span id="L1139"><span class="lineNum">    1139</span>              :     bool IsAttestationInformationMissing(const CommissioningParameters &amp; params);</span>
+<span id="L1140"><span class="lineNum">    1140</span>              : </span>
+<span id="L1141"><span class="lineNum">    1141</span>              :     chip::Callback::Callback&lt;OnDeviceConnected&gt; mOnDeviceConnectedCallback;</span>
+<span id="L1142"><span class="lineNum">    1142</span>              :     chip::Callback::Callback&lt;OnDeviceConnectionFailure&gt; mOnDeviceConnectionFailureCallback;</span>
+<span id="L1143"><span class="lineNum">    1143</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L1144"><span class="lineNum">    1144</span>              :     chip::Callback::Callback&lt;OnDeviceConnectionRetry&gt; mOnDeviceConnectionRetryCallback;</span>
+<span id="L1145"><span class="lineNum">    1145</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_AUTOMATIC_CASE_RETRIES</span>
+<span id="L1146"><span class="lineNum">    1146</span>              : </span>
+<span id="L1147"><span class="lineNum">    1147</span>              :     chip::Callback::Callback&lt;Credentials::DeviceAttestationVerifier::OnAttestationInformationVerification&gt;</span>
+<span id="L1148"><span class="lineNum">    1148</span>              :         mDeviceAttestationInformationVerificationCallback;</span>
+<span id="L1149"><span class="lineNum">    1149</span>              : </span>
+<span id="L1150"><span class="lineNum">    1150</span>              :     chip::Callback::Callback&lt;OnNOCChainGeneration&gt; mDeviceNOCChainCallback;</span>
+<span id="L1151"><span class="lineNum">    1151</span>              :     SetUpCodePairer mSetUpCodePairer;</span>
+<span id="L1152"><span class="lineNum">    1152</span>              :     AutoCommissioner mAutoCommissioner;</span>
+<span id="L1153"><span class="lineNum">    1153</span>              :     CommissioningDelegate * mDefaultCommissioner =</span>
+<span id="L1154"><span class="lineNum">    1154</span>              :         nullptr; // Commissioning delegate to call when PairDevice / Commission functions are used</span>
+<span id="L1155"><span class="lineNum">    1155</span>              :     CommissioningDelegate * mCommissioningDelegate =</span>
+<span id="L1156"><span class="lineNum">    1156</span>              :         nullptr; // Commissioning delegate that issued the PerformCommissioningStep command</span>
+<span id="L1157"><span class="lineNum">    1157</span>              :     CompletionStatus mCommissioningCompletionStatus;</span>
+<span id="L1158"><span class="lineNum">    1158</span>              :     Credentials::AttestationVerificationResult mAttestationResult;</span>
+<span id="L1159"><span class="lineNum">    1159</span>              :     Platform::UniquePtr&lt;Credentials::DeviceAttestationVerifier::AttestationDeviceInfo&gt; mAttestationDeviceInfo;</span>
+<span id="L1160"><span class="lineNum">    1160</span>              :     Credentials::DeviceAttestationVerifier * mDeviceAttestationVerifier = nullptr;</span>
+<span id="L1161"><span class="lineNum">    1161</span>              : </span>
+<span id="L1162"><span class="lineNum">    1162</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_JOINT_FABRIC</span>
+<span id="L1163"><span class="lineNum">    1163</span>              :     Optional&lt;Crypto::P256PublicKey&gt; mTrustedIcacPublicKeyB;</span>
+<span id="L1164"><span class="lineNum">    1164</span>              :     EndpointId mPeerAdminJFAdminClusterEndpointId = kInvalidEndpointId;</span>
+<span id="L1165"><span class="lineNum">    1165</span>              : #endif</span>
+<span id="L1166"><span class="lineNum">    1166</span>              : };</span>
+<span id="L1167"><span class="lineNum">    1167</span>              : </span>
+<span id="L1168"><span class="lineNum">    1168</span>              : } // namespace Controller</span>
+<span id="L1169"><span class="lineNum">    1169</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

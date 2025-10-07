@@ -1,0 +1,358 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - lib/address_resolve/AddressResolve.h</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">lib/address_resolve</a> - AddressResolve.h<span style="font-size: 80%;"> (source / <a href="AddressResolve.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">19</td>
+            <td class="headerCovTableEntry">19</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryMed">88.2&nbsp;%</td>
+            <td class="headerCovTableEntry">17</td>
+            <td class="headerCovTableEntry">15</td>
+          </tr>
+                  <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2022 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : #pragma once</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : #include &lt;lib/core/PeerId.h&gt;</span>
+<span id="L20"><span class="lineNum">      20</span>              : #include &lt;lib/support/IntrusiveList.h&gt;</span>
+<span id="L21"><span class="lineNum">      21</span>              : #include &lt;messaging/ReliableMessageProtocolConfig.h&gt;</span>
+<span id="L22"><span class="lineNum">      22</span>              : #include &lt;system/SystemClock.h&gt;</span>
+<span id="L23"><span class="lineNum">      23</span>              : #include &lt;system/SystemLayer.h&gt;</span>
+<span id="L24"><span class="lineNum">      24</span>              : #include &lt;transport/raw/PeerAddress.h&gt;</span>
+<span id="L25"><span class="lineNum">      25</span>              : </span>
+<span id="L26"><span class="lineNum">      26</span>              : namespace chip {</span>
+<span id="L27"><span class="lineNum">      27</span>              : namespace AddressResolve {</span>
+<span id="L28"><span class="lineNum">      28</span>              : </span>
+<span id="L29"><span class="lineNum">      29</span>              : /// Contains resolve information received from nodes. Contains all information</span>
+<span id="L30"><span class="lineNum">      30</span>              : /// bits that are considered useful but does not contain a full DNSSD data</span>
+<span id="L31"><span class="lineNum">      31</span>              : /// structure since not all DNSSD data is useful during operational processing.</span>
+<span id="L32"><span class="lineNum">      32</span>              : struct ResolveResult</span>
+<span id="L33"><span class="lineNum">      33</span>              : {</span>
+<span id="L34"><span class="lineNum">      34</span>              :     Transport::PeerAddress address;</span>
+<span id="L35"><span class="lineNum">      35</span>              :     ReliableMessageProtocolConfig mrpRemoteConfig;</span>
+<span id="L36"><span class="lineNum">      36</span>              :     bool supportsTcpServer   = false;</span>
+<span id="L37"><span class="lineNum">      37</span>              :     bool supportsTcpClient   = false;</span>
+<span id="L38"><span class="lineNum">      38</span>              :     bool isICDOperatingAsLIT = false;</span>
+<span id="L39"><span class="lineNum">      39</span>              : </span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC tlaBgGNC">         196 :     ResolveResult() : address(Transport::Type::kUdp), mrpRemoteConfig(GetDefaultMRPConfig()) {}</span></span>
+<span id="L41"><span class="lineNum">      41</span>              : };</span>
+<span id="L42"><span class="lineNum">      42</span>              : </span>
+<span id="L43"><span class="lineNum">      43</span>              : /// Represents an object interested in callbacks for a resolve operation.</span>
+<span id="L44"><span class="lineNum">      44</span>              : class NodeListener</span>
+<span id="L45"><span class="lineNum">      45</span>              : {</span>
+<span id="L46"><span class="lineNum">      46</span>              : public:</span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">           7 :     NodeListener()          = default;</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">           7 :     virtual ~NodeListener() = default;</span></span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
+<span id="L50"><span class="lineNum">      50</span>              :     /// Callback executed once only for a lookup, when the final address of a</span>
+<span id="L51"><span class="lineNum">      51</span>              :     /// node is considered to be the best choice for reachability.</span>
+<span id="L52"><span class="lineNum">      52</span>              :     ///</span>
+<span id="L53"><span class="lineNum">      53</span>              :     /// The callback is expected to be executed within the CHIP event loop</span>
+<span id="L54"><span class="lineNum">      54</span>              :     /// thread.</span>
+<span id="L55"><span class="lineNum">      55</span>              :     virtual void OnNodeAddressResolved(const PeerId &amp; peerId, const ResolveResult &amp; result) = 0;</span>
+<span id="L56"><span class="lineNum">      56</span>              : </span>
+<span id="L57"><span class="lineNum">      57</span>              :     /// Node resolution failure - occurs only once for a lookup, when an address</span>
+<span id="L58"><span class="lineNum">      58</span>              :     /// could not be resolved - generally due to a timeout or due to DNSSD</span>
+<span id="L59"><span class="lineNum">      59</span>              :     /// infrastructure returning an error.</span>
+<span id="L60"><span class="lineNum">      60</span>              :     ///</span>
+<span id="L61"><span class="lineNum">      61</span>              :     /// The callback is expected to be executed within the CHIP event loop</span>
+<span id="L62"><span class="lineNum">      62</span>              :     /// thread.</span>
+<span id="L63"><span class="lineNum">      63</span>              :     virtual void OnNodeAddressResolutionFailed(const PeerId &amp; peerId, CHIP_ERROR reason) = 0;</span>
+<span id="L64"><span class="lineNum">      64</span>              : };</span>
+<span id="L65"><span class="lineNum">      65</span>              : </span>
+<span id="L66"><span class="lineNum">      66</span>              : /// Represents an active Address resolution lookup.</span>
+<span id="L67"><span class="lineNum">      67</span>              : ///</span>
+<span id="L68"><span class="lineNum">      68</span>              : /// Implementations extend this class with implementation-specific data like</span>
+<span id="L69"><span class="lineNum">      69</span>              : /// storing the 'last known good address' and 'scores' or any additional data</span>
+<span id="L70"><span class="lineNum">      70</span>              : /// required to figure out when a resolve is ok.</span>
+<span id="L71"><span class="lineNum">      71</span>              : class NodeLookupHandleBase : public IntrusiveListNodeBase&lt;&gt;</span>
+<span id="L72"><span class="lineNum">      72</span>              : {</span>
+<span id="L73"><span class="lineNum">      73</span>              : public:</span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC">          15 :     NodeLookupHandleBase() {}</span></span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">          15 :     virtual ~NodeLookupHandleBase() {}</span></span>
+<span id="L76"><span class="lineNum">      76</span>              : </span>
+<span id="L77"><span class="lineNum">      77</span>              :     // While active, resolve handles are maintained in an internal list</span>
+<span id="L78"><span class="lineNum">      78</span>              :     // to be processed, so copying their values (i.e. pointers) is not</span>
+<span id="L79"><span class="lineNum">      79</span>              :     // allowed.</span>
+<span id="L80"><span class="lineNum">      80</span>              :     NodeLookupHandleBase(const NodeLookupHandleBase &amp;)             = delete;</span>
+<span id="L81"><span class="lineNum">      81</span>              :     NodeLookupHandleBase &amp; operator=(const NodeLookupHandleBase &amp;) = delete;</span>
+<span id="L82"><span class="lineNum">      82</span>              : </span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">           8 :     void SetListener(NodeListener * listener) { mListener = listener; }</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">           6 :     NodeListener * GetListener() { return mListener; }</span></span>
+<span id="L85"><span class="lineNum">      85</span>              : </span>
+<span id="L86"><span class="lineNum">      86</span>              :     /// Convenience method that is more readable than 'IsInList'</span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">           1 :     inline bool IsActive() const { return IntrusiveListNodeBase::IsInList(); }</span></span>
+<span id="L88"><span class="lineNum">      88</span>              : </span>
+<span id="L89"><span class="lineNum">      89</span>              : protected:</span>
+<span id="L90"><span class="lineNum">      90</span>              :     NodeListener * mListener = nullptr;</span>
+<span id="L91"><span class="lineNum">      91</span>              : };</span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              : /// Represents a request to perform a single node lookup</span>
+<span id="L94"><span class="lineNum">      94</span>              : /// Contains all the information that should be looked for as well as</span>
+<span id="L95"><span class="lineNum">      95</span>              : /// extra timeout configurations.</span>
+<span id="L96"><span class="lineNum">      96</span>              : class NodeLookupRequest</span>
+<span id="L97"><span class="lineNum">      97</span>              : {</span>
+<span id="L98"><span class="lineNum">      98</span>              : public:</span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC">          15 :     NodeLookupRequest() {}</span></span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC">          13 :     NodeLookupRequest(const PeerId &amp; peerId) : mPeerId(peerId) {}</span></span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span>              :     NodeLookupRequest(const NodeLookupRequest &amp;)             = default;</span>
+<span id="L103"><span class="lineNum">     103</span>              :     NodeLookupRequest &amp; operator=(const NodeLookupRequest &amp;) = default;</span>
+<span id="L104"><span class="lineNum">     104</span>              : </span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">          70 :     const PeerId &amp; GetPeerId() const { return mPeerId; }</span></span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">          23 :     System::Clock::Milliseconds32 GetMinLookupTime() const { return mMinLookupTimeMs; }</span></span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">           6 :     System::Clock::Milliseconds32 GetMaxLookupTime() const { return mMaxLookupTimeMs; }</span></span>
+<span id="L108"><span class="lineNum">     108</span>              : </span>
+<span id="L109"><span class="lineNum">     109</span>              :     /// The minimum lookup time is how much to wait for additional DNSSD</span>
+<span id="L110"><span class="lineNum">     110</span>              :     /// queries even if a reply has already been received or to allow for</span>
+<span id="L111"><span class="lineNum">     111</span>              :     /// additional heuristics regarding node choice to succeed.</span>
+<span id="L112"><span class="lineNum">     112</span>              :     /// Example heuristics and considerations:</span>
+<span id="L113"><span class="lineNum">     113</span>              :     ///   - ping/ping6 could be used as an indicator of reachability. NOTE that</span>
+<span id="L114"><span class="lineNum">     114</span>              :     ///     not all devices may respond to ping, so this would only be an</span>
+<span id="L115"><span class="lineNum">     115</span>              :     ///     additional signal to accept/increase suitability score of an address</span>
+<span id="L116"><span class="lineNum">     116</span>              :     ///     and should NOT be used as a reject if no ping response</span>
+<span id="L117"><span class="lineNum">     117</span>              :     ///   - At lookup time, if the source ip of a dns reply is contained in the</span>
+<span id="L118"><span class="lineNum">     118</span>              :     ///     list of server ips, that is a great indication of routability and</span>
+<span id="L119"><span class="lineNum">     119</span>              :     ///     this minlookuptime could be bypassed altogether.</span>
+<span id="L120"><span class="lineNum">     120</span>              :     ///</span>
+<span id="L121"><span class="lineNum">     121</span>              :     /// Implementations for DNSSD may choose to return responses one by one</span>
+<span id="L122"><span class="lineNum">     122</span>              :     /// for addresses (e.g. Platform mdns does this at the time this was written)</span>
+<span id="L123"><span class="lineNum">     123</span>              :     /// or different interfaces will return separate 'done resolving' calls.</span>
+<span id="L124"><span class="lineNum">     124</span>              :     ///</span>
+<span id="L125"><span class="lineNum">     125</span>              :     /// If the min lookup time is set to 0, implementations are expected to call</span>
+<span id="L126"><span class="lineNum">     126</span>              :     /// 'OnNodeAddressResolved' as soon as the first DNSSD response is received.</span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          11 :     NodeLookupRequest &amp; SetMinLookupTime(System::Clock::Milliseconds32 value)</span></span>
+<span id="L128"><span class="lineNum">     128</span>              :     {</span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">          11 :         mMinLookupTimeMs = value;</span></span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">          11 :         return *this;</span></span>
+<span id="L131"><span class="lineNum">     131</span>              :     }</span>
+<span id="L132"><span class="lineNum">     132</span>              : </span>
+<span id="L133"><span class="lineNum">     133</span>              :     /// The maximum lookup time is how much to wait until a TIMEOUT error is</span>
+<span id="L134"><span class="lineNum">     134</span>              :     /// declared.</span>
+<span id="L135"><span class="lineNum">     135</span>              :     ///</span>
+<span id="L136"><span class="lineNum">     136</span>              :     /// If a DNSSD response is received before this max timeout, then</span>
+<span id="L137"><span class="lineNum">     137</span>              :     /// OnNodeAddressResolved will be called on listener objects (immediately)</span>
+<span id="L138"><span class="lineNum">     138</span>              :     /// if the first DNSSD reply arrives after MinLookupTimeMs has expired.</span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">          11 :     NodeLookupRequest &amp; SetMaxLookupTime(System::Clock::Milliseconds32 value)</span></span>
+<span id="L140"><span class="lineNum">     140</span>              :     {</span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">          11 :         mMaxLookupTimeMs = value;</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">          11 :         return *this;</span></span>
+<span id="L143"><span class="lineNum">     143</span>              :     }</span>
+<span id="L144"><span class="lineNum">     144</span>              : </span>
+<span id="L145"><span class="lineNum">     145</span>              : private:</span>
+<span id="L146"><span class="lineNum">     146</span>              :     static_assert((CHIP_CONFIG_ADDRESS_RESOLVE_MIN_LOOKUP_TIME_MS) &lt;= (CHIP_CONFIG_ADDRESS_RESOLVE_MAX_LOOKUP_TIME_MS),</span>
+<span id="L147"><span class="lineNum">     147</span>              :                   &quot;AddressResolveMinLookupTime must be equal or less than AddressResolveMaxLookupTime&quot;);</span>
+<span id="L148"><span class="lineNum">     148</span>              :     static_assert((CHIP_CONFIG_ADDRESS_RESOLVE_MIN_LOOKUP_TIME_MS) &gt;= 0,</span>
+<span id="L149"><span class="lineNum">     149</span>              :                   &quot;AddressResolveMinLookupTime must be equal or greater than 0&quot;);</span>
+<span id="L150"><span class="lineNum">     150</span>              :     static_assert((CHIP_CONFIG_ADDRESS_RESOLVE_MAX_LOOKUP_TIME_MS) &lt; UINT32_MAX,</span>
+<span id="L151"><span class="lineNum">     151</span>              :                   &quot;AddressResolveMaxLookupTime must be less than UINT32_MAX&quot;);</span>
+<span id="L152"><span class="lineNum">     152</span>              :     static constexpr uint32_t kMinLookupTimeMsDefault = CHIP_CONFIG_ADDRESS_RESOLVE_MIN_LOOKUP_TIME_MS;</span>
+<span id="L153"><span class="lineNum">     153</span>              :     static constexpr uint32_t kMaxLookupTimeMsDefault = CHIP_CONFIG_ADDRESS_RESOLVE_MAX_LOOKUP_TIME_MS;</span>
+<span id="L154"><span class="lineNum">     154</span>              : </span>
+<span id="L155"><span class="lineNum">     155</span>              :     PeerId mPeerId;</span>
+<span id="L156"><span class="lineNum">     156</span>              :     System::Clock::Milliseconds32 mMinLookupTimeMs{ kMinLookupTimeMsDefault };</span>
+<span id="L157"><span class="lineNum">     157</span>              :     System::Clock::Milliseconds32 mMaxLookupTimeMs{ kMaxLookupTimeMsDefault };</span>
+<span id="L158"><span class="lineNum">     158</span>              : };</span>
+<span id="L159"><span class="lineNum">     159</span>              : </span>
+<span id="L160"><span class="lineNum">     160</span>              : /// These things are expected to be defined by the implementation header.</span>
+<span id="L161"><span class="lineNum">     161</span>              : namespace Impl {</span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span>              : // The NodeLookup handle is a CONCRETE implementation that</span>
+<span id="L164"><span class="lineNum">     164</span>              : // MUST derive from NodeLookupHandleBase</span>
+<span id="L165"><span class="lineNum">     165</span>              : //</span>
+<span id="L166"><span class="lineNum">     166</span>              : // The underlying reason is that this handle is used to hold memory for</span>
+<span id="L167"><span class="lineNum">     167</span>              : // lookup metadata, so that resolvers do not need to maintain a likely unused</span>
+<span id="L168"><span class="lineNum">     168</span>              : // pool of 'active lookup' metadata.</span>
+<span id="L169"><span class="lineNum">     169</span>              : //</span>
+<span id="L170"><span class="lineNum">     170</span>              : // The side-effect of this is that the Impl::NodeLookupHandle is exposed to</span>
+<span id="L171"><span class="lineNum">     171</span>              : // clients for sizeof() memory purposes.</span>
+<span id="L172"><span class="lineNum">     172</span>              : //</span>
+<span id="L173"><span class="lineNum">     173</span>              : // Clients MUST only use the interface in NodeLookupHandleBase and assume all</span>
+<span id="L174"><span class="lineNum">     174</span>              : // other methods/content is implementation defined.</span>
+<span id="L175"><span class="lineNum">     175</span>              : class NodeLookupHandle;</span>
+<span id="L176"><span class="lineNum">     176</span>              : </span>
+<span id="L177"><span class="lineNum">     177</span>              : } // namespace Impl</span>
+<span id="L178"><span class="lineNum">     178</span>              : </span>
+<span id="L179"><span class="lineNum">     179</span>              : class Resolver</span>
+<span id="L180"><span class="lineNum">     180</span>              : {</span>
+<span id="L181"><span class="lineNum">     181</span>              : public:</span>
+<span id="L182"><span class="lineNum">     182</span>              :     /// Enumeration defining how to handle cancel callbacks during operation</span>
+<span id="L183"><span class="lineNum">     183</span>              :     /// cancellation.</span>
+<span id="L184"><span class="lineNum">     184</span>              :     enum class FailureCallback</span>
+<span id="L185"><span class="lineNum">     185</span>              :     {</span>
+<span id="L186"><span class="lineNum">     186</span>              :         Call, // Call the failure callback</span>
+<span id="L187"><span class="lineNum">     187</span>              :         Skip  // do not call the failure callback (generally silent operation)</span>
+<span id="L188"><span class="lineNum">     188</span>              :     };</span>
+<span id="L189"><span class="lineNum">     189</span>              : </span>
+<span id="L190"><span class="lineNum">     190</span>              :     virtual ~Resolver();</span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span>              :     /// Expected to be called at least once before the resolver is ever</span>
+<span id="L193"><span class="lineNum">     193</span>              :     /// used.</span>
+<span id="L194"><span class="lineNum">     194</span>              :     ///</span>
+<span id="L195"><span class="lineNum">     195</span>              :     /// Expected to override global setting of DNSSD callback for addres resolution</span>
+<span id="L196"><span class="lineNum">     196</span>              :     /// and may use the underlying system layer for timers and other functionality.</span>
+<span id="L197"><span class="lineNum">     197</span>              :     ///</span>
+<span id="L198"><span class="lineNum">     198</span>              :     /// If called multiple times, it is expected that the input systemLayer does</span>
+<span id="L199"><span class="lineNum">     199</span>              :     /// not change.</span>
+<span id="L200"><span class="lineNum">     200</span>              :     virtual CHIP_ERROR Init(System::Layer * systemLayer) = 0;</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span>              :     /// Initiate a node lookup for a particular node and use the specified</span>
+<span id="L203"><span class="lineNum">     203</span>              :     /// Lookup handle to keep track of node resolution</span>
+<span id="L204"><span class="lineNum">     204</span>              :     ///</span>
+<span id="L205"><span class="lineNum">     205</span>              :     /// If this returns CHIP_NO_ERROR, the following is expected:</span>
+<span id="L206"><span class="lineNum">     206</span>              :     ///   - exactly one of the listener OnNodeAddressResolved</span>
+<span id="L207"><span class="lineNum">     207</span>              :     ///     or OnNodeAddressResolutionFailed will be called at a later time</span>
+<span id="L208"><span class="lineNum">     208</span>              :     ///   - handle must NOT be destroyed while the lookup is in progress (it</span>
+<span id="L209"><span class="lineNum">     209</span>              :     ///     is part of an internal 'lookup list')</span>
+<span id="L210"><span class="lineNum">     210</span>              :     ///   - handle must NOT be reused (the lookup is done on a per-node basis</span>
+<span id="L211"><span class="lineNum">     211</span>              :     ///     and maintains lookup data internally while the operation is still</span>
+<span id="L212"><span class="lineNum">     212</span>              :     ///     in progress)</span>
+<span id="L213"><span class="lineNum">     213</span>              :     virtual CHIP_ERROR LookupNode(const NodeLookupRequest &amp; request, Impl::NodeLookupHandle &amp; handle) = 0;</span>
+<span id="L214"><span class="lineNum">     214</span>              : </span>
+<span id="L215"><span class="lineNum">     215</span>              :     /// Inform the Lookup handle that the previous node lookup was not</span>
+<span id="L216"><span class="lineNum">     216</span>              :     /// sufficient for the purpose of the caller (e.g establishing a session</span>
+<span id="L217"><span class="lineNum">     217</span>              :     /// fails with the result of the previous lookup), and that more data is</span>
+<span id="L218"><span class="lineNum">     218</span>              :     /// needed.</span>
+<span id="L219"><span class="lineNum">     219</span>              :     ///</span>
+<span id="L220"><span class="lineNum">     220</span>              :     /// This method must be called on a handle that is no longer active to</span>
+<span id="L221"><span class="lineNum">     221</span>              :     /// succeed.</span>
+<span id="L222"><span class="lineNum">     222</span>              :     ///</span>
+<span id="L223"><span class="lineNum">     223</span>              :     /// If the handle is no longer active and has results that have not been</span>
+<span id="L224"><span class="lineNum">     224</span>              :     /// delivered to the listener yet, the listener's OnNodeAddressResolved will</span>
+<span id="L225"><span class="lineNum">     225</span>              :     /// be called synchronously before the method returns.  Note that depending</span>
+<span id="L226"><span class="lineNum">     226</span>              :     /// on the listener implementation this can end up destroying the handle</span>
+<span id="L227"><span class="lineNum">     227</span>              :     /// and/or the listener.</span>
+<span id="L228"><span class="lineNum">     228</span>              :     ///</span>
+<span id="L229"><span class="lineNum">     229</span>              :     /// This method will return CHIP_NO_ERROR if and only if it has called</span>
+<span id="L230"><span class="lineNum">     230</span>              :     /// OnNodeAddressResolved.</span>
+<span id="L231"><span class="lineNum">     231</span>              :     ///</span>
+<span id="L232"><span class="lineNum">     232</span>              :     /// This method will return CHIP_ERROR_INCORRECT_STATE if the handle is</span>
+<span id="L233"><span class="lineNum">     233</span>              :     /// still active.</span>
+<span id="L234"><span class="lineNum">     234</span>              :     ///</span>
+<span id="L235"><span class="lineNum">     235</span>              :     /// This method will return CHIP_ERROR_NOT_FOUND if there are no more</span>
+<span id="L236"><span class="lineNum">     236</span>              :     /// results.</span>
+<span id="L237"><span class="lineNum">     237</span>              :     ///</span>
+<span id="L238"><span class="lineNum">     238</span>              :     /// This method may return other errors in some cases.</span>
+<span id="L239"><span class="lineNum">     239</span>              :     virtual CHIP_ERROR TryNextResult(Impl::NodeLookupHandle &amp; handle) = 0;</span>
+<span id="L240"><span class="lineNum">     240</span>              : </span>
+<span id="L241"><span class="lineNum">     241</span>              :     /// Stops an active lookup request.</span>
+<span id="L242"><span class="lineNum">     242</span>              :     ///</span>
+<span id="L243"><span class="lineNum">     243</span>              :     /// Caller controlls weather the `fail` callback of the handle is invoked or not by using</span>
+<span id="L244"><span class="lineNum">     244</span>              :     /// the `cancel_method` argument.</span>
+<span id="L245"><span class="lineNum">     245</span>              :     ///</span>
+<span id="L246"><span class="lineNum">     246</span>              :     /// Note that there is no default cancel_method on purpose, so that the caller has to make</span>
+<span id="L247"><span class="lineNum">     247</span>              :     /// a clear decision if the callback should or should not be invoked.</span>
+<span id="L248"><span class="lineNum">     248</span>              :     virtual CHIP_ERROR CancelLookup(Impl::NodeLookupHandle &amp; handle, FailureCallback cancel_method) = 0;</span>
+<span id="L249"><span class="lineNum">     249</span>              : </span>
+<span id="L250"><span class="lineNum">     250</span>              :     /// Shut down any active resolves</span>
+<span id="L251"><span class="lineNum">     251</span>              :     ///</span>
+<span id="L252"><span class="lineNum">     252</span>              :     /// Will immediately fail any scheduled resolve calls and will refuse to register</span>
+<span id="L253"><span class="lineNum">     253</span>              :     /// any new lookups until re-initialized.</span>
+<span id="L254"><span class="lineNum">     254</span>              :     virtual void Shutdown() = 0;</span>
+<span id="L255"><span class="lineNum">     255</span>              : </span>
+<span id="L256"><span class="lineNum">     256</span>              :     /// Expected to be provided by the implementation.</span>
+<span id="L257"><span class="lineNum">     257</span>              :     static Resolver &amp; Instance();</span>
+<span id="L258"><span class="lineNum">     258</span>              : };</span>
+<span id="L259"><span class="lineNum">     259</span>              : </span>
+<span id="L260"><span class="lineNum">     260</span>              : } // namespace AddressResolve</span>
+<span id="L261"><span class="lineNum">     261</span>              : } // namespace chip</span>
+<span id="L262"><span class="lineNum">     262</span>              : </span>
+<span id="L263"><span class="lineNum">     263</span>              : // Include the required platform header for the actual implementation, if defined.</span>
+<span id="L264"><span class="lineNum">     264</span>              : // Otherwise assume the default implementation is being used.</span>
+<span id="L265"><span class="lineNum">     265</span>              : // Expectations of this include:</span>
+<span id="L266"><span class="lineNum">     266</span>              : //   - define the `Impl::NodeLookupHandle` deriving from NodeLookupHandleBase</span>
+<span id="L267"><span class="lineNum">     267</span>              : //   - corresponding CPP file should provide a valid Resolver::Instance()</span>
+<span id="L268"><span class="lineNum">     268</span>              : //     implementation</span>
+<span id="L269"><span class="lineNum">     269</span>              : #ifdef CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER</span>
+<span id="L270"><span class="lineNum">     270</span>              : #include CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER</span>
+<span id="L271"><span class="lineNum">     271</span>              : #else</span>
+<span id="L272"><span class="lineNum">     272</span>              : #include &lt;lib/address_resolve/AddressResolve_DefaultImpl.h&gt;</span>
+<span id="L273"><span class="lineNum">     273</span>              : #endif</span>
+<span id="L274"><span class="lineNum">     274</span>              : </span>
+<span id="L275"><span class="lineNum">     275</span>              : namespace chip {</span>
+<span id="L276"><span class="lineNum">     276</span>              : namespace AddressResolve {</span>
+<span id="L277"><span class="lineNum">     277</span>              : </span>
+<span id="L278"><span class="lineNum">     278</span>              : // Make the code easy to read: do not reach into Impl.</span>
+<span id="L279"><span class="lineNum">     279</span>              : using NodeLookupHandle = Impl::NodeLookupHandle;</span>
+<span id="L280"><span class="lineNum">     280</span>              : </span>
+<span id="L281"><span class="lineNum">     281</span>              : } // namespace AddressResolve</span>
+<span id="L282"><span class="lineNum">     282</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

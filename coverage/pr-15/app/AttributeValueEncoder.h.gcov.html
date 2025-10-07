@@ -1,0 +1,428 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - app/AttributeValueEncoder.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">app</a> - AttributeValueEncoder.h<span style="font-size: 80%;"> (source / <a href="AttributeValueEncoder.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">90.5&nbsp;%</td>
+            <td class="headerCovTableEntry">63</td>
+            <td class="headerCovTableEntry">57</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">21.5&nbsp;%</td>
+            <td class="headerCovTableEntry">465</td>
+            <td class="headerCovTableEntry">100</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *    Copyright (c) 2021-2024 Project CHIP Authors</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    All rights reserved.</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : #pragma once</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : #include &lt;access/SubjectDescriptor.h&gt;</span>
+<span id="L20"><span class="lineNum">      20</span>              : #include &lt;app/AttributeEncodeState.h&gt;</span>
+<span id="L21"><span class="lineNum">      21</span>              : #include &lt;app/AttributeReportBuilder.h&gt;</span>
+<span id="L22"><span class="lineNum">      22</span>              : #include &lt;app/ConcreteAttributePath.h&gt;</span>
+<span id="L23"><span class="lineNum">      23</span>              : #include &lt;app/MessageDef/AttributeReportIBs.h&gt;</span>
+<span id="L24"><span class="lineNum">      24</span>              : #include &lt;app/data-model/FabricScoped.h&gt;</span>
+<span id="L25"><span class="lineNum">      25</span>              : #include &lt;app/data-model/List.h&gt;</span>
+<span id="L26"><span class="lineNum">      26</span>              : #include &lt;lib/support/BitFlags.h&gt;</span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;lib/support/BitMask.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/support/TypeTraits.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;type_traits&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : </span>
+<span id="L32"><span class="lineNum">      32</span>              : namespace chip {</span>
+<span id="L33"><span class="lineNum">      33</span>              : namespace app {</span>
+<span id="L34"><span class="lineNum">      34</span>              : </span>
+<span id="L35"><span class="lineNum">      35</span>              : /**</span>
+<span id="L36"><span class="lineNum">      36</span>              :  * The AttributeValueEncoder is a helper class for filling report payloads into AttributeReportIBs.</span>
+<span id="L37"><span class="lineNum">      37</span>              :  * The attribute value encoder can be initialized with a AttributeEncodeState for saving and recovering its state between encode</span>
+<span id="L38"><span class="lineNum">      38</span>              :  * sessions (chunkings).</span>
+<span id="L39"><span class="lineNum">      39</span>              :  *</span>
+<span id="L40"><span class="lineNum">      40</span>              :  * When Encode returns recoverable errors (e.g. CHIP_ERROR_NO_MEMORY) the state can be used to initialize the AttributeValueEncoder</span>
+<span id="L41"><span class="lineNum">      41</span>              :  * for future use on the same attribute path.</span>
+<span id="L42"><span class="lineNum">      42</span>              :  */</span>
+<span id="L43"><span class="lineNum">      43</span>              : class AttributeValueEncoder</span>
+<span id="L44"><span class="lineNum">      44</span>              : {</span>
+<span id="L45"><span class="lineNum">      45</span>              : private:</span>
+<span id="L46"><span class="lineNum">      46</span>              :     // Attempt to save flash by reducing the number of instantiations of the</span>
+<span id="L47"><span class="lineNum">      47</span>              :     // Encode methods for AttributeValueEncoder and ListEncodeHelper.  The idea</span>
+<span id="L48"><span class="lineNum">      48</span>              :     // here is that some types actually end up encoded as other types anyway</span>
+<span id="L49"><span class="lineNum">      49</span>              :     // (e.g. all integers are encoded are uint64_t or int64_t), so we might as</span>
+<span id="L50"><span class="lineNum">      50</span>              :     // well avoid generating template instantiations of our methods (which have</span>
+<span id="L51"><span class="lineNum">      51</span>              :     // extra logic) for all the different types that end up encoded the same in</span>
+<span id="L52"><span class="lineNum">      52</span>              :     // the end.</span>
+<span id="L53"><span class="lineNum">      53</span>              :     //</span>
+<span id="L54"><span class="lineNum">      54</span>              :     // A type is a &quot;base&quot; type if it can't be treated as any other type for</span>
+<span id="L55"><span class="lineNum">      55</span>              :     // encoding purposes.  Overloads of BaseEncodableValue can be added for</span>
+<span id="L56"><span class="lineNum">      56</span>              :     // &quot;non-base&quot; types to return values of a base type.</span>
+<span id="L57"><span class="lineNum">      57</span>              :     //</span>
+<span id="L58"><span class="lineNum">      58</span>              :     // It's important here to not collapse together types for which</span>
+<span id="L59"><span class="lineNum">      59</span>              :     // DataModel::Encode in fact has different behavior (e.g. enum types).</span>
+<span id="L60"><span class="lineNum">      60</span>              :     template &lt;typename T&gt;</span>
+<span id="L61"><span class="lineNum">      61</span>              :     static constexpr const T &amp; BaseEncodableValue(const T &amp; aArg)</span>
+<span id="L62"><span class="lineNum">      62</span>              :     {</span>
+<span id="L63"><span class="lineNum">      63</span>              :         return aArg;</span>
+<span id="L64"><span class="lineNum">      64</span>              :     }</span>
+<span id="L65"><span class="lineNum">      65</span>              :     template &lt;typename T&gt;</span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC tlaBgGNC">           1 :     static constexpr auto BaseEncodableValue(const BitFlags&lt;T&gt; &amp; aArg)</span></span>
+<span id="L67"><span class="lineNum">      67</span>              :     {</span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">           1 :         return BaseEncodableValue(aArg.Raw());</span></span>
+<span id="L69"><span class="lineNum">      69</span>              :     }</span>
+<span id="L70"><span class="lineNum">      70</span>              :     template &lt;typename T&gt;</span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaUNC tlaBgUNC">           0 :     static constexpr auto BaseEncodableValue(const BitMask&lt;T&gt; &amp; aArg)</span></span>
+<span id="L72"><span class="lineNum">      72</span>              :     {</span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaUNC">           0 :         return BaseEncodableValue(aArg.Raw());</span></span>
+<span id="L74"><span class="lineNum">      74</span>              :     }</span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC tlaBgGNC">          13 :     static constexpr uint64_t BaseEncodableValue(uint32_t aArg) { return aArg; }</span></span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">         303 :     static constexpr uint64_t BaseEncodableValue(uint16_t aArg) { return aArg; }</span></span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">        3340 :     static constexpr uint64_t BaseEncodableValue(uint8_t aArg) { return aArg; }</span></span>
+<span id="L78"><span class="lineNum">      78</span>              :     static constexpr int64_t BaseEncodableValue(int32_t aArg) { return aArg; }</span>
+<span id="L79"><span class="lineNum">      79</span> <span class="tlaUNC tlaBgUNC">           0 :     static constexpr int64_t BaseEncodableValue(int16_t aArg) { return aArg; }</span></span>
+<span id="L80"><span class="lineNum">      80</span>              :     static constexpr int64_t BaseEncodableValue(int8_t aArg) { return aArg; }</span>
+<span id="L81"><span class="lineNum">      81</span>              : </span>
+<span id="L82"><span class="lineNum">      82</span>              :     // Determines whether a type should be encoded as-is (if IsBaseType&lt;T&gt; is</span>
+<span id="L83"><span class="lineNum">      83</span>              :     // true) or transformed to a different type by calling BaseEncodableValue()</span>
+<span id="L84"><span class="lineNum">      84</span>              :     // on it.</span>
+<span id="L85"><span class="lineNum">      85</span>              :     template &lt;typename T&gt;</span>
+<span id="L86"><span class="lineNum">      86</span>              :     static constexpr bool IsBaseType = std::is_same_v&lt;const T &amp;, decltype(BaseEncodableValue(std::declval&lt;const T &amp;&gt;()))&gt;;</span>
+<span id="L87"><span class="lineNum">      87</span>              : </span>
+<span id="L88"><span class="lineNum">      88</span>              :     template &lt;typename T&gt;</span>
+<span id="L89"><span class="lineNum">      89</span>              :     static constexpr bool IsMatterEnum = std::is_enum_v&lt;T&gt; &amp;&amp; DataModel::detail::HasUnknownValue&lt;T&gt;;</span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span>              : public:</span>
+<span id="L92"><span class="lineNum">      92</span>              :     class ListEncodeHelper</span>
+<span id="L93"><span class="lineNum">      93</span>              :     {</span>
+<span id="L94"><span class="lineNum">      94</span>              :     public:</span>
+<span id="L95"><span class="lineNum">      95</span> <span class="tlaGNC tlaBgGNC">        2367 :         ListEncodeHelper(AttributeValueEncoder &amp; encoder) : mAttributeValueEncoder(encoder) {}</span></span>
+<span id="L96"><span class="lineNum">      96</span>              : </span>
+<span id="L97"><span class="lineNum">      97</span>              :         template &lt;typename T, std::enable_if_t&lt;IsBaseType&lt;T&gt; &amp;&amp; DataModel::IsFabricScoped&lt;T&gt;::value, bool&gt; = true&gt;</span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC">         156 :         CHIP_ERROR Encode(const T &amp; aArg) const</span></span>
+<span id="L99"><span class="lineNum">      99</span>              :         {</span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC">         156 :             VerifyOrReturnError(aArg.GetFabricIndex() != kUndefinedFabricIndex, CHIP_ERROR_INVALID_FABRIC_INDEX);</span></span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span>              :             // If we are encoding for a fabric filtered attribute read and the fabric index does not match that present in the</span>
+<span id="L103"><span class="lineNum">     103</span>              :             // request, skip encoding this list item.</span>
+<span id="L104"><span class="lineNum">     104</span> <span class="tlaGNC">         156 :             VerifyOrReturnError(!mAttributeValueEncoder.mIsFabricFiltered ||</span></span>
+<span id="L105"><span class="lineNum">     105</span>              :                                     aArg.GetFabricIndex() == mAttributeValueEncoder.AccessingFabricIndex(),</span>
+<span id="L106"><span class="lineNum">     106</span>              :                                 CHIP_NO_ERROR);</span>
+<span id="L107"><span class="lineNum">     107</span> <span class="tlaGNC">          81 :             return mAttributeValueEncoder.EncodeListItem(mCheckpoint, aArg, mAttributeValueEncoder.AccessingFabricIndex());</span></span>
+<span id="L108"><span class="lineNum">     108</span>              :         }</span>
+<span id="L109"><span class="lineNum">     109</span>              : </span>
+<span id="L110"><span class="lineNum">     110</span>              :         template &lt;typename T,</span>
+<span id="L111"><span class="lineNum">     111</span>              :                   std::enable_if_t&lt;IsBaseType&lt;T&gt; &amp;&amp; !DataModel::IsFabricScoped&lt;T&gt;::value &amp;&amp; !IsMatterEnum&lt;T&gt;, bool&gt; = true&gt;</span>
+<span id="L112"><span class="lineNum">     112</span> <span class="tlaGNC">        6770 :         CHIP_ERROR Encode(const T &amp; aArg) const</span></span>
+<span id="L113"><span class="lineNum">     113</span>              :         {</span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC">        6770 :             return mAttributeValueEncoder.EncodeListItem(mCheckpoint, aArg);</span></span>
+<span id="L115"><span class="lineNum">     115</span>              :         }</span>
+<span id="L116"><span class="lineNum">     116</span>              : </span>
+<span id="L117"><span class="lineNum">     117</span>              :         // Specialization for enums to share as much code as possible in attribute encoding while</span>
+<span id="L118"><span class="lineNum">     118</span>              :         // still doing the &quot;unknown value&quot; checks that might be needed..</span>
+<span id="L119"><span class="lineNum">     119</span>              :         template &lt;typename T, std::enable_if_t&lt;IsBaseType&lt;T&gt; &amp;&amp; IsMatterEnum&lt;T&gt;, bool&gt; = true&gt;</span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaUNC tlaBgUNC">           0 :         CHIP_ERROR Encode(const T &amp; aArg) const</span></span>
+<span id="L121"><span class="lineNum">     121</span>              :         {</span>
+<span id="L122"><span class="lineNum">     122</span>              :             static_assert(!DataModel::IsFabricScoped&lt;T&gt;::value, &quot;How do we have a fabric-scoped enum?&quot;);</span>
+<span id="L123"><span class="lineNum">     123</span>              :             using UnderlyingType = std::remove_cv_t&lt;std::remove_reference_t&lt;decltype(to_underlying(aArg))&gt;&gt;;</span>
+<span id="L124"><span class="lineNum">     124</span>              :             static_assert(!std::is_same_v&lt;UnderlyingType, T&gt;, &quot;Encode will call itself recursively&quot;);</span>
+<span id="L125"><span class="lineNum">     125</span>              : </span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaUNC">           0 :             CHIP_DM_ENCODING_MAYBE_FAIL_UNKNOWN_ENUM_VALUE(aArg);</span></span>
+<span id="L127"><span class="lineNum">     127</span>              : </span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaUNC">           0 :             return Encode(to_underlying(aArg));</span></span>
+<span id="L129"><span class="lineNum">     129</span>              :         }</span>
+<span id="L130"><span class="lineNum">     130</span>              : </span>
+<span id="L131"><span class="lineNum">     131</span>              :         template &lt;typename T, std::enable_if_t&lt;!IsBaseType&lt;T&gt;, bool&gt; = true&gt;</span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC tlaBgGNC">        2016 :         CHIP_ERROR Encode(const T &amp; aArg) const</span></span>
+<span id="L133"><span class="lineNum">     133</span>              :         {</span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">        2016 :             return Encode(BaseEncodableValue(aArg));</span></span>
+<span id="L135"><span class="lineNum">     135</span>              :         }</span>
+<span id="L136"><span class="lineNum">     136</span>              : </span>
+<span id="L137"><span class="lineNum">     137</span>              :     private:</span>
+<span id="L138"><span class="lineNum">     138</span>              :         AttributeValueEncoder &amp; mAttributeValueEncoder;</span>
+<span id="L139"><span class="lineNum">     139</span>              :         // Avoid calling the TLVWriter constructor for every instantiation of</span>
+<span id="L140"><span class="lineNum">     140</span>              :         // EncodeListItem.  We treat encoding as a const operation, so either</span>
+<span id="L141"><span class="lineNum">     141</span>              :         // have to put this on the stack (in which case it's per-instantiation),</span>
+<span id="L142"><span class="lineNum">     142</span>              :         // or have it as mutable state.</span>
+<span id="L143"><span class="lineNum">     143</span>              :         mutable TLV::TLVWriter mCheckpoint;</span>
+<span id="L144"><span class="lineNum">     144</span>              :     };</span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC">        6006 :     AttributeValueEncoder(AttributeReportIBs::Builder &amp; aAttributeReportIBsBuilder, Access::SubjectDescriptor subjectDescriptor,</span></span>
+<span id="L147"><span class="lineNum">     147</span>              :                           const ConcreteAttributePath &amp; aPath, DataVersion aDataVersion, bool aIsFabricFiltered = false,</span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">        6006 :                           const AttributeEncodeState &amp; aState = AttributeEncodeState()) :</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">        6006 :         mAttributeReportIBsBuilder(aAttributeReportIBsBuilder),</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">        6006 :         mSubjectDescriptor(subjectDescriptor), mPath(aPath.mEndpointId, aPath.mClusterId, aPath.mAttributeId),</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaGNC">        6006 :         mDataVersion(aDataVersion), mIsFabricFiltered(aIsFabricFiltered), mEncodeState(aState)</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">        6006 :     {}</span></span>
+<span id="L153"><span class="lineNum">     153</span>              : </span>
+<span id="L154"><span class="lineNum">     154</span>              :     /**</span>
+<span id="L155"><span class="lineNum">     155</span>              :      * Encode a single value.  This value will not be chunked; it will either be</span>
+<span id="L156"><span class="lineNum">     156</span>              :      * entirely encoded or fail to be encoded.  Consumers are allowed to make</span>
+<span id="L157"><span class="lineNum">     157</span>              :      * either one call to Encode or one call to EncodeList to handle a read.</span>
+<span id="L158"><span class="lineNum">     158</span>              :      */</span>
+<span id="L159"><span class="lineNum">     159</span>              :     template &lt;typename T, std::enable_if_t&lt;IsBaseType&lt;T&gt; &amp;&amp; !IsMatterEnum&lt;T&gt;, bool&gt; = true&gt;</span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">        1723 :     CHIP_ERROR Encode(const T &amp; aArg)</span></span>
+<span id="L161"><span class="lineNum">     161</span>              :     {</span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">        1723 :         mTriedEncode = true;</span></span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">        1723 :         return EncodeAttributeReportIB(aArg);</span></span>
+<span id="L164"><span class="lineNum">     164</span>              :     }</span>
+<span id="L165"><span class="lineNum">     165</span>              : </span>
+<span id="L166"><span class="lineNum">     166</span>              :     template &lt;typename T, std::enable_if_t&lt;IsBaseType&lt;T&gt; &amp;&amp; IsMatterEnum&lt;T&gt;, bool&gt; = true&gt;</span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">           6 :     CHIP_ERROR Encode(const T &amp; aArg)</span></span>
+<span id="L168"><span class="lineNum">     168</span>              :     {</span>
+<span id="L169"><span class="lineNum">     169</span>              :         using UnderlyingType = std::remove_cv_t&lt;std::remove_reference_t&lt;decltype(to_underlying(aArg))&gt;&gt;;</span>
+<span id="L170"><span class="lineNum">     170</span>              :         static_assert(!std::is_same_v&lt;UnderlyingType, T&gt;, &quot;Encode will call itself recursively&quot;);</span>
+<span id="L171"><span class="lineNum">     171</span>              : </span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">           6 :         CHIP_DM_ENCODING_MAYBE_FAIL_UNKNOWN_ENUM_VALUE(aArg);</span></span>
+<span id="L173"><span class="lineNum">     173</span>              : </span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">           6 :         return Encode(to_underlying(aArg));</span></span>
+<span id="L175"><span class="lineNum">     175</span>              :     }</span>
+<span id="L176"><span class="lineNum">     176</span>              : </span>
+<span id="L177"><span class="lineNum">     177</span>              :     template &lt;typename T, std::enable_if_t&lt;!IsBaseType&lt;T&gt;, bool&gt; = true&gt;</span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">        1641 :     CHIP_ERROR Encode(const T &amp; aArg)</span></span>
+<span id="L179"><span class="lineNum">     179</span>              :     {</span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">        1641 :         return Encode(BaseEncodableValue(aArg));</span></span>
+<span id="L181"><span class="lineNum">     181</span>              :     }</span>
+<span id="L182"><span class="lineNum">     182</span>              : </span>
+<span id="L183"><span class="lineNum">     183</span>              :     /**</span>
+<span id="L184"><span class="lineNum">     184</span>              :      * Encode an explicit null value.</span>
+<span id="L185"><span class="lineNum">     185</span>              :      */</span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">           1 :     CHIP_ERROR EncodeNull()</span></span>
+<span id="L187"><span class="lineNum">     187</span>              :     {</span>
+<span id="L188"><span class="lineNum">     188</span>              :         // Doesn't matter what type Nullable we use here.</span>
+<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">           1 :         return Encode(DataModel::Nullable&lt;uint8_t&gt;());</span></span>
+<span id="L190"><span class="lineNum">     190</span>              :     }</span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span>              :     /**</span>
+<span id="L193"><span class="lineNum">     193</span>              :      * Encode an explicit empty list.</span>
+<span id="L194"><span class="lineNum">     194</span>              :      */</span>
+<span id="L195"><span class="lineNum">     195</span> <span class="tlaGNC">          22 :     CHIP_ERROR EncodeEmptyList()</span></span>
+<span id="L196"><span class="lineNum">     196</span>              :     {</span>
+<span id="L197"><span class="lineNum">     197</span>              :         // Doesn't matter what type List we use here.</span>
+<span id="L198"><span class="lineNum">     198</span> <span class="tlaGNC">          22 :         return Encode(DataModel::List&lt;uint8_t&gt;());</span></span>
+<span id="L199"><span class="lineNum">     199</span>              :     }</span>
+<span id="L200"><span class="lineNum">     200</span>              : </span>
+<span id="L201"><span class="lineNum">     201</span>              :     /**</span>
+<span id="L202"><span class="lineNum">     202</span>              :      * aCallback is expected to take a const auto &amp; argument and Encode() on it as many times as needed to encode all the list</span>
+<span id="L203"><span class="lineNum">     203</span>              :      * elements one by one.  If any of those Encode() calls returns failure, aCallback must stop encoding and return failure.  When</span>
+<span id="L204"><span class="lineNum">     204</span>              :      * all items are encoded aCallback is expected to return success.</span>
+<span id="L205"><span class="lineNum">     205</span>              :      *</span>
+<span id="L206"><span class="lineNum">     206</span>              :      * aCallback may not be called.  Consumers must not assume it will be called.</span>
+<span id="L207"><span class="lineNum">     207</span>              :      *</span>
+<span id="L208"><span class="lineNum">     208</span>              :      * When EncodeList returns an error, the consumers must abort the encoding, and return the exact error to the caller.</span>
+<span id="L209"><span class="lineNum">     209</span>              :      *</span>
+<span id="L210"><span class="lineNum">     210</span>              :      * TODO: Can we hold a error state in the AttributeValueEncoder itself?</span>
+<span id="L211"><span class="lineNum">     211</span>              :      *</span>
+<span id="L212"><span class="lineNum">     212</span>              :      * Consumers are allowed to make either one call to EncodeList or one call to Encode to handle a read.</span>
+<span id="L213"><span class="lineNum">     213</span>              :      *</span>
+<span id="L214"><span class="lineNum">     214</span>              :      */</span>
+<span id="L215"><span class="lineNum">     215</span>              :     template &lt;typename ListGenerator&gt;</span>
+<span id="L216"><span class="lineNum">     216</span> <span class="tlaGNC">        2487 :     CHIP_ERROR EncodeList(ListGenerator aCallback)</span></span>
+<span id="L217"><span class="lineNum">     217</span>              :     {</span>
+<span id="L218"><span class="lineNum">     218</span> <span class="tlaGNC">        2487 :         mTriedEncode = true;</span></span>
+<span id="L219"><span class="lineNum">     219</span>              :         // Spec 10.5.4.3.1, 10.5.4.6 (Replace a list w/ Multiple IBs)</span>
+<span id="L220"><span class="lineNum">     220</span>              :         // EmptyList acts as the beginning of the whole array type attribute report.</span>
+<span id="L221"><span class="lineNum">     221</span>              :         // An empty list is encoded iff both mCurrentEncodingListIndex and mEncodeState.mCurrentEncodingListIndex are invalid</span>
+<span id="L222"><span class="lineNum">     222</span>              :         // values. After encoding the empty list, mEncodeState.mCurrentEncodingListIndex and mCurrentEncodingListIndex are set to 0.</span>
+<span id="L223"><span class="lineNum">     223</span> <span class="tlaGNC">        2487 :         ReturnErrorOnFailure(EnsureListStarted());</span></span>
+<span id="L224"><span class="lineNum">     224</span> <span class="tlaGNC">        2367 :         CHIP_ERROR err = aCallback(ListEncodeHelper(*this));</span></span>
+<span id="L225"><span class="lineNum">     225</span>              : </span>
+<span id="L226"><span class="lineNum">     226</span>              :         // Even if encoding list items failed, make sure we EnsureListEnded().</span>
+<span id="L227"><span class="lineNum">     227</span>              :         // Since we encode list items atomically, in the case when we just</span>
+<span id="L228"><span class="lineNum">     228</span>              :         // didn't fit the next item we want to make sure our list is properly</span>
+<span id="L229"><span class="lineNum">     229</span>              :         // ended before the reporting engine starts chunking.</span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">        2367 :         EnsureListEnded();</span></span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">        2367 :         if (err == CHIP_NO_ERROR)</span></span>
+<span id="L232"><span class="lineNum">     232</span>              :         {</span>
+<span id="L233"><span class="lineNum">     233</span>              :             // The Encode procedure finished without any error, clear the state.</span>
+<span id="L234"><span class="lineNum">     234</span> <span class="tlaGNC">        2096 :             mEncodeState.Reset();</span></span>
+<span id="L235"><span class="lineNum">     235</span>              :         }</span>
+<span id="L236"><span class="lineNum">     236</span> <span class="tlaGNC">        2367 :         return err;</span></span>
+<span id="L237"><span class="lineNum">     237</span>              :     }</span>
+<span id="L238"><span class="lineNum">     238</span>              : </span>
+<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">        1647 :     bool TriedEncode() const { return mTriedEncode; }</span></span>
+<span id="L240"><span class="lineNum">     240</span>              : </span>
+<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">         232 :     const Access::SubjectDescriptor &amp; GetSubjectDescriptor() const { return mSubjectDescriptor; }</span></span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span>              :     /**</span>
+<span id="L244"><span class="lineNum">     244</span>              :      * The accessing fabric index for this read or subscribe interaction.</span>
+<span id="L245"><span class="lineNum">     245</span>              :      */</span>
+<span id="L246"><span class="lineNum">     246</span> <span class="tlaGNC">         232 :     FabricIndex AccessingFabricIndex() const { return GetSubjectDescriptor().fabricIndex; }</span></span>
+<span id="L247"><span class="lineNum">     247</span>              : </span>
+<span id="L248"><span class="lineNum">     248</span>              :     /**</span>
+<span id="L249"><span class="lineNum">     249</span>              :      * AttributeValueEncoder is a short lived object, and the state is persisted by mEncodeState and restored by constructor.</span>
+<span id="L250"><span class="lineNum">     250</span>              :      */</span>
+<span id="L251"><span class="lineNum">     251</span> <span class="tlaGNC">        2353 :     const AttributeEncodeState &amp; GetState() const { return mEncodeState; }</span></span>
+<span id="L252"><span class="lineNum">     252</span>              : </span>
+<span id="L253"><span class="lineNum">     253</span>              : private:</span>
+<span id="L254"><span class="lineNum">     254</span>              :     // We made EncodeListItem() private, and ListEncoderHelper will expose it by Encode()</span>
+<span id="L255"><span class="lineNum">     255</span>              :     friend class ListEncodeHelper;</span>
+<span id="L256"><span class="lineNum">     256</span>              :     friend class TestOnlyAttributeValueEncoderAccessor;</span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span>              :     // Returns true if the list item should be encoded.  If it should, the</span>
+<span id="L259"><span class="lineNum">     259</span>              :     // passed-in TLVWriter will be used to checkpoint the current state of our</span>
+<span id="L260"><span class="lineNum">     260</span>              :     // attribute report list builder.</span>
+<span id="L261"><span class="lineNum">     261</span>              :     bool ShouldEncodeListItem(TLV::TLVWriter &amp; aCheckpoint);</span>
+<span id="L262"><span class="lineNum">     262</span>              : </span>
+<span id="L263"><span class="lineNum">     263</span>              :     // Does any cleanup work needed after attempting to encode a list item.</span>
+<span id="L264"><span class="lineNum">     264</span>              :     void PostEncodeListItem(CHIP_ERROR aEncodeStatus, const TLV::TLVWriter &amp; aCheckpoint);</span>
+<span id="L265"><span class="lineNum">     265</span>              : </span>
+<span id="L266"><span class="lineNum">     266</span>              :     // EncodeListItem may be given an extra FabricIndex argument as a second</span>
+<span id="L267"><span class="lineNum">     267</span>              :     // arg, or not.  Represent that via a parameter pack (which might be</span>
+<span id="L268"><span class="lineNum">     268</span>              :     // empty). In practice, for any given ItemType the extra arg is either there</span>
+<span id="L269"><span class="lineNum">     269</span>              :     // or not, so we don't get more template explosion due to aExtraArgs.</span>
+<span id="L270"><span class="lineNum">     270</span>              :     template &lt;typename ItemType, typename... ExtraArgTypes&gt;</span>
+<span id="L271"><span class="lineNum">     271</span> <span class="tlaGNC">        6851 :     CHIP_ERROR EncodeListItem(TLV::TLVWriter &amp; aCheckpoint, const ItemType &amp; aItem, ExtraArgTypes &amp;&amp;... aExtraArgs)</span></span>
+<span id="L272"><span class="lineNum">     272</span>              :     {</span>
+<span id="L273"><span class="lineNum">     273</span> <span class="tlaGNC">        6851 :         if (!ShouldEncodeListItem(aCheckpoint))</span></span>
+<span id="L274"><span class="lineNum">     274</span>              :         {</span>
+<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">         602 :             return CHIP_NO_ERROR;</span></span>
+<span id="L276"><span class="lineNum">     276</span>              :         }</span>
+<span id="L277"><span class="lineNum">     277</span>              : </span>
+<span id="L278"><span class="lineNum">     278</span>              :         CHIP_ERROR err;</span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">        6249 :         if (mEncodingInitialList)</span></span>
+<span id="L280"><span class="lineNum">     280</span>              :         {</span>
+<span id="L281"><span class="lineNum">     281</span>              :             // Just encode a single item, with an anonymous tag.</span>
+<span id="L282"><span class="lineNum">     282</span>              :             AttributeReportBuilder builder;</span>
+<span id="L283"><span class="lineNum">     283</span> <span class="tlaGNC">        5884 :             err = builder.EncodeValue(mAttributeReportIBsBuilder, TLV::AnonymousTag(), aItem,</span></span>
+<span id="L284"><span class="lineNum">     284</span> <span class="tlaGNC">          81 :                                       std::forward&lt;ExtraArgTypes&gt;(aExtraArgs)...);</span></span>
+<span id="L285"><span class="lineNum">     285</span>              :         }</span>
+<span id="L286"><span class="lineNum">     286</span>              :         else</span>
+<span id="L287"><span class="lineNum">     287</span>              :         {</span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">         365 :             err = EncodeAttributeReportIB(aItem, std::forward&lt;ExtraArgTypes&gt;(aExtraArgs)...);</span></span>
+<span id="L289"><span class="lineNum">     289</span>              :         }</span>
+<span id="L290"><span class="lineNum">     290</span>              : </span>
+<span id="L291"><span class="lineNum">     291</span> <span class="tlaGNC">        6249 :         PostEncodeListItem(err, aCheckpoint);</span></span>
+<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC">        6249 :         return err;</span></span>
+<span id="L293"><span class="lineNum">     293</span>              :     }</span>
+<span id="L294"><span class="lineNum">     294</span>              : </span>
+<span id="L295"><span class="lineNum">     295</span>              :     /**</span>
+<span id="L296"><span class="lineNum">     296</span>              :      * Builds a single AttributeReportIB in AttributeReportIBs.  The caller is</span>
+<span id="L297"><span class="lineNum">     297</span>              :      * responsible for setting up mPath correctly.</span>
+<span id="L298"><span class="lineNum">     298</span>              :      *</span>
+<span id="L299"><span class="lineNum">     299</span>              :      * In particular, when we are encoding a single element in the list, mPath</span>
+<span id="L300"><span class="lineNum">     300</span>              :      * must indicate a null list index to represent an &quot;append&quot; operation.</span>
+<span id="L301"><span class="lineNum">     301</span>              :      * operation.</span>
+<span id="L302"><span class="lineNum">     302</span>              :      *</span>
+<span id="L303"><span class="lineNum">     303</span>              :      * EncodeAttributeReportIB may be given an extra FabricIndex argument as a second</span>
+<span id="L304"><span class="lineNum">     304</span>              :      * arg, or not.  Represent that via a parameter pack (which might be</span>
+<span id="L305"><span class="lineNum">     305</span>              :      * empty). In practice, for any given ItemType the extra arg is either</span>
+<span id="L306"><span class="lineNum">     306</span>              :      * there or not, so we don't get more template explosion due to aExtraArgs.</span>
+<span id="L307"><span class="lineNum">     307</span>              :      */</span>
+<span id="L308"><span class="lineNum">     308</span>              :     template &lt;typename ItemType, typename... ExtraArgTypes&gt;</span>
+<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">        2088 :     CHIP_ERROR EncodeAttributeReportIB(const ItemType &amp; aItem, ExtraArgTypes &amp;&amp;... aExtraArgs)</span></span>
+<span id="L310"><span class="lineNum">     310</span>              :     {</span>
+<span id="L311"><span class="lineNum">     311</span>              :         AttributeReportBuilder builder;</span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaGNC">        2088 :         ReturnErrorOnFailure(builder.PrepareAttribute(mAttributeReportIBsBuilder, mPath, mDataVersion));</span></span>
+<span id="L313"><span class="lineNum">     313</span> <span class="tlaGNC">        2056 :         ReturnErrorOnFailure(builder.EncodeValue(mAttributeReportIBsBuilder, TLV::ContextTag(AttributeDataIB::Tag::kData), aItem,</span></span>
+<span id="L314"><span class="lineNum">     314</span>              :                                                  std::forward&lt;ExtraArgTypes&gt;(aExtraArgs)...));</span>
+<span id="L315"><span class="lineNum">     315</span>              : </span>
+<span id="L316"><span class="lineNum">     316</span> <span class="tlaGNC">        2056 :         return builder.FinishAttribute(mAttributeReportIBsBuilder);</span></span>
+<span id="L317"><span class="lineNum">     317</span>              :     }</span>
+<span id="L318"><span class="lineNum">     318</span>              : </span>
+<span id="L319"><span class="lineNum">     319</span>              :     /**</span>
+<span id="L320"><span class="lineNum">     320</span>              :      * EnsureListStarted sets our mCurrentEncodingListIndex to 0, and:</span>
+<span id="L321"><span class="lineNum">     321</span>              :      *</span>
+<span id="L322"><span class="lineNum">     322</span>              :      * * If we are just starting the list, gets us ready to encode list items.</span>
+<span id="L323"><span class="lineNum">     323</span>              :      *</span>
+<span id="L324"><span class="lineNum">     324</span>              :      * * If we are continuing a chunked list, guarantees that mPath.mListOp is</span>
+<span id="L325"><span class="lineNum">     325</span>              :      *   AppendItem after it returns.</span>
+<span id="L326"><span class="lineNum">     326</span>              :      */</span>
+<span id="L327"><span class="lineNum">     327</span>              :     CHIP_ERROR EnsureListStarted();</span>
+<span id="L328"><span class="lineNum">     328</span>              : </span>
+<span id="L329"><span class="lineNum">     329</span>              :     /**</span>
+<span id="L330"><span class="lineNum">     330</span>              :      * EnsureListEnded writes out the end of the list and our attribute data IB,</span>
+<span id="L331"><span class="lineNum">     331</span>              :      * if we were encoding our initial list</span>
+<span id="L332"><span class="lineNum">     332</span>              :      */</span>
+<span id="L333"><span class="lineNum">     333</span>              :     void EnsureListEnded();</span>
+<span id="L334"><span class="lineNum">     334</span>              : </span>
+<span id="L335"><span class="lineNum">     335</span>              :     AttributeReportIBs::Builder &amp; mAttributeReportIBsBuilder;</span>
+<span id="L336"><span class="lineNum">     336</span>              :     const Access::SubjectDescriptor mSubjectDescriptor;</span>
+<span id="L337"><span class="lineNum">     337</span>              :     ConcreteDataAttributePath mPath;</span>
+<span id="L338"><span class="lineNum">     338</span>              :     DataVersion mDataVersion;</span>
+<span id="L339"><span class="lineNum">     339</span>              :     bool mTriedEncode      = false;</span>
+<span id="L340"><span class="lineNum">     340</span>              :     bool mIsFabricFiltered = false;</span>
+<span id="L341"><span class="lineNum">     341</span>              :     // mEncodingInitialList is true if we're encoding a list and we have not</span>
+<span id="L342"><span class="lineNum">     342</span>              :     // started chunking it yet, so we're encoding a single attribute report IB</span>
+<span id="L343"><span class="lineNum">     343</span>              :     // for the whole list, not one per item.</span>
+<span id="L344"><span class="lineNum">     344</span>              :     bool mEncodingInitialList = false;</span>
+<span id="L345"><span class="lineNum">     345</span>              :     // mEncodedAtLeastOneListItem becomes true once we successfully encode a list item.</span>
+<span id="L346"><span class="lineNum">     346</span>              :     bool mEncodedAtLeastOneListItem     = false;</span>
+<span id="L347"><span class="lineNum">     347</span>              :     ListIndex mCurrentEncodingListIndex = kInvalidListIndex;</span>
+<span id="L348"><span class="lineNum">     348</span>              :     AttributeEncodeState mEncodeState;</span>
+<span id="L349"><span class="lineNum">     349</span>              : };</span>
+<span id="L350"><span class="lineNum">     350</span>              : </span>
+<span id="L351"><span class="lineNum">     351</span>              : } // namespace app</span>
+<span id="L352"><span class="lineNum">     352</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

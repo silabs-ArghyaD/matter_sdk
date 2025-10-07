@@ -1,0 +1,676 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - protocols/secure_channel/CASESession.h</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">protocols/secure_channel</a> - CASESession.h<span style="font-size: 80%;"> (source / <a href="CASESession.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryMed">83.3&nbsp;%</td>
+            <td class="headerCovTableEntry">18</td>
+            <td class="headerCovTableEntry">15</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">91.7&nbsp;%</td>
+            <td class="headerCovTableEntry">12</td>
+            <td class="headerCovTableEntry">11</td>
+          </tr>
+                  <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2021-2022 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    All rights reserved.</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L16"><span class="lineNum">      16</span>              :  *    limitations under the License.</span>
+<span id="L17"><span class="lineNum">      17</span>              :  */</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : /**</span>
+<span id="L20"><span class="lineNum">      20</span>              :  *    @file</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *      This file defines the CHIP CASE Session object that provides</span>
+<span id="L22"><span class="lineNum">      22</span>              :  *      APIs for constructing a secure session using a certificate from the device's</span>
+<span id="L23"><span class="lineNum">      23</span>              :  *      operational credentials.</span>
+<span id="L24"><span class="lineNum">      24</span>              :  */</span>
+<span id="L25"><span class="lineNum">      25</span>              : </span>
+<span id="L26"><span class="lineNum">      26</span>              : #pragma once</span>
+<span id="L27"><span class="lineNum">      27</span>              : </span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;credentials/CHIPCert.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;credentials/CertificateValidityPolicy.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;credentials/FabricTable.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;credentials/GroupDataProvider.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;crypto/CHIPCryptoPAL.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;lib/core/ScopedNodeId.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : #include &lt;lib/core/TLV.h&gt;</span>
+<span id="L35"><span class="lineNum">      35</span>              : #include &lt;lib/support/Base64.h&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              : #include &lt;lib/support/CHIPMem.h&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : #include &lt;messaging/ExchangeContext.h&gt;</span>
+<span id="L38"><span class="lineNum">      38</span>              : #include &lt;messaging/ExchangeDelegate.h&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              : #include &lt;messaging/ReliableMessageProtocolConfig.h&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : #include &lt;protocols/secure_channel/CASEDestinationId.h&gt;</span>
+<span id="L41"><span class="lineNum">      41</span>              : #include &lt;protocols/secure_channel/Constants.h&gt;</span>
+<span id="L42"><span class="lineNum">      42</span>              : #include &lt;protocols/secure_channel/PairingSession.h&gt;</span>
+<span id="L43"><span class="lineNum">      43</span>              : #include &lt;protocols/secure_channel/SessionEstablishmentExchangeDispatch.h&gt;</span>
+<span id="L44"><span class="lineNum">      44</span>              : #include &lt;protocols/secure_channel/SessionResumptionStorage.h&gt;</span>
+<span id="L45"><span class="lineNum">      45</span>              : #include &lt;system/SystemClock.h&gt;</span>
+<span id="L46"><span class="lineNum">      46</span>              : #include &lt;system/SystemPacketBuffer.h&gt;</span>
+<span id="L47"><span class="lineNum">      47</span>              : #include &lt;system/TLVPacketBufferBackingStore.h&gt;</span>
+<span id="L48"><span class="lineNum">      48</span>              : #include &lt;transport/CryptoContext.h&gt;</span>
+<span id="L49"><span class="lineNum">      49</span>              : #include &lt;transport/raw/MessageHeader.h&gt;</span>
+<span id="L50"><span class="lineNum">      50</span>              : #include &lt;transport/raw/PeerAddress.h&gt;</span>
+<span id="L51"><span class="lineNum">      51</span>              : </span>
+<span id="L52"><span class="lineNum">      52</span>              : namespace chip {</span>
+<span id="L53"><span class="lineNum">      53</span>              : </span>
+<span id="L54"><span class="lineNum">      54</span>              : // TODO: temporary derive from Messaging::UnsolicitedMessageHandler, actually the CASEServer should be the umh, it will be fixed</span>
+<span id="L55"><span class="lineNum">      55</span>              : // when implementing concurrent CASE session.</span>
+<span id="L56"><span class="lineNum">      56</span>              : class DLL_EXPORT CASESession : public Messaging::UnsolicitedMessageHandler,</span>
+<span id="L57"><span class="lineNum">      57</span>              :                                public Messaging::ExchangeDelegate,</span>
+<span id="L58"><span class="lineNum">      58</span>              :                                public FabricTable::Delegate,</span>
+<span id="L59"><span class="lineNum">      59</span>              :                                public PairingSession</span>
+<span id="L60"><span class="lineNum">      60</span>              : {</span>
+<span id="L61"><span class="lineNum">      61</span>              : public:</span>
+<span id="L62"><span class="lineNum">      62</span>              :     ~CASESession() override;</span>
+<span id="L63"><span class="lineNum">      63</span>              : </span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC tlaBgGNC">          40 :     Transport::SecureSession::Type GetSecureSessionType() const override { return Transport::SecureSession::Type::kCASE; }</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">         153 :     ScopedNodeId GetPeer() const override { return ScopedNodeId(mPeerNodeId, GetFabricIndex()); }</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">          19 :     ScopedNodeId GetLocalScopedNodeId() const override { return ScopedNodeId(mLocalNodeId, GetFabricIndex()); }</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">          19 :     CATValues GetPeerCATs() const override { return mPeerCATs; };</span></span>
+<span id="L68"><span class="lineNum">      68</span>              : </span>
+<span id="L69"><span class="lineNum">      69</span>              :     /**</span>
+<span id="L70"><span class="lineNum">      70</span>              :      * @brief</span>
+<span id="L71"><span class="lineNum">      71</span>              :      *   Initialize using configured fabrics and wait for session establishment requests (as a responder).</span>
+<span id="L72"><span class="lineNum">      72</span>              :      *</span>
+<span id="L73"><span class="lineNum">      73</span>              :      * @param sessionManager                session manager from which to allocate a secure session object</span>
+<span id="L74"><span class="lineNum">      74</span>              :      * @param fabricTable                   Table of fabrics that are currently configured on the device</span>
+<span id="L75"><span class="lineNum">      75</span>              :      * @param policy                        Optional application-provided certificate validity policy</span>
+<span id="L76"><span class="lineNum">      76</span>              :      * @param delegate                      Callback object</span>
+<span id="L77"><span class="lineNum">      77</span>              :      * @param previouslyEstablishedPeer     If a session had previously been established successfully to a peer, this should</span>
+<span id="L78"><span class="lineNum">      78</span>              :      *                                      be set to its scoped node-id. Else, this should be initialized to a</span>
+<span id="L79"><span class="lineNum">      79</span>              :      *                                      default-constructed ScopedNodeId().</span>
+<span id="L80"><span class="lineNum">      80</span>              :      * @param mrpLocalConfig                MRP configuration to encode into Sigma2. If not provided, it won't be encoded.</span>
+<span id="L81"><span class="lineNum">      81</span>              :      *</span>
+<span id="L82"><span class="lineNum">      82</span>              :      * @return CHIP_ERROR     The result of initialization</span>
+<span id="L83"><span class="lineNum">      83</span>              :      */</span>
+<span id="L84"><span class="lineNum">      84</span>              :     CHIP_ERROR PrepareForSessionEstablishment(SessionManager &amp; sessionManager, FabricTable * fabricTable,</span>
+<span id="L85"><span class="lineNum">      85</span>              :                                               SessionResumptionStorage * sessionResumptionStorage,</span>
+<span id="L86"><span class="lineNum">      86</span>              :                                               Credentials::CertificateValidityPolicy * policy,</span>
+<span id="L87"><span class="lineNum">      87</span>              :                                               SessionEstablishmentDelegate * delegate,</span>
+<span id="L88"><span class="lineNum">      88</span>              :                                               const ScopedNodeId &amp; previouslyEstablishedPeer,</span>
+<span id="L89"><span class="lineNum">      89</span>              :                                               Optional&lt;ReliableMessageProtocolConfig&gt; mrpLocalConfig);</span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span>              :     /**</span>
+<span id="L92"><span class="lineNum">      92</span>              :      * @brief</span>
+<span id="L93"><span class="lineNum">      93</span>              :      *   Create and send session establishment request (as an initiator) using device's operational credentials.</span>
+<span id="L94"><span class="lineNum">      94</span>              :      *</span>
+<span id="L95"><span class="lineNum">      95</span>              :      * @param sessionManager                session manager from which to allocate a secure session object</span>
+<span id="L96"><span class="lineNum">      96</span>              :      * @param fabricTable                   The fabric table that contains a fabric in common with the peer</span>
+<span id="L97"><span class="lineNum">      97</span>              :      * @param peerScopedNodeId              Node to which we want to establish a session</span>
+<span id="L98"><span class="lineNum">      98</span>              :      * @param exchangeCtxt                  The exchange context to send and receive messages with the peer</span>
+<span id="L99"><span class="lineNum">      99</span>              :      * @param policy                        Optional application-provided certificate validity policy</span>
+<span id="L100"><span class="lineNum">     100</span>              :      * @param delegate                      Callback object</span>
+<span id="L101"><span class="lineNum">     101</span>              :      *</span>
+<span id="L102"><span class="lineNum">     102</span>              :      * @return CHIP_ERROR      The result of initialization</span>
+<span id="L103"><span class="lineNum">     103</span>              :      */</span>
+<span id="L104"><span class="lineNum">     104</span>              :     CHIP_ERROR</span>
+<span id="L105"><span class="lineNum">     105</span>              :     EstablishSession(SessionManager &amp; sessionManager, FabricTable * fabricTable, ScopedNodeId peerScopedNodeId,</span>
+<span id="L106"><span class="lineNum">     106</span>              :                      Messaging::ExchangeContext * exchangeCtxt, SessionResumptionStorage * sessionResumptionStorage,</span>
+<span id="L107"><span class="lineNum">     107</span>              :                      Credentials::CertificateValidityPolicy * policy, SessionEstablishmentDelegate * delegate,</span>
+<span id="L108"><span class="lineNum">     108</span>              :                      Optional&lt;ReliableMessageProtocolConfig&gt; mrpLocalConfig);</span>
+<span id="L109"><span class="lineNum">     109</span>              : </span>
+<span id="L110"><span class="lineNum">     110</span>              :     /**</span>
+<span id="L111"><span class="lineNum">     111</span>              :      * @brief Set the Group Data Provider which will be used to look up IPKs</span>
+<span id="L112"><span class="lineNum">     112</span>              :      *</span>
+<span id="L113"><span class="lineNum">     113</span>              :      * The GroupDataProvider set MUST have key sets available through `GetIpkKeySet` method</span>
+<span id="L114"><span class="lineNum">     114</span>              :      * for the FabricIndex that is associated with the CASESession's FabricInfo.</span>
+<span id="L115"><span class="lineNum">     115</span>              :      *</span>
+<span id="L116"><span class="lineNum">     116</span>              :      * @param groupDataProvider - Pointer to the group data provider (if nullptr, will error at start of</span>
+<span id="L117"><span class="lineNum">     117</span>              :      *                            establishment, not here).</span>
+<span id="L118"><span class="lineNum">     118</span>              :      */</span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">          29 :     void SetGroupDataProvider(Credentials::GroupDataProvider * groupDataProvider) { mGroupDataProvider = groupDataProvider; }</span></span>
+<span id="L120"><span class="lineNum">     120</span>              : </span>
+<span id="L121"><span class="lineNum">     121</span>              :     /**</span>
+<span id="L122"><span class="lineNum">     122</span>              :      * @brief</span>
+<span id="L123"><span class="lineNum">     123</span>              :      *   Derive a secure session from the established session. The API will return error if called before session is established.</span>
+<span id="L124"><span class="lineNum">     124</span>              :      *</span>
+<span id="L125"><span class="lineNum">     125</span>              :      * @param session     Reference to the secure session that will be initialized once session establishment is complete</span>
+<span id="L126"><span class="lineNum">     126</span>              :      * @return CHIP_ERROR The result of session derivation</span>
+<span id="L127"><span class="lineNum">     127</span>              :      */</span>
+<span id="L128"><span class="lineNum">     128</span>              :     CHIP_ERROR DeriveSecureSession(CryptoContext &amp; session) override;</span>
+<span id="L129"><span class="lineNum">     129</span>              : </span>
+<span id="L130"><span class="lineNum">     130</span>              :     //// UnsolicitedMessageHandler Implementation ////</span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">           5 :     CHIP_ERROR OnUnsolicitedMessageReceived(const PayloadHeader &amp; payloadHeader, ExchangeDelegate *&amp; newDelegate) override</span></span>
+<span id="L132"><span class="lineNum">     132</span>              :     {</span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">           5 :         newDelegate = this;</span></span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">           5 :         return CHIP_NO_ERROR;</span></span>
+<span id="L135"><span class="lineNum">     135</span>              :     }</span>
+<span id="L136"><span class="lineNum">     136</span>              : </span>
+<span id="L137"><span class="lineNum">     137</span>              :     //// ExchangeDelegate Implementation ////</span>
+<span id="L138"><span class="lineNum">     138</span>              :     CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * ec, const PayloadHeader &amp; payloadHeader,</span>
+<span id="L139"><span class="lineNum">     139</span>              :                                  System::PacketBufferHandle &amp;&amp; payload) override;</span>
+<span id="L140"><span class="lineNum">     140</span>              :     void OnResponseTimeout(Messaging::ExchangeContext * ec) override;</span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">          30 :     Messaging::ExchangeMessageDispatch &amp; GetMessageDispatch() override { return SessionEstablishmentExchangeDispatch::Instance(); }</span></span>
+<span id="L142"><span class="lineNum">     142</span>              : </span>
+<span id="L143"><span class="lineNum">     143</span>              :     //// SessionDelegate ////</span>
+<span id="L144"><span class="lineNum">     144</span>              :     void OnSessionReleased() override;</span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span>              :     //// FabricTable::Delegate Implementation ////</span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC tlaBgUNC">           0 :     void OnFabricRemoved(const FabricTable &amp; fabricTable, FabricIndex fabricIndex) override</span></span>
+<span id="L148"><span class="lineNum">     148</span>              :     {</span>
+<span id="L149"><span class="lineNum">     149</span>              :         (void) fabricTable;</span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :         InvalidateIfPendingEstablishmentOnFabric(fabricIndex);</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :     }</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC tlaBgGNC">           6 :     void OnFabricUpdated(const chip::FabricTable &amp; fabricTable, chip::FabricIndex fabricIndex) override</span></span>
+<span id="L153"><span class="lineNum">     153</span>              :     {</span>
+<span id="L154"><span class="lineNum">     154</span>              :         (void) fabricTable;</span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">           6 :         InvalidateIfPendingEstablishmentOnFabric(fabricIndex);</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">           6 :     }</span></span>
+<span id="L157"><span class="lineNum">     157</span>              : </span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC">         172 :     FabricIndex GetFabricIndex() const { return mFabricIndex; }</span></span>
+<span id="L159"><span class="lineNum">     159</span>              : </span>
+<span id="L160"><span class="lineNum">     160</span>              :     // Compute our Sigma1 response timeout.  This can give consumers an idea of</span>
+<span id="L161"><span class="lineNum">     161</span>              :     // how long it will take to detect that our Sigma1 did not get through.</span>
+<span id="L162"><span class="lineNum">     162</span>              :     static System::Clock::Timeout ComputeSigma1ResponseTimeout(const ReliableMessageProtocolConfig &amp; remoteMrpConfig);</span>
+<span id="L163"><span class="lineNum">     163</span>              : </span>
+<span id="L164"><span class="lineNum">     164</span>              :     // Compute our Sigma2 response timeout.  This can give consumers an idea of</span>
+<span id="L165"><span class="lineNum">     165</span>              :     // how long it will take to detect that our Sigma1 did not get through.</span>
+<span id="L166"><span class="lineNum">     166</span>              :     static System::Clock::Timeout ComputeSigma2ResponseTimeout(const ReliableMessageProtocolConfig &amp; remoteMrpConfig);</span>
+<span id="L167"><span class="lineNum">     167</span>              : </span>
+<span id="L168"><span class="lineNum">     168</span>              :     // TODO: remove Clear, we should create a new instance instead reset the old instance.</span>
+<span id="L169"><span class="lineNum">     169</span>              :     /** @brief This function zeroes out and resets the memory used by the object.</span>
+<span id="L170"><span class="lineNum">     170</span>              :      **/</span>
+<span id="L171"><span class="lineNum">     171</span>              :     void Clear();</span>
+<span id="L172"><span class="lineNum">     172</span>              : </span>
+<span id="L173"><span class="lineNum">     173</span>              :     enum class State : uint8_t</span>
+<span id="L174"><span class="lineNum">     174</span>              :     {</span>
+<span id="L175"><span class="lineNum">     175</span>              :         kInitialized         = 0,</span>
+<span id="L176"><span class="lineNum">     176</span>              :         kSentSigma1          = 1,</span>
+<span id="L177"><span class="lineNum">     177</span>              :         kSentSigma2          = 2,</span>
+<span id="L178"><span class="lineNum">     178</span>              :         kSentSigma3          = 3,</span>
+<span id="L179"><span class="lineNum">     179</span>              :         kSentSigma1Resume    = 4,</span>
+<span id="L180"><span class="lineNum">     180</span>              :         kSentSigma2Resume    = 5,</span>
+<span id="L181"><span class="lineNum">     181</span>              :         kFinished            = 6,</span>
+<span id="L182"><span class="lineNum">     182</span>              :         kFinishedViaResume   = 7,</span>
+<span id="L183"><span class="lineNum">     183</span>              :         kSendSigma3Pending   = 8,</span>
+<span id="L184"><span class="lineNum">     184</span>              :         kHandleSigma3Pending = 9,</span>
+<span id="L185"><span class="lineNum">     185</span>              :     };</span>
+<span id="L186"><span class="lineNum">     186</span>              : </span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaGNC">          12 :     State GetState() { return mState; }</span></span>
+<span id="L188"><span class="lineNum">     188</span>              : </span>
+<span id="L189"><span class="lineNum">     189</span>              :     // Returns true if the CASE session handshake was stuck due to failing to schedule work on the Matter thread.</span>
+<span id="L190"><span class="lineNum">     190</span>              :     // If this function returns true, the CASE session has been reset and is ready for a new session establishment.</span>
+<span id="L191"><span class="lineNum">     191</span>              :     bool InvokeBackgroundWorkWatchdog();</span>
+<span id="L192"><span class="lineNum">     192</span>              : </span>
+<span id="L193"><span class="lineNum">     193</span>              : protected:</span>
+<span id="L194"><span class="lineNum">     194</span>              :     // Helper Enum for use in HandleSigma1_and_SendSigma2</span>
+<span id="L195"><span class="lineNum">     195</span>              :     enum class Step : uint8_t</span>
+<span id="L196"><span class="lineNum">     196</span>              :     {</span>
+<span id="L197"><span class="lineNum">     197</span>              :         kSendSigma2,</span>
+<span id="L198"><span class="lineNum">     198</span>              :         kSendSigma2Resume,</span>
+<span id="L199"><span class="lineNum">     199</span>              :     };</span>
+<span id="L200"><span class="lineNum">     200</span>              :     // Making NextStep a Variant allows HandleSigma() to return either a Step value (indicating</span>
+<span id="L201"><span class="lineNum">     201</span>              :     // the next Sigma step to send) or a CHIP_ERROR (indicating a failure that will trigger</span>
+<span id="L202"><span class="lineNum">     202</span>              :     // a Status Report).</span>
+<span id="L203"><span class="lineNum">     203</span>              :     using NextStep = Variant&lt;Step, CHIP_ERROR&gt;;</span>
+<span id="L204"><span class="lineNum">     204</span>              :     // This struct only serves as a base struct for EncodeSigma1Inputs and ParsedSigma1</span>
+<span id="L205"><span class="lineNum">     205</span>              :     struct Sigma1Param</span>
+<span id="L206"><span class="lineNum">     206</span>              :     {</span>
+<span id="L207"><span class="lineNum">     207</span>              :         ByteSpan initiatorRandom;</span>
+<span id="L208"><span class="lineNum">     208</span>              :         uint16_t initiatorSessionId;</span>
+<span id="L209"><span class="lineNum">     209</span>              :         ByteSpan destinationId;</span>
+<span id="L210"><span class="lineNum">     210</span>              :         bool sessionResumptionRequested = false;</span>
+<span id="L211"><span class="lineNum">     211</span>              :         ByteSpan resumptionId;</span>
+<span id="L212"><span class="lineNum">     212</span>              :         ByteSpan initiatorResumeMIC;</span>
+<span id="L213"><span class="lineNum">     213</span>              :     };</span>
+<span id="L214"><span class="lineNum">     214</span>              : </span>
+<span id="L215"><span class="lineNum">     215</span>              :     struct EncodeSigma1Inputs : Sigma1Param</span>
+<span id="L216"><span class="lineNum">     216</span>              :     {</span>
+<span id="L217"><span class="lineNum">     217</span>              :         const Crypto::P256PublicKey * initiatorEphPubKey         = nullptr;</span>
+<span id="L218"><span class="lineNum">     218</span>              :         const ReliableMessageProtocolConfig * initiatorMrpConfig = nullptr;</span>
+<span id="L219"><span class="lineNum">     219</span>              :         uint8_t initiatorResume1MICBuffer[Crypto::CHIP_CRYPTO_AEAD_MIC_LENGTH_BYTES];</span>
+<span id="L220"><span class="lineNum">     220</span>              :     };</span>
+<span id="L221"><span class="lineNum">     221</span>              : </span>
+<span id="L222"><span class="lineNum">     222</span>              :     struct ParsedSigma1 : Sigma1Param</span>
+<span id="L223"><span class="lineNum">     223</span>              :     {</span>
+<span id="L224"><span class="lineNum">     224</span>              :         // Backed by: Sigma1 PacketBuffer passed to the method HandleSigma1()</span>
+<span id="L225"><span class="lineNum">     225</span>              :         // Lifetime: Valid for the lifetime of the TLVReader, which takes ownership of the Sigma1 PacketBuffer in the HandleSigma1()</span>
+<span id="L226"><span class="lineNum">     226</span>              :         // method.</span>
+<span id="L227"><span class="lineNum">     227</span>              :         ByteSpan initiatorEphPubKey;</span>
+<span id="L228"><span class="lineNum">     228</span>              :         bool initiatorSessionParamStructPresent = false;</span>
+<span id="L229"><span class="lineNum">     229</span>              :         SessionParameters initiatorSessionParams;</span>
+<span id="L230"><span class="lineNum">     230</span>              :     };</span>
+<span id="L231"><span class="lineNum">     231</span>              : </span>
+<span id="L232"><span class="lineNum">     232</span>              :     struct EncodeSigma2Inputs</span>
+<span id="L233"><span class="lineNum">     233</span>              :     {</span>
+<span id="L234"><span class="lineNum">     234</span>              :         uint8_t responderRandom[kSigmaParamRandomNumberSize];</span>
+<span id="L235"><span class="lineNum">     235</span>              :         uint16_t responderSessionId;</span>
+<span id="L236"><span class="lineNum">     236</span>              :         const Crypto::P256PublicKey * responderEphPubKey = nullptr;</span>
+<span id="L237"><span class="lineNum">     237</span>              :         // ScopedMemoryBufferWithSize is not used for msgR2Encrypted since encrypted2Length might differ from the allocated buffer</span>
+<span id="L238"><span class="lineNum">     238</span>              :         // size</span>
+<span id="L239"><span class="lineNum">     239</span>              :         Platform::ScopedMemoryBuffer&lt;uint8_t&gt; msgR2Encrypted;</span>
+<span id="L240"><span class="lineNum">     240</span>              :         size_t encrypted2Length = 0;</span>
+<span id="L241"><span class="lineNum">     241</span>              :         const ReliableMessageProtocolConfig * responderMrpConfig;</span>
+<span id="L242"><span class="lineNum">     242</span>              :     };</span>
+<span id="L243"><span class="lineNum">     243</span>              :     struct ParsedSigma2</span>
+<span id="L244"><span class="lineNum">     244</span>              :     {</span>
+<span id="L245"><span class="lineNum">     245</span>              :         // Below ByteSpans are Backed by: Sigma2 PacketBuffer passed to the method HandleSigma2()</span>
+<span id="L246"><span class="lineNum">     246</span>              :         // Lifetime: Valid for the lifetime of the TLVReader, which takes ownership of the Sigma2 PacketBuffer in the HandleSigma2()</span>
+<span id="L247"><span class="lineNum">     247</span>              :         // method.</span>
+<span id="L248"><span class="lineNum">     248</span>              :         ByteSpan responderRandom;</span>
+<span id="L249"><span class="lineNum">     249</span>              :         ByteSpan responderEphPubKey;</span>
+<span id="L250"><span class="lineNum">     250</span>              : </span>
+<span id="L251"><span class="lineNum">     251</span>              :         Platform::ScopedMemoryBufferWithSize&lt;uint8_t&gt; msgR2Encrypted;</span>
+<span id="L252"><span class="lineNum">     252</span>              :         Platform::ScopedMemoryBufferWithSize&lt;uint8_t&gt; msgR2Decrypted;</span>
+<span id="L253"><span class="lineNum">     253</span>              :         // Below ByteSpans are Backed by: msgR2Encrypted buffer</span>
+<span id="L254"><span class="lineNum">     254</span>              :         // Lifetime: Valid as long as msgR2Encrypted is not released</span>
+<span id="L255"><span class="lineNum">     255</span>              :         MutableByteSpan msgR2EncryptedPayload;</span>
+<span id="L256"><span class="lineNum">     256</span>              :         ByteSpan msgR2MIC;</span>
+<span id="L257"><span class="lineNum">     257</span>              :         SessionParameters responderSessionParams;</span>
+<span id="L258"><span class="lineNum">     258</span>              :         uint16_t responderSessionId;</span>
+<span id="L259"><span class="lineNum">     259</span>              :         bool responderSessionParamStructPresent = false;</span>
+<span id="L260"><span class="lineNum">     260</span>              :     };</span>
+<span id="L261"><span class="lineNum">     261</span>              : </span>
+<span id="L262"><span class="lineNum">     262</span>              :     struct ParsedSigma2TBEData</span>
+<span id="L263"><span class="lineNum">     263</span>              :     {</span>
+<span id="L264"><span class="lineNum">     264</span>              :         // Below ByteSpans are Backed by: msgR2Decrypted Buffer, member of ParsedSigma2 struct</span>
+<span id="L265"><span class="lineNum">     265</span>              :         // Lifetime: Valid for the lifetime of the instance of ParsedSigma2 that contains the msgR2Decrypted Buffer.</span>
+<span id="L266"><span class="lineNum">     266</span>              :         ByteSpan responderNOC;</span>
+<span id="L267"><span class="lineNum">     267</span>              :         ByteSpan responderICAC;</span>
+<span id="L268"><span class="lineNum">     268</span>              :         ByteSpan resumptionId;</span>
+<span id="L269"><span class="lineNum">     269</span>              :         Crypto::P256ECDSASignature tbsData2Signature;</span>
+<span id="L270"><span class="lineNum">     270</span>              :     };</span>
+<span id="L271"><span class="lineNum">     271</span>              : </span>
+<span id="L272"><span class="lineNum">     272</span>              :     struct EncodeSigma2ResumeInputs</span>
+<span id="L273"><span class="lineNum">     273</span>              :     {</span>
+<span id="L274"><span class="lineNum">     274</span>              :         ByteSpan resumptionId;</span>
+<span id="L275"><span class="lineNum">     275</span>              :         uint8_t sigma2ResumeMICBuffer[Crypto::CHIP_CRYPTO_AEAD_MIC_LENGTH_BYTES];</span>
+<span id="L276"><span class="lineNum">     276</span>              :         MutableByteSpan sigma2ResumeMIC{ sigma2ResumeMICBuffer };</span>
+<span id="L277"><span class="lineNum">     277</span>              :         uint16_t responderSessionId;</span>
+<span id="L278"><span class="lineNum">     278</span>              :         const ReliableMessageProtocolConfig * responderMrpConfig;</span>
+<span id="L279"><span class="lineNum">     279</span>              :     };</span>
+<span id="L280"><span class="lineNum">     280</span>              : </span>
+<span id="L281"><span class="lineNum">     281</span>              :     struct ParsedSigma2Resume</span>
+<span id="L282"><span class="lineNum">     282</span>              :     {</span>
+<span id="L283"><span class="lineNum">     283</span>              :         // Below ByteSpans are Backed by: Sigma2Resume PacketBuffer passed to the method HandleSigma2Resume()</span>
+<span id="L284"><span class="lineNum">     284</span>              :         // Lifetime: Valid for the lifetime of the TLVReader, which takes ownership of the Sigma2Resume PacketBuffer in the</span>
+<span id="L285"><span class="lineNum">     285</span>              :         // HandleSigma2Resume() method.</span>
+<span id="L286"><span class="lineNum">     286</span>              :         ByteSpan resumptionId;</span>
+<span id="L287"><span class="lineNum">     287</span>              :         ByteSpan sigma2ResumeMIC;</span>
+<span id="L288"><span class="lineNum">     288</span>              :         SessionParameters responderSessionParams;</span>
+<span id="L289"><span class="lineNum">     289</span>              :         uint16_t responderSessionId;</span>
+<span id="L290"><span class="lineNum">     290</span>              :         bool responderSessionParamStructPresent = false;</span>
+<span id="L291"><span class="lineNum">     291</span>              :     };</span>
+<span id="L292"><span class="lineNum">     292</span>              : </span>
+<span id="L293"><span class="lineNum">     293</span>              :     struct SendSigma3Data</span>
+<span id="L294"><span class="lineNum">     294</span>              :     {</span>
+<span id="L295"><span class="lineNum">     295</span>              :         FabricIndex fabricIndex;</span>
+<span id="L296"><span class="lineNum">     296</span>              : </span>
+<span id="L297"><span class="lineNum">     297</span>              :         // Use one or the other</span>
+<span id="L298"><span class="lineNum">     298</span>              :         const FabricTable * fabricTable;</span>
+<span id="L299"><span class="lineNum">     299</span>              :         const Crypto::OperationalKeystore * keystore;</span>
+<span id="L300"><span class="lineNum">     300</span>              : </span>
+<span id="L301"><span class="lineNum">     301</span>              :         chip::Platform::ScopedMemoryBuffer&lt;uint8_t&gt; msgR3Signed;</span>
+<span id="L302"><span class="lineNum">     302</span>              :         MutableByteSpan msgR3SignedSpan;</span>
+<span id="L303"><span class="lineNum">     303</span>              : </span>
+<span id="L304"><span class="lineNum">     304</span>              :         chip::Platform::ScopedMemoryBuffer&lt;uint8_t&gt; msg_R3_Encrypted;</span>
+<span id="L305"><span class="lineNum">     305</span>              :         size_t msg_r3_encrypted_len;</span>
+<span id="L306"><span class="lineNum">     306</span>              : </span>
+<span id="L307"><span class="lineNum">     307</span>              :         chip::Platform::ScopedMemoryBuffer&lt;uint8_t&gt; icacBuf;</span>
+<span id="L308"><span class="lineNum">     308</span>              :         MutableByteSpan icaCert;</span>
+<span id="L309"><span class="lineNum">     309</span>              : </span>
+<span id="L310"><span class="lineNum">     310</span>              :         chip::Platform::ScopedMemoryBuffer&lt;uint8_t&gt; nocBuf;</span>
+<span id="L311"><span class="lineNum">     311</span>              :         MutableByteSpan nocCert;</span>
+<span id="L312"><span class="lineNum">     312</span>              : </span>
+<span id="L313"><span class="lineNum">     313</span>              :         Crypto::P256ECDSASignature tbsData3Signature;</span>
+<span id="L314"><span class="lineNum">     314</span>              :     };</span>
+<span id="L315"><span class="lineNum">     315</span>              : </span>
+<span id="L316"><span class="lineNum">     316</span>              :     struct HandleSigma3Data</span>
+<span id="L317"><span class="lineNum">     317</span>              :     {</span>
+<span id="L318"><span class="lineNum">     318</span>              :         chip::Platform::ScopedMemoryBuffer&lt;uint8_t&gt; msgR3Signed;</span>
+<span id="L319"><span class="lineNum">     319</span>              :         MutableByteSpan msgR3SignedSpan;</span>
+<span id="L320"><span class="lineNum">     320</span>              : </span>
+<span id="L321"><span class="lineNum">     321</span>              :         // Below ByteSpans are Backed by: msgR3Encrypted Buffer, local to the HandleSigma3a() method,</span>
+<span id="L322"><span class="lineNum">     322</span>              :         // The Spans are later modified to point to the msgR3Signed member of this struct.</span>
+<span id="L323"><span class="lineNum">     323</span>              :         ByteSpan initiatorNOC;</span>
+<span id="L324"><span class="lineNum">     324</span>              :         ByteSpan initiatorICAC;</span>
+<span id="L325"><span class="lineNum">     325</span>              : </span>
+<span id="L326"><span class="lineNum">     326</span>              :         uint8_t rootCertBuf[Credentials::kMaxCHIPCertLength];</span>
+<span id="L327"><span class="lineNum">     327</span>              :         ByteSpan fabricRCAC;</span>
+<span id="L328"><span class="lineNum">     328</span>              : </span>
+<span id="L329"><span class="lineNum">     329</span>              :         Crypto::P256ECDSASignature tbsData3Signature;</span>
+<span id="L330"><span class="lineNum">     330</span>              : </span>
+<span id="L331"><span class="lineNum">     331</span>              :         FabricId fabricId;</span>
+<span id="L332"><span class="lineNum">     332</span>              :         NodeId initiatorNodeId;</span>
+<span id="L333"><span class="lineNum">     333</span>              : </span>
+<span id="L334"><span class="lineNum">     334</span>              :         Credentials::ValidationContext validContext;</span>
+<span id="L335"><span class="lineNum">     335</span>              :     };</span>
+<span id="L336"><span class="lineNum">     336</span>              : </span>
+<span id="L337"><span class="lineNum">     337</span>              :     /**</span>
+<span id="L338"><span class="lineNum">     338</span>              :      * @brief  Encodes a Sigma1 message into TLV format and allocates a buffer for it, which is owned by the PacketBufferHandle</span>
+<span id="L339"><span class="lineNum">     339</span>              :      *         outparam.</span>
+<span id="L340"><span class="lineNum">     340</span>              :      *</span>
+<span id="L341"><span class="lineNum">     341</span>              :      * @param outMsg     PacketBufferHandle passed by reference. A new buffer will be allocated and assigned to it within the</span>
+<span id="L342"><span class="lineNum">     342</span>              :      *                   method.</span>
+<span id="L343"><span class="lineNum">     343</span>              :      *</span>
+<span id="L344"><span class="lineNum">     344</span>              :      * @param inParam a struct containing all the values that will be encoded into TLV format</span>
+<span id="L345"><span class="lineNum">     345</span>              :      *</span>
+<span id="L346"><span class="lineNum">     346</span>              :      **/</span>
+<span id="L347"><span class="lineNum">     347</span>              :     static CHIP_ERROR EncodeSigma1(System::PacketBufferHandle &amp; outMsg, EncodeSigma1Inputs &amp; inParam);</span>
+<span id="L348"><span class="lineNum">     348</span>              : </span>
+<span id="L349"><span class="lineNum">     349</span>              :     /**</span>
+<span id="L350"><span class="lineNum">     350</span>              :      * Parse a Sigma1 message.  This function will return success only if the</span>
+<span id="L351"><span class="lineNum">     351</span>              :      * message passes schema checks.  Specifically:</span>
+<span id="L352"><span class="lineNum">     352</span>              :      *   * The tags come in order.</span>
+<span id="L353"><span class="lineNum">     353</span>              :      *   * The required tags are present.</span>
+<span id="L354"><span class="lineNum">     354</span>              :      *   * The values for the tags that are present satisfy schema requirements</span>
+<span id="L355"><span class="lineNum">     355</span>              :      *     (e.g. constraints on octet string lengths)</span>
+<span id="L356"><span class="lineNum">     356</span>              :      *   * Either resumptionID and initiatorResume1MICBuffer are both present or both are</span>
+<span id="L357"><span class="lineNum">     357</span>              :      *     absent.</span>
+<span id="L358"><span class="lineNum">     358</span>              :      *</span>
+<span id="L359"><span class="lineNum">     359</span>              :      * On success, the members of outParam will be set to the values corresponding to the message.</span>
+<span id="L360"><span class="lineNum">     360</span>              :      * These values will be valid as long as the buffer that the passed-in tlvReader is reading from is valid.</span>
+<span id="L361"><span class="lineNum">     361</span>              :      *</span>
+<span id="L362"><span class="lineNum">     362</span>              :      * On success, either the sessionResumptionRequested field will be set to true</span>
+<span id="L363"><span class="lineNum">     363</span>              :      * and the resumptionID and initiatorResumeMIC fields will be set to</span>
+<span id="L364"><span class="lineNum">     364</span>              :      * valid values, or the sessionResumptionRequested field will be set to false.</span>
+<span id="L365"><span class="lineNum">     365</span>              :      *</span>
+<span id="L366"><span class="lineNum">     366</span>              :      *  @note Calls to this function must always be made with a newly created and fresh ParsedSigma1 parameter.</span>
+<span id="L367"><span class="lineNum">     367</span>              :      */</span>
+<span id="L368"><span class="lineNum">     368</span>              :     static CHIP_ERROR ParseSigma1(TLV::ContiguousBufferTLVReader &amp; tlvReader, ParsedSigma1 &amp; parsedMessage);</span>
+<span id="L369"><span class="lineNum">     369</span>              : </span>
+<span id="L370"><span class="lineNum">     370</span>              :     /**</span>
+<span id="L371"><span class="lineNum">     371</span>              :      * Parse a Sigma2 message.  This function will return success only if the</span>
+<span id="L372"><span class="lineNum">     372</span>              :      * message passes schema checks.</span>
+<span id="L373"><span class="lineNum">     373</span>              :      *</span>
+<span id="L374"><span class="lineNum">     374</span>              :      * @param tlvReader a reference to the TLVReader that has ownership of the Sigma2 PacketBuffer.</span>
+<span id="L375"><span class="lineNum">     375</span>              :      * @param outParsedSigma2   a reference to ParsedSigma2. All members of parsedMessage will stay valid as long as tlvReader is</span>
+<span id="L376"><span class="lineNum">     376</span>              :      *                          valid.</span>
+<span id="L377"><span class="lineNum">     377</span>              :      *</span>
+<span id="L378"><span class="lineNum">     378</span>              :      * @note Calls to this function must always be made with a newly created and fresh ParsedSigma2 parameter.</span>
+<span id="L379"><span class="lineNum">     379</span>              :      **/</span>
+<span id="L380"><span class="lineNum">     380</span>              :     static CHIP_ERROR ParseSigma2(TLV::ContiguousBufferTLVReader &amp; tlvReader, ParsedSigma2 &amp; outParsedSigma2);</span>
+<span id="L381"><span class="lineNum">     381</span>              : </span>
+<span id="L382"><span class="lineNum">     382</span>              :     /**</span>
+<span id="L383"><span class="lineNum">     383</span>              :      * Parse a decrypted TBEData2Encrypted message. This function will return success only if the message passes schema checks.</span>
+<span id="L384"><span class="lineNum">     384</span>              :      *</span>
+<span id="L385"><span class="lineNum">     385</span>              :      * @param tlvReader a reference to the TLVReader that points to the decrypted TBEData2Encrypted buffer (i.e.</span>
+<span id="L386"><span class="lineNum">     386</span>              :      *                  msgR2Decrypted member of ParsedSigma2 struct)</span>
+<span id="L387"><span class="lineNum">     387</span>              :      * @param outParsedSigma2TBEData a reference to ParsedSigma2TBEData. All members of parsedMessage will stay valid as long</span>
+<span id="L388"><span class="lineNum">     388</span>              :      *                               as the msgR2Decrypted member of ParsedSigma2 is valid</span>
+<span id="L389"><span class="lineNum">     389</span>              :      *</span>
+<span id="L390"><span class="lineNum">     390</span>              :      * @note Calls to this function must always be made with a newly created and fresh ParsedSigma2TBEData parameter.</span>
+<span id="L391"><span class="lineNum">     391</span>              :      **/</span>
+<span id="L392"><span class="lineNum">     392</span>              :     static CHIP_ERROR ParseSigma2TBEData(TLV::ContiguousBufferTLVReader &amp; tlvReader, ParsedSigma2TBEData &amp; outParsedSigma2TBEData);</span>
+<span id="L393"><span class="lineNum">     393</span>              : </span>
+<span id="L394"><span class="lineNum">     394</span>              :     /**</span>
+<span id="L395"><span class="lineNum">     395</span>              :      * Parse a Sigma2Resume message.  This function will return success only if the</span>
+<span id="L396"><span class="lineNum">     396</span>              :      * message passes schema checks.</span>
+<span id="L397"><span class="lineNum">     397</span>              :      *</span>
+<span id="L398"><span class="lineNum">     398</span>              :      * @param tlvReader a reference to the TLVReader that has ownership of the Sigma2Resume PacketBuffer.</span>
+<span id="L399"><span class="lineNum">     399</span>              :      * @param outParsedSigma2Resume a reference to ParsedSigma2Resume. All members of parsedMessage will stay valid as long</span>
+<span id="L400"><span class="lineNum">     400</span>              :      *                              as tlvReader is valid.</span>
+<span id="L401"><span class="lineNum">     401</span>              :      *</span>
+<span id="L402"><span class="lineNum">     402</span>              :      * @note Calls to this function must always be made with a newly created and fresh ParsedSigma2Resume parameter.</span>
+<span id="L403"><span class="lineNum">     403</span>              :      **/</span>
+<span id="L404"><span class="lineNum">     404</span>              :     static CHIP_ERROR ParseSigma2Resume(TLV::ContiguousBufferTLVReader &amp; tlvReader, ParsedSigma2Resume &amp; outParsedSigma2Resume);</span>
+<span id="L405"><span class="lineNum">     405</span>              : </span>
+<span id="L406"><span class="lineNum">     406</span>              :     /**</span>
+<span id="L407"><span class="lineNum">     407</span>              :      * @brief  Encodes a Sigma2 message into TLV format and allocates a buffer for it, which is owned by the PacketBufferHandle</span>
+<span id="L408"><span class="lineNum">     408</span>              :      *         outparam.</span>
+<span id="L409"><span class="lineNum">     409</span>              :      *</span>
+<span id="L410"><span class="lineNum">     410</span>              :      * @param outMsg     PacketBufferHandle passed by reference. A new buffer will be allocated and assigned to it within the</span>
+<span id="L411"><span class="lineNum">     411</span>              :      *                   method.</span>
+<span id="L412"><span class="lineNum">     412</span>              :      *</span>
+<span id="L413"><span class="lineNum">     413</span>              :      * @param inParam a struct containing all the values that will be encoded into TLV format</span>
+<span id="L414"><span class="lineNum">     414</span>              :      *</span>
+<span id="L415"><span class="lineNum">     415</span>              :      * @note The inParam member msgR2Encrypted will be freed after encoding it.</span>
+<span id="L416"><span class="lineNum">     416</span>              :      **/</span>
+<span id="L417"><span class="lineNum">     417</span>              : </span>
+<span id="L418"><span class="lineNum">     418</span>              :     static CHIP_ERROR EncodeSigma2(System::PacketBufferHandle &amp; outMsg, EncodeSigma2Inputs &amp; inParam);</span>
+<span id="L419"><span class="lineNum">     419</span>              : </span>
+<span id="L420"><span class="lineNum">     420</span>              :     /**</span>
+<span id="L421"><span class="lineNum">     421</span>              :      * @brief  Encodes a Sigma2_Resume message into TLV format and allocates a buffer for it, which is owned by the</span>
+<span id="L422"><span class="lineNum">     422</span>              :      *         PacketBufferHandle outparam.</span>
+<span id="L423"><span class="lineNum">     423</span>              :      *</span>
+<span id="L424"><span class="lineNum">     424</span>              :      * @param outMsg     PacketBufferHandle passed by reference. A new buffer will be allocated and assigned to it within the</span>
+<span id="L425"><span class="lineNum">     425</span>              :      *                   method.</span>
+<span id="L426"><span class="lineNum">     426</span>              :      *</span>
+<span id="L427"><span class="lineNum">     427</span>              :      * @param inParam a struct containing all the values that will be encoded into TLV format</span>
+<span id="L428"><span class="lineNum">     428</span>              :      *</span>
+<span id="L429"><span class="lineNum">     429</span>              :      **/</span>
+<span id="L430"><span class="lineNum">     430</span>              :     static CHIP_ERROR EncodeSigma2Resume(System::PacketBufferHandle &amp; outMsg, EncodeSigma2ResumeInputs &amp; inParam);</span>
+<span id="L431"><span class="lineNum">     431</span>              : </span>
+<span id="L432"><span class="lineNum">     432</span>              :     /**</span>
+<span id="L433"><span class="lineNum">     433</span>              :      * Parse a Sigma3 message.  This function will return success only if the</span>
+<span id="L434"><span class="lineNum">     434</span>              :      * message passes schema checks.</span>
+<span id="L435"><span class="lineNum">     435</span>              :      *</span>
+<span id="L436"><span class="lineNum">     436</span>              :      * @param tlvReader a reference to the TLVReader that has ownership of the Sigma3 PacketBuffer.</span>
+<span id="L437"><span class="lineNum">     437</span>              :      *</span>
+<span id="L438"><span class="lineNum">     438</span>              :      * @param outMsgR3Encrypted The encrypted3 (TBEData3Encrypted) TLV element. This will be a buffer that is owned by the caller</span>
+<span id="L439"><span class="lineNum">     439</span>              :      *                          but is allocated and initialised within ParseSigma3. Calls to this function must always be made with</span>
+<span id="L440"><span class="lineNum">     440</span>              :      *                          a newly created and fresh outMsgR3Encrypted</span>
+<span id="L441"><span class="lineNum">     441</span>              :      *</span>
+<span id="L442"><span class="lineNum">     442</span>              :      * @param outMsgR3EncryptedPayload  reference to a span that will be set to point to the payload of outMsgR3Encrypted within</span>
+<span id="L443"><span class="lineNum">     443</span>              :      *                                  ParseSigma3. Calls to this function must always be made with a newly created and fresh</span>
+<span id="L444"><span class="lineNum">     444</span>              :      *                                  outMsgR3MIC</span>
+<span id="L445"><span class="lineNum">     445</span>              :      *</span>
+<span id="L446"><span class="lineNum">     446</span>              :      * @param outMsgR3MIC      reference to a span that will be set to point to the MIC of outMsgR3Encrypted within ParseSigma3.</span>
+<span id="L447"><span class="lineNum">     447</span>              :      *                         Calls to this function must always be made with a newly created and fresh outMsgR3MIC</span>
+<span id="L448"><span class="lineNum">     448</span>              :      *</span>
+<span id="L449"><span class="lineNum">     449</span>              :      * @note all out parameters will be valid as long the Buffer outMsgR3Encrypted is valid.</span>
+<span id="L450"><span class="lineNum">     450</span>              :      **/</span>
+<span id="L451"><span class="lineNum">     451</span>              :     static CHIP_ERROR ParseSigma3(TLV::ContiguousBufferTLVReader &amp; tlvReader,</span>
+<span id="L452"><span class="lineNum">     452</span>              :                                   Platform::ScopedMemoryBufferWithSize&lt;uint8_t&gt; &amp; outMsgR3Encrypted,</span>
+<span id="L453"><span class="lineNum">     453</span>              :                                   MutableByteSpan &amp; outMsgR3EncryptedPayload, ByteSpan &amp; outMsgR3MIC);</span>
+<span id="L454"><span class="lineNum">     454</span>              : </span>
+<span id="L455"><span class="lineNum">     455</span>              :     /**</span>
+<span id="L456"><span class="lineNum">     456</span>              :      * Parse a decrypted TBEData3Encrypted message.  This function will return success only if the</span>
+<span id="L457"><span class="lineNum">     457</span>              :      * message passes schema checks.</span>
+<span id="L458"><span class="lineNum">     458</span>              :      *</span>
+<span id="L459"><span class="lineNum">     459</span>              :      * @param tlvReader a reference to the TLVReader that  points to the decrypted TBEData3Encrypted buffer.</span>
+<span id="L460"><span class="lineNum">     460</span>              :      * @param data      a reference to HandleSigma3Data.</span>
+<span id="L461"><span class="lineNum">     461</span>              :      *</span>
+<span id="L462"><span class="lineNum">     462</span>              :      **/</span>
+<span id="L463"><span class="lineNum">     463</span>              :     static CHIP_ERROR ParseSigma3TBEData(TLV::ContiguousBufferTLVReader &amp; tlvReader, HandleSigma3Data &amp; data);</span>
+<span id="L464"><span class="lineNum">     464</span>              : </span>
+<span id="L465"><span class="lineNum">     465</span>              :     static CHIP_ERROR HandleSigma3b(HandleSigma3Data &amp; data, bool &amp; cancel);</span>
+<span id="L466"><span class="lineNum">     466</span>              : </span>
+<span id="L467"><span class="lineNum">     467</span>              : private:</span>
+<span id="L468"><span class="lineNum">     468</span>              :     friend class TestCASESession;</span>
+<span id="L469"><span class="lineNum">     469</span>              : </span>
+<span id="L470"><span class="lineNum">     470</span>              :     using AutoReleaseSessionKey = Crypto::AutoReleaseSymmetricKey&lt;Crypto::Aes128KeyHandle&gt;;</span>
+<span id="L471"><span class="lineNum">     471</span>              : </span>
+<span id="L472"><span class="lineNum">     472</span>              :     /*</span>
+<span id="L473"><span class="lineNum">     473</span>              :      * Initialize the object given a reference to the SessionManager, certificate validity policy and a delegate which will be</span>
+<span id="L474"><span class="lineNum">     474</span>              :      * notified of any further progress on this session.</span>
+<span id="L475"><span class="lineNum">     475</span>              :      *</span>
+<span id="L476"><span class="lineNum">     476</span>              :      * If we're either establishing or finished establishing a session to a peer in either initiator or responder</span>
+<span id="L477"><span class="lineNum">     477</span>              :      * roles, the node id of that peer should be provided in sessionEvictionHint. Else, it should be initialized</span>
+<span id="L478"><span class="lineNum">     478</span>              :      * to a default-constructed ScopedNodeId().</span>
+<span id="L479"><span class="lineNum">     479</span>              :      *</span>
+<span id="L480"><span class="lineNum">     480</span>              :      */</span>
+<span id="L481"><span class="lineNum">     481</span>              :     CHIP_ERROR Init(SessionManager &amp; sessionManager, Credentials::CertificateValidityPolicy * policy,</span>
+<span id="L482"><span class="lineNum">     482</span>              :                     SessionEstablishmentDelegate * delegate, const ScopedNodeId &amp; sessionEvictionHint);</span>
+<span id="L483"><span class="lineNum">     483</span>              : </span>
+<span id="L484"><span class="lineNum">     484</span>              :     // On success, sets mIpk to the correct value for outgoing Sigma1 based on internal state</span>
+<span id="L485"><span class="lineNum">     485</span>              :     CHIP_ERROR RecoverInitiatorIpk();</span>
+<span id="L486"><span class="lineNum">     486</span>              :     // On success, sets locally maching mFabricInfo in internal state to the entry matched by</span>
+<span id="L487"><span class="lineNum">     487</span>              :     // destinationId/initiatorRandom from processing of Sigma1, and sets mIpk to the right IPK.</span>
+<span id="L488"><span class="lineNum">     488</span>              :     CHIP_ERROR FindLocalNodeFromDestinationId(const ByteSpan &amp; destinationId, const ByteSpan &amp; initiatorRandom);</span>
+<span id="L489"><span class="lineNum">     489</span>              : </span>
+<span id="L490"><span class="lineNum">     490</span>              :     CHIP_ERROR SendSigma1();</span>
+<span id="L491"><span class="lineNum">     491</span>              :     CHIP_ERROR HandleSigma1_and_SendSigma2(System::PacketBufferHandle &amp;&amp; msg);</span>
+<span id="L492"><span class="lineNum">     492</span>              :     NextStep HandleSigma1(System::PacketBufferHandle &amp;&amp; msg);</span>
+<span id="L493"><span class="lineNum">     493</span>              :     CHIP_ERROR TryResumeSession(SessionResumptionStorage::ConstResumptionIdView resumptionId, ByteSpan resume1MIC,</span>
+<span id="L494"><span class="lineNum">     494</span>              :                                 ByteSpan initiatorRandom);</span>
+<span id="L495"><span class="lineNum">     495</span>              : </span>
+<span id="L496"><span class="lineNum">     496</span>              :     CHIP_ERROR PrepareSigma2(EncodeSigma2Inputs &amp; output);</span>
+<span id="L497"><span class="lineNum">     497</span>              :     CHIP_ERROR PrepareSigma2Resume(EncodeSigma2ResumeInputs &amp; output);</span>
+<span id="L498"><span class="lineNum">     498</span>              :     CHIP_ERROR SendSigma2(System::PacketBufferHandle &amp;&amp; msg_R2);</span>
+<span id="L499"><span class="lineNum">     499</span>              :     CHIP_ERROR SendSigma2Resume(System::PacketBufferHandle &amp;&amp; msg_R2_resume);</span>
+<span id="L500"><span class="lineNum">     500</span>              : </span>
+<span id="L501"><span class="lineNum">     501</span>              :     CHIP_ERROR HandleSigma2_and_SendSigma3(System::PacketBufferHandle &amp;&amp; msg);</span>
+<span id="L502"><span class="lineNum">     502</span>              :     CHIP_ERROR HandleSigma2(System::PacketBufferHandle &amp;&amp; msg);</span>
+<span id="L503"><span class="lineNum">     503</span>              :     CHIP_ERROR HandleSigma2Resume(System::PacketBufferHandle &amp;&amp; msg);</span>
+<span id="L504"><span class="lineNum">     504</span>              : </span>
+<span id="L505"><span class="lineNum">     505</span>              :     CHIP_ERROR SendSigma3a();</span>
+<span id="L506"><span class="lineNum">     506</span>              :     static CHIP_ERROR SendSigma3b(SendSigma3Data &amp; data, bool &amp; cancel);</span>
+<span id="L507"><span class="lineNum">     507</span>              :     CHIP_ERROR SendSigma3c(SendSigma3Data &amp; data, CHIP_ERROR status);</span>
+<span id="L508"><span class="lineNum">     508</span>              : </span>
+<span id="L509"><span class="lineNum">     509</span>              :     CHIP_ERROR HandleSigma3a(System::PacketBufferHandle &amp;&amp; msg);</span>
+<span id="L510"><span class="lineNum">     510</span>              :     CHIP_ERROR HandleSigma3c(HandleSigma3Data &amp; data, CHIP_ERROR status);</span>
+<span id="L511"><span class="lineNum">     511</span>              : </span>
+<span id="L512"><span class="lineNum">     512</span>              :     CHIP_ERROR SendSigma2Resume();</span>
+<span id="L513"><span class="lineNum">     513</span>              : </span>
+<span id="L514"><span class="lineNum">     514</span>              :     CHIP_ERROR DeriveSigmaKey(const ByteSpan &amp; salt, const ByteSpan &amp; info, AutoReleaseSessionKey &amp; key) const;</span>
+<span id="L515"><span class="lineNum">     515</span>              :     CHIP_ERROR ConstructSaltSigma2(const ByteSpan &amp; rand, const Crypto::P256PublicKey &amp; pubkey, const ByteSpan &amp; ipk,</span>
+<span id="L516"><span class="lineNum">     516</span>              :                                    MutableByteSpan &amp; salt);</span>
+<span id="L517"><span class="lineNum">     517</span>              :     CHIP_ERROR ConstructTBSData(const ByteSpan &amp; senderNOC, const ByteSpan &amp; senderICAC, const ByteSpan &amp; senderPubKey,</span>
+<span id="L518"><span class="lineNum">     518</span>              :                                 const ByteSpan &amp; receiverPubKey, MutableByteSpan &amp; outTbsData);</span>
+<span id="L519"><span class="lineNum">     519</span>              :     CHIP_ERROR ConstructSaltSigma3(const ByteSpan &amp; ipk, MutableByteSpan &amp; salt);</span>
+<span id="L520"><span class="lineNum">     520</span>              : </span>
+<span id="L521"><span class="lineNum">     521</span>              :     CHIP_ERROR ConstructSigmaResumeKey(const ByteSpan &amp; initiatorRandom, const ByteSpan &amp; resumptionID, const ByteSpan &amp; skInfo,</span>
+<span id="L522"><span class="lineNum">     522</span>              :                                        const ByteSpan &amp; nonce, AutoReleaseSessionKey &amp; resumeKey);</span>
+<span id="L523"><span class="lineNum">     523</span>              : </span>
+<span id="L524"><span class="lineNum">     524</span>              :     CHIP_ERROR GenerateSigmaResumeMIC(const ByteSpan &amp; initiatorRandom, const ByteSpan &amp; resumptionID, const ByteSpan &amp; skInfo,</span>
+<span id="L525"><span class="lineNum">     525</span>              :                                       const ByteSpan &amp; nonce, MutableByteSpan &amp; resumeMIC);</span>
+<span id="L526"><span class="lineNum">     526</span>              :     CHIP_ERROR ValidateSigmaResumeMIC(const ByteSpan &amp; resumeMIC, const ByteSpan &amp; initiatorRandom, const ByteSpan &amp; resumptionID,</span>
+<span id="L527"><span class="lineNum">     527</span>              :                                       const ByteSpan &amp; skInfo, const ByteSpan &amp; nonce);</span>
+<span id="L528"><span class="lineNum">     528</span>              : </span>
+<span id="L529"><span class="lineNum">     529</span>              :     void OnSuccessStatusReport() override;</span>
+<span id="L530"><span class="lineNum">     530</span>              :     CHIP_ERROR OnFailureStatusReport(Protocols::SecureChannel::GeneralStatusCode generalCode, uint16_t protocolCode,</span>
+<span id="L531"><span class="lineNum">     531</span>              :                                      Optional&lt;uintptr_t&gt; protocolData) override;</span>
+<span id="L532"><span class="lineNum">     532</span>              : </span>
+<span id="L533"><span class="lineNum">     533</span>              :     void AbortPendingEstablish(CHIP_ERROR err);</span>
+<span id="L534"><span class="lineNum">     534</span>              : </span>
+<span id="L535"><span class="lineNum">     535</span>              :     CHIP_ERROR GetHardcodedTime();</span>
+<span id="L536"><span class="lineNum">     536</span>              : </span>
+<span id="L537"><span class="lineNum">     537</span>              :     CHIP_ERROR SetEffectiveTime();</span>
+<span id="L538"><span class="lineNum">     538</span>              : </span>
+<span id="L539"><span class="lineNum">     539</span>              :     CHIP_ERROR ValidateReceivedMessage(Messaging::ExchangeContext * ec, const PayloadHeader &amp; payloadHeader,</span>
+<span id="L540"><span class="lineNum">     540</span>              :                                        const System::PacketBufferHandle &amp; msg);</span>
+<span id="L541"><span class="lineNum">     541</span>              : </span>
+<span id="L542"><span class="lineNum">     542</span>              :     void InvalidateIfPendingEstablishmentOnFabric(FabricIndex fabricIndex);</span>
+<span id="L543"><span class="lineNum">     543</span>              : </span>
+<span id="L544"><span class="lineNum">     544</span>              : #if INET_CONFIG_ENABLE_TCP_ENDPOINT</span>
+<span id="L545"><span class="lineNum">     545</span>              :     void HandleConnectionAttemptComplete(Transport::ActiveTCPConnectionHolder &amp; conn, CHIP_ERROR conErr) override;</span>
+<span id="L546"><span class="lineNum">     546</span>              :     void HandleConnectionClosed(const Transport::ActiveTCPConnectionState &amp; conn, CHIP_ERROR conErr) override;</span>
+<span id="L547"><span class="lineNum">     547</span>              : </span>
+<span id="L548"><span class="lineNum">     548</span>              :     // Reference holder to the underlying TCP connection state. Returned by the</span>
+<span id="L549"><span class="lineNum">     549</span>              :     // TCPConnect() method (on the connection Initiator side) when an</span>
+<span id="L550"><span class="lineNum">     550</span>              :     // ActiveTCPConnectionState object is allocated. This connection</span>
+<span id="L551"><span class="lineNum">     551</span>              :     // context is used on the CASE Initiator side to facilitate the</span>
+<span id="L552"><span class="lineNum">     552</span>              :     // invocation of the callbacks when the connection is established/closed.</span>
+<span id="L553"><span class="lineNum">     553</span>              :     //</span>
+<span id="L554"><span class="lineNum">     554</span>              :     // This pointer must be nulled out when the connection is closed.</span>
+<span id="L555"><span class="lineNum">     555</span>              :     Transport::ActiveTCPConnectionHolder mPeerConnState;</span>
+<span id="L556"><span class="lineNum">     556</span>              : #endif // INET_CONFIG_ENABLE_TCP_ENDPOINT</span>
+<span id="L557"><span class="lineNum">     557</span>              : </span>
+<span id="L558"><span class="lineNum">     558</span>              : #if CONFIG_BUILD_FOR_HOST_UNIT_TEST</span>
+<span id="L559"><span class="lineNum">     559</span> <span class="tlaGNC">           1 :     void SetStopSigmaHandshakeAt(Optional&lt;State&gt; state) { mStopHandshakeAtState = state; }</span></span>
+<span id="L560"><span class="lineNum">     560</span>              : #endif // CONFIG_BUILD_FOR_HOST_UNIT_TEST</span>
+<span id="L561"><span class="lineNum">     561</span>              : </span>
+<span id="L562"><span class="lineNum">     562</span>              :     Crypto::Hash_SHA256_stream mCommissioningHash;</span>
+<span id="L563"><span class="lineNum">     563</span>              :     Crypto::P256PublicKey mRemotePubKey;</span>
+<span id="L564"><span class="lineNum">     564</span>              :     Crypto::P256Keypair * mEphemeralKey = nullptr;</span>
+<span id="L565"><span class="lineNum">     565</span>              :     Crypto::P256ECDHDerivedSecret mSharedSecret;</span>
+<span id="L566"><span class="lineNum">     566</span>              :     Credentials::ValidationContext mValidContext;</span>
+<span id="L567"><span class="lineNum">     567</span>              :     Credentials::GroupDataProvider * mGroupDataProvider = nullptr;</span>
+<span id="L568"><span class="lineNum">     568</span>              : </span>
+<span id="L569"><span class="lineNum">     569</span>              :     uint8_t mMessageDigest[Crypto::kSHA256_Hash_Length];</span>
+<span id="L570"><span class="lineNum">     570</span>              :     uint8_t mIPK[kIPKSize];</span>
+<span id="L571"><span class="lineNum">     571</span>              : </span>
+<span id="L572"><span class="lineNum">     572</span>              :     SessionResumptionStorage * mSessionResumptionStorage = nullptr;</span>
+<span id="L573"><span class="lineNum">     573</span>              :     SessionManager * mSessionManager                     = nullptr;</span>
+<span id="L574"><span class="lineNum">     574</span>              : </span>
+<span id="L575"><span class="lineNum">     575</span>              :     FabricTable * mFabricsTable = nullptr;</span>
+<span id="L576"><span class="lineNum">     576</span>              :     FabricIndex mFabricIndex    = kUndefinedFabricIndex;</span>
+<span id="L577"><span class="lineNum">     577</span>              :     NodeId mPeerNodeId          = kUndefinedNodeId;</span>
+<span id="L578"><span class="lineNum">     578</span>              :     NodeId mLocalNodeId         = kUndefinedNodeId;</span>
+<span id="L579"><span class="lineNum">     579</span>              :     CATValues mPeerCATs;</span>
+<span id="L580"><span class="lineNum">     580</span>              : </span>
+<span id="L581"><span class="lineNum">     581</span>              :     SessionResumptionStorage::ResumptionIdStorage mResumeResumptionId; // ResumptionId which is used to resume this session</span>
+<span id="L582"><span class="lineNum">     582</span>              :     SessionResumptionStorage::ResumptionIdStorage mNewResumptionId;    // ResumptionId which is stored to resume future session</span>
+<span id="L583"><span class="lineNum">     583</span>              :     // Sigma1 initiator random, maintained to be reused post-Sigma1, such as when generating Sigma2 S2RK key</span>
+<span id="L584"><span class="lineNum">     584</span>              :     uint8_t mInitiatorRandom[kSigmaParamRandomNumberSize];</span>
+<span id="L585"><span class="lineNum">     585</span>              : </span>
+<span id="L586"><span class="lineNum">     586</span>              :     template &lt;class DATA&gt;</span>
+<span id="L587"><span class="lineNum">     587</span>              :     class WorkHelper;</span>
+<span id="L588"><span class="lineNum">     588</span>              :     Platform::SharedPtr&lt;WorkHelper&lt;SendSigma3Data&gt;&gt; mSendSigma3Helper;</span>
+<span id="L589"><span class="lineNum">     589</span>              :     Platform::SharedPtr&lt;WorkHelper&lt;HandleSigma3Data&gt;&gt; mHandleSigma3Helper;</span>
+<span id="L590"><span class="lineNum">     590</span>              : </span>
+<span id="L591"><span class="lineNum">     591</span>              :     State mState;</span>
+<span id="L592"><span class="lineNum">     592</span>              : </span>
+<span id="L593"><span class="lineNum">     593</span>              : #if CONFIG_BUILD_FOR_HOST_UNIT_TEST</span>
+<span id="L594"><span class="lineNum">     594</span>              :     Optional&lt;State&gt; mStopHandshakeAtState = Optional&lt;State&gt;::Missing();</span>
+<span id="L595"><span class="lineNum">     595</span>              : #endif // CONFIG_BUILD_FOR_HOST_UNIT_TEST</span>
+<span id="L596"><span class="lineNum">     596</span>              : </span>
+<span id="L597"><span class="lineNum">     597</span>              :     SessionEstablishmentStage MapCASEStateToSessionEstablishmentStage(State caseState);</span>
+<span id="L598"><span class="lineNum">     598</span>              : };</span>
+<span id="L599"><span class="lineNum">     599</span>              : </span>
+<span id="L600"><span class="lineNum">     600</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

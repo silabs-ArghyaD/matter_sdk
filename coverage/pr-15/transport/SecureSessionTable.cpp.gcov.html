@@ -1,0 +1,483 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - transport/SecureSessionTable.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">transport</a> - SecureSessionTable.cpp<span style="font-size: 80%;"> (source / <a href="SecureSessionTable.cpp.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">96.2&nbsp;%</td>
+            <td class="headerCovTableEntry">132</td>
+            <td class="headerCovTableEntry">127</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">14</td>
+            <td class="headerCovTableEntry">14</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *    Copyright (c) 2021 Project CHIP Authors</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    limitations under the License.</span>
+<span id="L15"><span class="lineNum">      15</span>              :  */</span>
+<span id="L16"><span class="lineNum">      16</span>              : </span>
+<span id="L17"><span class="lineNum">      17</span>              : #include &quot;lib/support/CHIPMem.h&quot;</span>
+<span id="L18"><span class="lineNum">      18</span>              : #include &quot;lib/support/CodeUtils.h&quot;</span>
+<span id="L19"><span class="lineNum">      19</span>              : #include &quot;lib/support/ScopedBuffer.h&quot;</span>
+<span id="L20"><span class="lineNum">      20</span>              : #include &lt;access/AuthMode.h&gt;</span>
+<span id="L21"><span class="lineNum">      21</span>              : #include &lt;lib/support/Defer.h&gt;</span>
+<span id="L22"><span class="lineNum">      22</span>              : #include &lt;transport/SecureSession.h&gt;</span>
+<span id="L23"><span class="lineNum">      23</span>              : #include &lt;transport/SecureSessionTable.h&gt;</span>
+<span id="L24"><span class="lineNum">      24</span>              : </span>
+<span id="L25"><span class="lineNum">      25</span>              : namespace chip {</span>
+<span id="L26"><span class="lineNum">      26</span>              : namespace Transport {</span>
+<span id="L27"><span class="lineNum">      27</span>              : </span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC tlaBgGNC">        1618 : Optional&lt;SessionHandle&gt; SecureSessionTable::CreateNewSecureSessionForTest(SecureSession::Type secureSessionType,</span></span>
+<span id="L29"><span class="lineNum">      29</span>              :                                                                           uint16_t localSessionId, NodeId localNodeId,</span>
+<span id="L30"><span class="lineNum">      30</span>              :                                                                           NodeId peerNodeId, CATValues peerCATs,</span>
+<span id="L31"><span class="lineNum">      31</span>              :                                                                           uint16_t peerSessionId, FabricIndex fabricIndex,</span>
+<span id="L32"><span class="lineNum">      32</span>              :                                                                           const ReliableMessageProtocolConfig &amp; config)</span>
+<span id="L33"><span class="lineNum">      33</span>              : {</span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">        1618 :     if (secureSessionType == SecureSession::Type::kCASE)</span></span>
+<span id="L35"><span class="lineNum">      35</span>              :     {</span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">          75 :         if ((fabricIndex == kUndefinedFabricIndex) || (localNodeId == kUndefinedNodeId) || (peerNodeId == kUndefinedNodeId))</span></span>
+<span id="L37"><span class="lineNum">      37</span>              :         {</span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaUNC tlaBgUNC">           0 :             return Optional&lt;SessionHandle&gt;::Missing();</span></span>
+<span id="L39"><span class="lineNum">      39</span>              :         }</span>
+<span id="L40"><span class="lineNum">      40</span>              :     }</span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC tlaBgGNC">        1543 :     else if (secureSessionType == SecureSession::Type::kPASE)</span></span>
+<span id="L42"><span class="lineNum">      42</span>              :     {</span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">        1543 :         if ((fabricIndex != kUndefinedFabricIndex) || (localNodeId != kUndefinedNodeId) || (peerNodeId != kUndefinedNodeId))</span></span>
+<span id="L44"><span class="lineNum">      44</span>              :         {</span>
+<span id="L45"><span class="lineNum">      45</span>              :             // TODO: This secure session type is infeasible! We must fix the tests</span>
+<span id="L46"><span class="lineNum">      46</span>              :             if (false)</span>
+<span id="L47"><span class="lineNum">      47</span>              :             {</span>
+<span id="L48"><span class="lineNum">      48</span>              :                 return Optional&lt;SessionHandle&gt;::Missing();</span>
+<span id="L49"><span class="lineNum">      49</span>              :             }</span>
+<span id="L50"><span class="lineNum">      50</span>              : </span>
+<span id="L51"><span class="lineNum">      51</span>              :             (void) fabricIndex;</span>
+<span id="L52"><span class="lineNum">      52</span>              :         }</span>
+<span id="L53"><span class="lineNum">      53</span>              :     }</span>
+<span id="L54"><span class="lineNum">      54</span>              : </span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">        1618 :     SecureSession * result = mEntries.CreateObject(*this, secureSessionType, localSessionId, localNodeId, peerNodeId, peerCATs,</span></span>
+<span id="L56"><span class="lineNum">      56</span>              :                                                    peerSessionId, fabricIndex, config);</span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">        1618 :     return result != nullptr ? MakeOptional&lt;SessionHandle&gt;(*result) : Optional&lt;SessionHandle&gt;::Missing();</span></span>
+<span id="L58"><span class="lineNum">      58</span>              : }</span>
+<span id="L59"><span class="lineNum">      59</span>              : </span>
+<span id="L60"><span class="lineNum">      60</span> <span class="tlaGNC">      133760 : Optional&lt;SessionHandle&gt; SecureSessionTable::CreateNewSecureSession(SecureSession::Type secureSessionType,</span></span>
+<span id="L61"><span class="lineNum">      61</span>              :                                                                    ScopedNodeId sessionEvictionHint)</span>
+<span id="L62"><span class="lineNum">      62</span>              : {</span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">      133760 :     Optional&lt;SessionHandle&gt; rv = Optional&lt;SessionHandle&gt;::Missing();</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">      133760 :     SecureSession * allocated  = nullptr;</span></span>
+<span id="L65"><span class="lineNum">      65</span>              : </span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">      133760 :     auto sessionId = FindUnusedSessionId();</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">      133760 :     VerifyOrReturnValue(sessionId.HasValue(), Optional&lt;SessionHandle&gt;::Missing());</span></span>
+<span id="L68"><span class="lineNum">      68</span>              : </span>
+<span id="L69"><span class="lineNum">      69</span>              :     //</span>
+<span id="L70"><span class="lineNum">      70</span>              :     // We allocate a new session out of the pool if we have space in it. If we don't, we need</span>
+<span id="L71"><span class="lineNum">      71</span>              :     // to run the eviction algorithm to get a free slot. We shall ALWAYS be guaranteed to evict</span>
+<span id="L72"><span class="lineNum">      72</span>              :     // an existing session in the table in normal operating circumstances.</span>
+<span id="L73"><span class="lineNum">      73</span>              :     //</span>
+<span id="L74"><span class="lineNum">      74</span> <span class="tlaGNC">      133760 :     if (mEntries.Allocated() &lt; GetMaxSessionTableSize())</span></span>
+<span id="L75"><span class="lineNum">      75</span>              :     {</span>
+<span id="L76"><span class="lineNum">      76</span> <span class="tlaGNC">      133747 :         allocated = mEntries.CreateObject(*this, secureSessionType, sessionId.Value());</span></span>
+<span id="L77"><span class="lineNum">      77</span>              :     }</span>
+<span id="L78"><span class="lineNum">      78</span>              :     else</span>
+<span id="L79"><span class="lineNum">      79</span>              :     {</span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">          13 :         allocated = EvictAndAllocate(sessionId.Value(), secureSessionType, sessionEvictionHint);</span></span>
+<span id="L81"><span class="lineNum">      81</span>              :     }</span>
+<span id="L82"><span class="lineNum">      82</span>              : </span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">      133760 :     VerifyOrReturnValue(allocated != nullptr, Optional&lt;SessionHandle&gt;::Missing());</span></span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">      133760 :     rv             = MakeOptional&lt;SessionHandle&gt;(*allocated);</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">      133760 :     mNextSessionId = sessionId.Value() == kMaxSessionID ? static_cast&lt;uint16_t&gt;(kUnsecuredSessionId + 1)</span></span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">      133758 :                                                         : static_cast&lt;uint16_t&gt;(sessionId.Value() + 1);</span></span>
+<span id="L88"><span class="lineNum">      88</span>              : </span>
+<span id="L89"><span class="lineNum">      89</span> <span class="tlaGNC">      133760 :     return rv;</span></span>
+<span id="L90"><span class="lineNum">      90</span> <span class="tlaGNC">      133760 : }</span></span>
+<span id="L91"><span class="lineNum">      91</span>              : </span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">          13 : SecureSession * SecureSessionTable::EvictAndAllocate(uint16_t localSessionId, SecureSession::Type secureSessionType,</span></span>
+<span id="L93"><span class="lineNum">      93</span>              :                                                      const ScopedNodeId &amp; sessionEvictionHint)</span>
+<span id="L94"><span class="lineNum">      94</span>              : {</span>
+<span id="L95"><span class="lineNum">      95</span> <span class="tlaGNC">          13 :     VerifyOrDieWithMsg(!mRunningEvictionLogic, SecureChannel,</span></span>
+<span id="L96"><span class="lineNum">      96</span>              :                        &quot;EvictAndAllocate isn't re-entrant, yet someone called us while we're already running&quot;);</span>
+<span id="L97"><span class="lineNum">      97</span>              : </span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC">          13 :     mRunningEvictionLogic = true;</span></span>
+<span id="L99"><span class="lineNum">      99</span>              : </span>
+<span id="L100"><span class="lineNum">     100</span> <span class="tlaGNC">          13 :     auto cleanup = MakeDefer([this]() { mRunningEvictionLogic = false; });</span></span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaGNC">          13 :     ChipLogProgress(SecureChannel, &quot;Evicting a slot for session with LSID: %d, type: %u&quot;, localSessionId,</span></span>
+<span id="L103"><span class="lineNum">     103</span>              :                     (uint8_t) secureSessionType);</span>
+<span id="L104"><span class="lineNum">     104</span>              : </span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">          13 :     VerifyOrDie(mEntries.Allocated() &lt;= GetMaxSessionTableSize());</span></span>
+<span id="L106"><span class="lineNum">     106</span>              : </span>
+<span id="L107"><span class="lineNum">     107</span>              :     //</span>
+<span id="L108"><span class="lineNum">     108</span>              :     // Create a temporary list of objects each of which points to a session in the existing</span>
+<span id="L109"><span class="lineNum">     109</span>              :     // session table, but are swappable. This allows them to then be used with a sorting algorithm</span>
+<span id="L110"><span class="lineNum">     110</span>              :     // without affecting the sessions in the table itself.</span>
+<span id="L111"><span class="lineNum">     111</span>              :     //</span>
+<span id="L112"><span class="lineNum">     112</span>              :     // The size of this shouldn't place significant demands on the stack if using the default</span>
+<span id="L113"><span class="lineNum">     113</span>              :     // configuration for CHIP_CONFIG_SECURE_SESSION_POOL_SIZE (17). Each item is</span>
+<span id="L114"><span class="lineNum">     114</span>              :     // 8 bytes in size (on a 32-bit platform), and 16 bytes in size (on a 64-bit platform,</span>
+<span id="L115"><span class="lineNum">     115</span>              :     // including padding).</span>
+<span id="L116"><span class="lineNum">     116</span>              :     //</span>
+<span id="L117"><span class="lineNum">     117</span>              :     // Total size of this stack variable = 17 * 8 = 136bytes (32-bit platform), 272 bytes (64-bit platform).</span>
+<span id="L118"><span class="lineNum">     118</span>              :     //</span>
+<span id="L119"><span class="lineNum">     119</span>              :     // Even if the define is set to a large value, it's likely not so bad on the sort of platform setup</span>
+<span id="L120"><span class="lineNum">     120</span>              :     // that would have that sort of pool size.</span>
+<span id="L121"><span class="lineNum">     121</span>              :     //</span>
+<span id="L122"><span class="lineNum">     122</span>              :     // We need to sort (as opposed to just a linear search for the smallest/largest item)</span>
+<span id="L123"><span class="lineNum">     123</span>              :     // since it is possible that the candidate selected for eviction may not actually be</span>
+<span id="L124"><span class="lineNum">     124</span>              :     // released once marked for expiration (see comments below for more details).</span>
+<span id="L125"><span class="lineNum">     125</span>              :     //</span>
+<span id="L126"><span class="lineNum">     126</span>              :     // Consequently, we may need to walk the candidate list till we find one that is.</span>
+<span id="L127"><span class="lineNum">     127</span>              :     // Sorting provides a better overall performance model in this scheme.</span>
+<span id="L128"><span class="lineNum">     128</span>              :     //</span>
+<span id="L129"><span class="lineNum">     129</span>              :     // (#19967): Investigate doing linear search instead.</span>
+<span id="L130"><span class="lineNum">     130</span>              :     //</span>
+<span id="L131"><span class="lineNum">     131</span>              :     //</span>
+<span id="L132"><span class="lineNum">     132</span>              :     SortableSession sortableSessions[CHIP_CONFIG_SECURE_SESSION_POOL_SIZE];</span>
+<span id="L133"><span class="lineNum">     133</span>              : </span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">          13 :     unsigned int index = 0;</span></span>
+<span id="L135"><span class="lineNum">     135</span>              : </span>
+<span id="L136"><span class="lineNum">     136</span>              :     //</span>
+<span id="L137"><span class="lineNum">     137</span>              :     // Compute two key stats for each session - the number of other sessions that</span>
+<span id="L138"><span class="lineNum">     138</span>              :     // match its fabric, as well as the number of other sessions that match its peer.</span>
+<span id="L139"><span class="lineNum">     139</span>              :     //</span>
+<span id="L140"><span class="lineNum">     140</span>              :     // This will be used by the session eviction algorithm later.</span>
+<span id="L141"><span class="lineNum">     141</span>              :     //</span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">          13 :     ForEachSession([&amp;index, &amp;sortableSessions, this](auto * session) {</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">          84 :         sortableSessions[index].mSession             = session;</span></span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC">          84 :         sortableSessions[index].mNumMatchingOnFabric = 0;</span></span>
+<span id="L145"><span class="lineNum">     145</span> <span class="tlaGNC">          84 :         sortableSessions[index].mNumMatchingOnPeer   = 0;</span></span>
+<span id="L146"><span class="lineNum">     146</span>              : </span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC">          84 :         ForEachSession([session, index, &amp;sortableSessions](auto * otherSession) {</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">         576 :             if (session != otherSession)</span></span>
+<span id="L149"><span class="lineNum">     149</span>              :             {</span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaGNC">         492 :                 if (session-&gt;GetFabricIndex() == otherSession-&gt;GetFabricIndex())</span></span>
+<span id="L151"><span class="lineNum">     151</span>              :                 {</span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">         246 :                     sortableSessions[index].mNumMatchingOnFabric++;</span></span>
+<span id="L153"><span class="lineNum">     153</span>              : </span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">         246 :                     if (session-&gt;GetPeerNodeId() == otherSession-&gt;GetPeerNodeId())</span></span>
+<span id="L155"><span class="lineNum">     155</span>              :                     {</span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">          78 :                         sortableSessions[index].mNumMatchingOnPeer++;</span></span>
+<span id="L157"><span class="lineNum">     157</span>              :                     }</span>
+<span id="L158"><span class="lineNum">     158</span>              :                 }</span>
+<span id="L159"><span class="lineNum">     159</span>              :             }</span>
+<span id="L160"><span class="lineNum">     160</span>              : </span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC">         576 :             return Loop::Continue;</span></span>
+<span id="L162"><span class="lineNum">     162</span>              :         });</span>
+<span id="L163"><span class="lineNum">     163</span>              : </span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">          84 :         index++;</span></span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">          84 :         return Loop::Continue;</span></span>
+<span id="L166"><span class="lineNum">     166</span>              :     });</span>
+<span id="L167"><span class="lineNum">     167</span>              : </span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">          13 :     auto sortableSessionSpan = Span&lt;SortableSession&gt;(sortableSessions, mEntries.Allocated());</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">          13 :     EvictionPolicyContext policyContext(sortableSessionSpan, sessionEvictionHint);</span></span>
+<span id="L170"><span class="lineNum">     170</span>              : </span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">          13 :     DefaultEvictionPolicy(policyContext);</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">          13 :     ChipLogProgress(SecureChannel, &quot;Sorted sessions for eviction...&quot;);</span></span>
+<span id="L173"><span class="lineNum">     173</span>              : </span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">          13 :     const auto numSessions = mEntries.Allocated();</span></span>
+<span id="L175"><span class="lineNum">     175</span>              : </span>
+<span id="L176"><span class="lineNum">     176</span>              : #if CHIP_DETAIL_LOGGING</span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaGNC">          13 :     ChipLogDetail(SecureChannel, &quot;Sorted Eviction Candidates (ranked from best candidate to worst):&quot;);</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">          97 :     for (auto * session = sortableSessions; session != (sortableSessions + numSessions); session++)</span></span>
+<span id="L179"><span class="lineNum">     179</span>              :     {</span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">          84 :         ChipLogDetail(SecureChannel,</span></span>
+<span id="L181"><span class="lineNum">     181</span>              :                       &quot;\t%ld: [%p] -- Peer: [%u:&quot; ChipLogFormatX64</span>
+<span id="L182"><span class="lineNum">     182</span>              :                       &quot;] State: '%s', NumMatchingOnFabric: %d NumMatchingOnPeer: %d ActivityTime: %lu&quot;,</span>
+<span id="L183"><span class="lineNum">     183</span>              :                       static_cast&lt;long int&gt;(session - sortableSessions), session-&gt;mSession,</span>
+<span id="L184"><span class="lineNum">     184</span>              :                       session-&gt;mSession-&gt;GetPeer().GetFabricIndex(), ChipLogValueX64(session-&gt;mSession-&gt;GetPeer().GetNodeId()),</span>
+<span id="L185"><span class="lineNum">     185</span>              :                       session-&gt;mSession-&gt;GetStateStr(), session-&gt;mNumMatchingOnFabric, session-&gt;mNumMatchingOnPeer,</span>
+<span id="L186"><span class="lineNum">     186</span>              :                       static_cast&lt;unsigned long&gt;(session-&gt;mSession-&gt;GetLastActivityTime().count()));</span>
+<span id="L187"><span class="lineNum">     187</span>              :     }</span>
+<span id="L188"><span class="lineNum">     188</span>              : #endif</span>
+<span id="L189"><span class="lineNum">     189</span>              : </span>
+<span id="L190"><span class="lineNum">     190</span> <span class="tlaGNC">          13 :     for (auto * session = sortableSessions; session != (sortableSessions + numSessions); session++)</span></span>
+<span id="L191"><span class="lineNum">     191</span>              :     {</span>
+<span id="L192"><span class="lineNum">     192</span> <span class="tlaGNC">          13 :         if (session-&gt;mSession-&gt;IsPendingEviction())</span></span>
+<span id="L193"><span class="lineNum">     193</span>              :         {</span>
+<span id="L194"><span class="lineNum">     194</span> <span class="tlaUNC tlaBgUNC">           0 :             continue;</span></span>
+<span id="L195"><span class="lineNum">     195</span>              :         }</span>
+<span id="L196"><span class="lineNum">     196</span>              : </span>
+<span id="L197"><span class="lineNum">     197</span> <span class="tlaGNC tlaBgGNC">          13 :         ChipLogProgress(SecureChannel, &quot;Candidate Session[%p] - Attempting to evict...&quot;, session-&gt;mSession);</span></span>
+<span id="L198"><span class="lineNum">     198</span>              : </span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC">          13 :         auto prevCount = mEntries.Allocated();</span></span>
+<span id="L200"><span class="lineNum">     200</span>              : </span>
+<span id="L201"><span class="lineNum">     201</span>              :         //</span>
+<span id="L202"><span class="lineNum">     202</span>              :         // SessionHolders act like weak-refs on a session, but since they do still add to the ref-count of a SecureSession, we</span>
+<span id="L203"><span class="lineNum">     203</span>              :         // cannot actually tell whether there are truly any strong-refs (SessionHandles) on this session because if we did, we'd</span>
+<span id="L204"><span class="lineNum">     204</span>              :         // avoid evicting it since it's pointless to do so.</span>
+<span id="L205"><span class="lineNum">     205</span>              :         //</span>
+<span id="L206"><span class="lineNum">     206</span>              :         // However, we don't actually have SessionHolders implemented correctly as weak-refs, requiring us to go ahead and 'try' to</span>
+<span id="L207"><span class="lineNum">     207</span>              :         // evict it, and see if it still remains in the table. If it does, we have to try the next one. If it doesn't, we know we've</span>
+<span id="L208"><span class="lineNum">     208</span>              :         // earned a free spot.</span>
+<span id="L209"><span class="lineNum">     209</span>              :         //</span>
+<span id="L210"><span class="lineNum">     210</span>              :         // See #19495.</span>
+<span id="L211"><span class="lineNum">     211</span>              :         //</span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">          13 :         session-&gt;mSession-&gt;MarkForEviction();</span></span>
+<span id="L213"><span class="lineNum">     213</span>              : </span>
+<span id="L214"><span class="lineNum">     214</span> <span class="tlaGNC">          13 :         auto newCount = mEntries.Allocated();</span></span>
+<span id="L215"><span class="lineNum">     215</span>              : </span>
+<span id="L216"><span class="lineNum">     216</span> <span class="tlaGNC">          13 :         if (newCount &lt; prevCount)</span></span>
+<span id="L217"><span class="lineNum">     217</span>              :         {</span>
+<span id="L218"><span class="lineNum">     218</span> <span class="tlaGNC">          13 :             ChipLogProgress(SecureChannel, &quot;Successfully evicted a session!&quot;);</span></span>
+<span id="L219"><span class="lineNum">     219</span> <span class="tlaGNC">          13 :             auto * retSession = mEntries.CreateObject(*this, secureSessionType, localSessionId);</span></span>
+<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">          13 :             VerifyOrDie(session != nullptr);</span></span>
+<span id="L221"><span class="lineNum">     221</span> <span class="tlaGNC">          13 :             return retSession;</span></span>
+<span id="L222"><span class="lineNum">     222</span>              :         }</span>
+<span id="L223"><span class="lineNum">     223</span>              :     }</span>
+<span id="L224"><span class="lineNum">     224</span>              : </span>
+<span id="L225"><span class="lineNum">     225</span> <span class="tlaUNC tlaBgUNC">           0 :     VerifyOrDieWithMsg(false, SecureChannel, &quot;We couldn't find any session to evict at all, something's wrong!&quot;);</span></span>
+<span id="L226"><span class="lineNum">     226</span>              :     return nullptr;</span>
+<span id="L227"><span class="lineNum">     227</span> <span class="tlaGNC tlaBgGNC">          13 : }</span></span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">          13 : void SecureSessionTable::DefaultEvictionPolicy(EvictionPolicyContext &amp; evictionContext)</span></span>
+<span id="L230"><span class="lineNum">     230</span>              : {</span>
+<span id="L231"><span class="lineNum">     231</span>              :     //</span>
+<span id="L232"><span class="lineNum">     232</span>              :     // This implements a spec-compliant sorting policy that ensures both guarantees for sessions per-fabric as</span>
+<span id="L233"><span class="lineNum">     233</span>              :     // mandated by the spec as well as fairness in terms of selecting the most appropriate session to evict</span>
+<span id="L234"><span class="lineNum">     234</span>              :     // based on multiple criteria.</span>
+<span id="L235"><span class="lineNum">     235</span>              :     //</span>
+<span id="L236"><span class="lineNum">     236</span>              :     // See the description of this function in the header for more details on each sorting key below.</span>
+<span id="L237"><span class="lineNum">     237</span>              :     //</span>
+<span id="L238"><span class="lineNum">     238</span> <span class="tlaGNC">          13 :     evictionContext.Sort([&amp;evictionContext](const SortableSession &amp; a, const SortableSession &amp; b) -&gt; bool {</span></span>
+<span id="L239"><span class="lineNum">     239</span>              :         //</span>
+<span id="L240"><span class="lineNum">     240</span>              :         // Sorting on Key1</span>
+<span id="L241"><span class="lineNum">     241</span>              :         //</span>
+<span id="L242"><span class="lineNum">     242</span> <span class="tlaGNC">         173 :         if (a.mNumMatchingOnFabric != b.mNumMatchingOnFabric)</span></span>
+<span id="L243"><span class="lineNum">     243</span>              :         {</span>
+<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">          24 :             return a.mNumMatchingOnFabric &gt; b.mNumMatchingOnFabric;</span></span>
+<span id="L245"><span class="lineNum">     245</span>              :         }</span>
+<span id="L246"><span class="lineNum">     246</span>              : </span>
+<span id="L247"><span class="lineNum">     247</span>              :         bool doesAMatchSessionHintFabric =</span>
+<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC">         149 :             a.mSession-&gt;GetPeer().GetFabricIndex() == evictionContext.GetSessionEvictionHint().GetFabricIndex();</span></span>
+<span id="L249"><span class="lineNum">     249</span>              :         bool doesBMatchSessionHintFabric =</span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">         149 :             b.mSession-&gt;GetPeer().GetFabricIndex() == evictionContext.GetSessionEvictionHint().GetFabricIndex();</span></span>
+<span id="L251"><span class="lineNum">     251</span>              : </span>
+<span id="L252"><span class="lineNum">     252</span>              :         //</span>
+<span id="L253"><span class="lineNum">     253</span>              :         // Sorting on Key2</span>
+<span id="L254"><span class="lineNum">     254</span>              :         //</span>
+<span id="L255"><span class="lineNum">     255</span> <span class="tlaGNC">         149 :         if (doesAMatchSessionHintFabric != doesBMatchSessionHintFabric)</span></span>
+<span id="L256"><span class="lineNum">     256</span>              :         {</span>
+<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC">          35 :             return doesAMatchSessionHintFabric &gt; doesBMatchSessionHintFabric;</span></span>
+<span id="L258"><span class="lineNum">     258</span>              :         }</span>
+<span id="L259"><span class="lineNum">     259</span>              : </span>
+<span id="L260"><span class="lineNum">     260</span>              :         //</span>
+<span id="L261"><span class="lineNum">     261</span>              :         // Sorting on Key3</span>
+<span id="L262"><span class="lineNum">     262</span>              :         //</span>
+<span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">         114 :         if (a.mNumMatchingOnPeer != b.mNumMatchingOnPeer)</span></span>
+<span id="L264"><span class="lineNum">     264</span>              :         {</span>
+<span id="L265"><span class="lineNum">     265</span> <span class="tlaGNC">           3 :             return a.mNumMatchingOnPeer &gt; b.mNumMatchingOnPeer;</span></span>
+<span id="L266"><span class="lineNum">     266</span>              :         }</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span>              :         // We have an evicton hint in two cases:</span>
+<span id="L269"><span class="lineNum">     269</span>              :         //</span>
+<span id="L270"><span class="lineNum">     270</span>              :         // 1) When we just established CASE as a responder, the hint is the node</span>
+<span id="L271"><span class="lineNum">     271</span>              :         //    we just established CASE to.</span>
+<span id="L272"><span class="lineNum">     272</span>              :         // 2) When starting to establish CASE as an initiator, the hint is the</span>
+<span id="L273"><span class="lineNum">     273</span>              :         //    node we are going to establish CASE to.</span>
+<span id="L274"><span class="lineNum">     274</span>              :         //</span>
+<span id="L275"><span class="lineNum">     275</span>              :         // In case 2, we should not end up here if there is an active session to</span>
+<span id="L276"><span class="lineNum">     276</span>              :         // the peer at all (because that session should have been used instead</span>
+<span id="L277"><span class="lineNum">     277</span>              :         // of establishing a new one).</span>
+<span id="L278"><span class="lineNum">     278</span>              :         //</span>
+<span id="L279"><span class="lineNum">     279</span>              :         // In case 1, we know we have a session matching the hint, but we don't</span>
+<span id="L280"><span class="lineNum">     280</span>              :         // want to pick that one for eviction, because we just established it.</span>
+<span id="L281"><span class="lineNum">     281</span>              :         // So we should not consider a session as matching a hint if it's active</span>
+<span id="L282"><span class="lineNum">     282</span>              :         // and is the only session to our peer.</span>
+<span id="L283"><span class="lineNum">     283</span>              :         //</span>
+<span id="L284"><span class="lineNum">     284</span>              :         // Checking for the &quot;active&quot; state in addition to the &quot;only session to</span>
+<span id="L285"><span class="lineNum">     285</span>              :         // peer&quot; state allows us to prioritize evicting defuct sessions that</span>
+<span id="L286"><span class="lineNum">     286</span>              :         // match the hint against other defunct sessions.</span>
+<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">         222 :         auto sessionMatchesEvictionHint = [&amp;evictionContext](const SortableSession &amp; session) -&gt; int {</span></span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">         222 :             if (session.mSession-&gt;GetPeer() != evictionContext.GetSessionEvictionHint())</span></span>
+<span id="L289"><span class="lineNum">     289</span>              :             {</span>
+<span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">         180 :                 return false;</span></span>
+<span id="L291"><span class="lineNum">     291</span>              :             }</span>
+<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC">          42 :             bool isOnlyActiveSessionToPeer = session.mSession-&gt;IsActiveSession() &amp;&amp; session.mNumMatchingOnPeer == 0;</span></span>
+<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">          42 :             return !isOnlyActiveSessionToPeer;</span></span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">         111 :         };</span></span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">         111 :         int doesAMatchSessionHint = sessionMatchesEvictionHint(a);</span></span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">         111 :         int doesBMatchSessionHint = sessionMatchesEvictionHint(b);</span></span>
+<span id="L297"><span class="lineNum">     297</span>              : </span>
+<span id="L298"><span class="lineNum">     298</span>              :         //</span>
+<span id="L299"><span class="lineNum">     299</span>              :         // Sorting on Key4</span>
+<span id="L300"><span class="lineNum">     300</span>              :         //</span>
+<span id="L301"><span class="lineNum">     301</span> <span class="tlaGNC">         111 :         if (doesAMatchSessionHint != doesBMatchSessionHint)</span></span>
+<span id="L302"><span class="lineNum">     302</span>              :         {</span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">           8 :             return doesAMatchSessionHint &gt; doesBMatchSessionHint;</span></span>
+<span id="L304"><span class="lineNum">     304</span>              :         }</span>
+<span id="L305"><span class="lineNum">     305</span>              : </span>
+<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">         103 :         int aStateScore = 0, bStateScore = 0;</span></span>
+<span id="L307"><span class="lineNum">     307</span> <span class="tlaGNC">         206 :         auto assignStateScore = [](auto &amp; score, const auto &amp; session) {</span></span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">         206 :             if (session.IsDefunct())</span></span>
+<span id="L309"><span class="lineNum">     309</span>              :             {</span>
+<span id="L310"><span class="lineNum">     310</span> <span class="tlaGNC">           9 :                 score = 2;</span></span>
+<span id="L311"><span class="lineNum">     311</span>              :             }</span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaGNC">         197 :             else if (session.IsActiveSession())</span></span>
+<span id="L313"><span class="lineNum">     313</span>              :             {</span>
+<span id="L314"><span class="lineNum">     314</span> <span class="tlaGNC">         194 :                 score = 1;</span></span>
+<span id="L315"><span class="lineNum">     315</span>              :             }</span>
+<span id="L316"><span class="lineNum">     316</span>              :             else</span>
+<span id="L317"><span class="lineNum">     317</span>              :             {</span>
+<span id="L318"><span class="lineNum">     318</span> <span class="tlaGNC">           3 :                 score = 0;</span></span>
+<span id="L319"><span class="lineNum">     319</span>              :             }</span>
+<span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC">         206 :         };</span></span>
+<span id="L321"><span class="lineNum">     321</span>              : </span>
+<span id="L322"><span class="lineNum">     322</span> <span class="tlaGNC">         103 :         assignStateScore(aStateScore, *a.mSession);</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">         103 :         assignStateScore(bStateScore, *b.mSession);</span></span>
+<span id="L324"><span class="lineNum">     324</span>              : </span>
+<span id="L325"><span class="lineNum">     325</span>              :         //</span>
+<span id="L326"><span class="lineNum">     326</span>              :         // Sorting on Key5</span>
+<span id="L327"><span class="lineNum">     327</span>              :         //</span>
+<span id="L328"><span class="lineNum">     328</span> <span class="tlaGNC">         103 :         if (aStateScore != bStateScore)</span></span>
+<span id="L329"><span class="lineNum">     329</span>              :         {</span>
+<span id="L330"><span class="lineNum">     330</span> <span class="tlaGNC">           4 :             return (aStateScore &gt; bStateScore);</span></span>
+<span id="L331"><span class="lineNum">     331</span>              :         }</span>
+<span id="L332"><span class="lineNum">     332</span>              : </span>
+<span id="L333"><span class="lineNum">     333</span>              :         //</span>
+<span id="L334"><span class="lineNum">     334</span>              :         // Sorting on Key6</span>
+<span id="L335"><span class="lineNum">     335</span>              :         //</span>
+<span id="L336"><span class="lineNum">     336</span> <span class="tlaGNC">          99 :         return (a-&gt;GetLastActivityTime() &lt; b-&gt;GetLastActivityTime());</span></span>
+<span id="L337"><span class="lineNum">     337</span>              :     });</span>
+<span id="L338"><span class="lineNum">     338</span> <span class="tlaGNC">          13 : }</span></span>
+<span id="L339"><span class="lineNum">     339</span>              : </span>
+<span id="L340"><span class="lineNum">     340</span> <span class="tlaGNC">       14906 : Optional&lt;SessionHandle&gt; SecureSessionTable::FindSecureSessionByLocalKey(uint16_t localSessionId)</span></span>
+<span id="L341"><span class="lineNum">     341</span>              : {</span>
+<span id="L342"><span class="lineNum">     342</span> <span class="tlaGNC">       14906 :     SecureSession * result = nullptr;</span></span>
+<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">       14906 :     mEntries.ForEachActiveObject([&amp;](auto session) {</span></span>
+<span id="L344"><span class="lineNum">     344</span> <span class="tlaGNC">       23394 :         if (session-&gt;GetLocalSessionId() == localSessionId)</span></span>
+<span id="L345"><span class="lineNum">     345</span>              :         {</span>
+<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">       14894 :             result = session;</span></span>
+<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">       14894 :             return Loop::Break;</span></span>
+<span id="L348"><span class="lineNum">     348</span>              :         }</span>
+<span id="L349"><span class="lineNum">     349</span> <span class="tlaGNC">        8500 :         return Loop::Continue;</span></span>
+<span id="L350"><span class="lineNum">     350</span>              :     });</span>
+<span id="L351"><span class="lineNum">     351</span> <span class="tlaGNC">       14906 :     return result != nullptr ? MakeOptional&lt;SessionHandle&gt;(*result) : Optional&lt;SessionHandle&gt;::Missing();</span></span>
+<span id="L352"><span class="lineNum">     352</span>              : }</span>
+<span id="L353"><span class="lineNum">     353</span>              : </span>
+<span id="L354"><span class="lineNum">     354</span> <span class="tlaGNC">      133760 : Optional&lt;uint16_t&gt; SecureSessionTable::FindUnusedSessionId()</span></span>
+<span id="L355"><span class="lineNum">     355</span>              : {</span>
+<span id="L356"><span class="lineNum">     356</span> <span class="tlaGNC">      133760 :     uint16_t candidate_base = 0;</span></span>
+<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">      133760 :     uint64_t candidate_mask = 0;</span></span>
+<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC">      133760 :     for (uint32_t i = 0; i &lt;= kMaxSessionID; i += 64)</span></span>
+<span id="L359"><span class="lineNum">     359</span>              :     {</span>
+<span id="L360"><span class="lineNum">     360</span>              :         // candidate_base is the base session ID we are searching from.</span>
+<span id="L361"><span class="lineNum">     361</span>              :         // We have a 64-bit mask anchored at this ID and iterate over the</span>
+<span id="L362"><span class="lineNum">     362</span>              :         // whole session table, setting bits in the mask for in-use IDs.</span>
+<span id="L363"><span class="lineNum">     363</span>              :         // If we can iterate through the entire session table and have</span>
+<span id="L364"><span class="lineNum">     364</span>              :         // any bits clear in the mask, we have available session IDs.</span>
+<span id="L365"><span class="lineNum">     365</span> <span class="tlaGNC">      133760 :         candidate_base = static_cast&lt;uint16_t&gt;(i + mNextSessionId);</span></span>
+<span id="L366"><span class="lineNum">     366</span> <span class="tlaGNC">      133760 :         candidate_mask = 0;</span></span>
+<span id="L367"><span class="lineNum">     367</span>              :         {</span>
+<span id="L368"><span class="lineNum">     368</span> <span class="tlaGNC">      133760 :             uint16_t shift = static_cast&lt;uint16_t&gt;(kUnsecuredSessionId - candidate_base);</span></span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">      133760 :             if (shift &lt;= 63)</span></span>
+<span id="L370"><span class="lineNum">     370</span>              :             {</span>
+<span id="L371"><span class="lineNum">     371</span> <span class="tlaGNC">         126 :                 candidate_mask |= (1ULL &lt;&lt; shift); // kUnsecuredSessionId is never available</span></span>
+<span id="L372"><span class="lineNum">     372</span>              :             }</span>
+<span id="L373"><span class="lineNum">     373</span>              :         }</span>
+<span id="L374"><span class="lineNum">     374</span> <span class="tlaGNC">      133760 :         mEntries.ForEachActiveObject([&amp;](auto session) {</span></span>
+<span id="L375"><span class="lineNum">     375</span> <span class="tlaGNC">     3269854 :             uint16_t shift = static_cast&lt;uint16_t&gt;(session-&gt;GetLocalSessionId() - candidate_base);</span></span>
+<span id="L376"><span class="lineNum">     376</span> <span class="tlaGNC">     3269854 :             if (shift &lt;= 63)</span></span>
+<span id="L377"><span class="lineNum">     377</span>              :             {</span>
+<span id="L378"><span class="lineNum">     378</span> <span class="tlaGNC">        3100 :                 candidate_mask |= (1ULL &lt;&lt; shift);</span></span>
+<span id="L379"><span class="lineNum">     379</span>              :             }</span>
+<span id="L380"><span class="lineNum">     380</span> <span class="tlaGNC">     3269854 :             if (candidate_mask == UINT64_MAX)</span></span>
+<span id="L381"><span class="lineNum">     381</span>              :             {</span>
+<span id="L382"><span class="lineNum">     382</span> <span class="tlaUNC tlaBgUNC">           0 :                 return Loop::Break; // No bits clear means this bucket is full.</span></span>
+<span id="L383"><span class="lineNum">     383</span>              :             }</span>
+<span id="L384"><span class="lineNum">     384</span> <span class="tlaGNC tlaBgGNC">     3269854 :             return Loop::Continue;</span></span>
+<span id="L385"><span class="lineNum">     385</span>              :         });</span>
+<span id="L386"><span class="lineNum">     386</span> <span class="tlaGNC">      133760 :         if (candidate_mask != UINT64_MAX)</span></span>
+<span id="L387"><span class="lineNum">     387</span>              :         {</span>
+<span id="L388"><span class="lineNum">     388</span> <span class="tlaGNC">      133760 :             break; // Any bit clear means we have an available ID in this bucket.</span></span>
+<span id="L389"><span class="lineNum">     389</span>              :         }</span>
+<span id="L390"><span class="lineNum">     390</span>              :     }</span>
+<span id="L391"><span class="lineNum">     391</span> <span class="tlaGNC">      133760 :     if (candidate_mask != UINT64_MAX)</span></span>
+<span id="L392"><span class="lineNum">     392</span>              :     {</span>
+<span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC">      133760 :         uint16_t offset = 0;</span></span>
+<span id="L394"><span class="lineNum">     394</span> <span class="tlaGNC">      133809 :         while (candidate_mask &amp; 1)</span></span>
+<span id="L395"><span class="lineNum">     395</span>              :         {</span>
+<span id="L396"><span class="lineNum">     396</span> <span class="tlaGNC">          49 :             candidate_mask &gt;&gt;= 1;</span></span>
+<span id="L397"><span class="lineNum">     397</span> <span class="tlaGNC">          49 :             ++offset;</span></span>
+<span id="L398"><span class="lineNum">     398</span>              :         }</span>
+<span id="L399"><span class="lineNum">     399</span> <span class="tlaGNC">      133760 :         uint16_t available = static_cast&lt;uint16_t&gt;(candidate_base + offset);</span></span>
+<span id="L400"><span class="lineNum">     400</span> <span class="tlaGNC">      133760 :         return MakeOptional&lt;uint16_t&gt;(available);</span></span>
+<span id="L401"><span class="lineNum">     401</span>              :     }</span>
+<span id="L402"><span class="lineNum">     402</span>              : </span>
+<span id="L403"><span class="lineNum">     403</span> <span class="tlaUNC tlaBgUNC">           0 :     return NullOptional;</span></span>
+<span id="L404"><span class="lineNum">     404</span>              : }</span>
+<span id="L405"><span class="lineNum">     405</span>              : </span>
+<span id="L406"><span class="lineNum">     406</span>              : } // namespace Transport</span>
+<span id="L407"><span class="lineNum">     407</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

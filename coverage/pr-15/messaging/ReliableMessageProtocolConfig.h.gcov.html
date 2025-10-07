@@ -1,0 +1,365 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - messaging/ReliableMessageProtocolConfig.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">messaging</a> - ReliableMessageProtocolConfig.h<span style="font-size: 80%;"> (source / <a href="ReliableMessageProtocolConfig.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntry">8</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">2</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2020-2021 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    Copyright (c) 2017 Nest Labs, Inc.</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    All rights reserved.</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L17"><span class="lineNum">      17</span>              :  *    limitations under the License.</span>
+<span id="L18"><span class="lineNum">      18</span>              :  */</span>
+<span id="L19"><span class="lineNum">      19</span>              : </span>
+<span id="L20"><span class="lineNum">      20</span>              : /**</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *    @file</span>
+<span id="L22"><span class="lineNum">      22</span>              :  *      This file defines the configuration parameters that are required</span>
+<span id="L23"><span class="lineNum">      23</span>              :  *      for the CHIP Reliable Messaging Protocol.</span>
+<span id="L24"><span class="lineNum">      24</span>              :  *</span>
+<span id="L25"><span class="lineNum">      25</span>              :  */</span>
+<span id="L26"><span class="lineNum">      26</span>              : #pragma once</span>
+<span id="L27"><span class="lineNum">      27</span>              : </span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/core/CHIPConfig.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;lib/core/Optional.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;system/SystemClock.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;system/SystemConfig.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : </span>
+<span id="L33"><span class="lineNum">      33</span>              : namespace chip {</span>
+<span id="L34"><span class="lineNum">      34</span>              : </span>
+<span id="L35"><span class="lineNum">      35</span>              : /**</span>
+<span id="L36"><span class="lineNum">      36</span>              :  *  @def CHIP_CONFIG_MRP_LOCAL_ACTIVE_RETRY_INTERVAL</span>
+<span id="L37"><span class="lineNum">      37</span>              :  *</span>
+<span id="L38"><span class="lineNum">      38</span>              :  *  @brief Base retry interval of the present node when it is in the active state.</span>
+<span id="L39"><span class="lineNum">      39</span>              :  *</span>
+<span id="L40"><span class="lineNum">      40</span>              :  *  Base interval that a peer node should use to calculate the retransmission</span>
+<span id="L41"><span class="lineNum">      41</span>              :  *  timeout when it sends a message to the present node and the present node is</span>
+<span id="L42"><span class="lineNum">      42</span>              :  *  perceived by the peer as active.</span>
+<span id="L43"><span class="lineNum">      43</span>              :  *</span>
+<span id="L44"><span class="lineNum">      44</span>              :  *  This value is announced to the peer using SAI (Session Active Interval) key</span>
+<span id="L45"><span class="lineNum">      45</span>              :  *  in the advertised DNS Service Discovery TXT records. Additionally, it is</span>
+<span id="L46"><span class="lineNum">      46</span>              :  *  exchanged in the initial phase of the PASE/CASE session establishment.</span>
+<span id="L47"><span class="lineNum">      47</span>              :  *</span>
+<span id="L48"><span class="lineNum">      48</span>              :  *  In the case of a Thread device, the default value is increased to limit the</span>
+<span id="L49"><span class="lineNum">      49</span>              :  *  possibility of spurious retransmissions. The assumption is that the average</span>
+<span id="L50"><span class="lineNum">      50</span>              :  *  round-trip time of a big request-response pair is substantially longer in</span>
+<span id="L51"><span class="lineNum">      51</span>              :  *  a Thread network that potentially constists of multiple intermediate hops.</span>
+<span id="L52"><span class="lineNum">      52</span>              :  */</span>
+<span id="L53"><span class="lineNum">      53</span>              : #ifndef CHIP_CONFIG_MRP_LOCAL_ACTIVE_RETRY_INTERVAL</span>
+<span id="L54"><span class="lineNum">      54</span>              : #if CHIP_ENABLE_OPENTHREAD &amp;&amp; !CHIP_DEVICE_LAYER_TARGET_LINUX</span>
+<span id="L55"><span class="lineNum">      55</span>              : #define CHIP_CONFIG_MRP_LOCAL_ACTIVE_RETRY_INTERVAL (2000_ms32)</span>
+<span id="L56"><span class="lineNum">      56</span>              : #else</span>
+<span id="L57"><span class="lineNum">      57</span>              : #define CHIP_CONFIG_MRP_LOCAL_ACTIVE_RETRY_INTERVAL (300_ms32)</span>
+<span id="L58"><span class="lineNum">      58</span>              : #endif</span>
+<span id="L59"><span class="lineNum">      59</span>              : #endif // CHIP_CONFIG_MRP_LOCAL_ACTIVE_RETRY_INTERVAL &amp;&amp; !CHIP_DEVICE_LAYER_TARGET_LINUX</span>
+<span id="L60"><span class="lineNum">      60</span>              : </span>
+<span id="L61"><span class="lineNum">      61</span>              : /**</span>
+<span id="L62"><span class="lineNum">      62</span>              :  *  @def CHIP_CONFIG_MRP_LOCAL_IDLE_RETRY_INTERVAL</span>
+<span id="L63"><span class="lineNum">      63</span>              :  *</span>
+<span id="L64"><span class="lineNum">      64</span>              :  *  @brief Base retry interval of the present node when it is in the idle state.</span>
+<span id="L65"><span class="lineNum">      65</span>              :  *</span>
+<span id="L66"><span class="lineNum">      66</span>              :  *  Base interval that a peer node should use to calculate the retransmission</span>
+<span id="L67"><span class="lineNum">      67</span>              :  *  timeout when it sends a message to the present node and the present node is</span>
+<span id="L68"><span class="lineNum">      68</span>              :  *  perceived by the peer as idle.</span>
+<span id="L69"><span class="lineNum">      69</span>              :  *</span>
+<span id="L70"><span class="lineNum">      70</span>              :  *  This value is announced to the peer using SII (Session Idle Interval) key</span>
+<span id="L71"><span class="lineNum">      71</span>              :  *  in the advertised DNS Service Discovery TXT records. Additionally, it is</span>
+<span id="L72"><span class="lineNum">      72</span>              :  *  exchanged in the initial phase of the PASE/CASE session establishment.</span>
+<span id="L73"><span class="lineNum">      73</span>              :  *</span>
+<span id="L74"><span class="lineNum">      74</span>              :  *  In the case of a Thread device, the default value is increased to limit the</span>
+<span id="L75"><span class="lineNum">      75</span>              :  *  possibility of spurious retransmissions. The assumption is that the average</span>
+<span id="L76"><span class="lineNum">      76</span>              :  *  round-trip time of a big request-response pair is substantially longer in</span>
+<span id="L77"><span class="lineNum">      77</span>              :  *  a Thread network that potentially constists of multiple intermediate hops.</span>
+<span id="L78"><span class="lineNum">      78</span>              :  */</span>
+<span id="L79"><span class="lineNum">      79</span>              : #ifndef CHIP_CONFIG_MRP_LOCAL_IDLE_RETRY_INTERVAL</span>
+<span id="L80"><span class="lineNum">      80</span>              : #if CHIP_ENABLE_OPENTHREAD &amp;&amp; !CHIP_DEVICE_LAYER_TARGET_LINUX</span>
+<span id="L81"><span class="lineNum">      81</span>              : #define CHIP_CONFIG_MRP_LOCAL_IDLE_RETRY_INTERVAL (2000_ms32)</span>
+<span id="L82"><span class="lineNum">      82</span>              : #else</span>
+<span id="L83"><span class="lineNum">      83</span>              : #define CHIP_CONFIG_MRP_LOCAL_IDLE_RETRY_INTERVAL (500_ms32)</span>
+<span id="L84"><span class="lineNum">      84</span>              : #endif</span>
+<span id="L85"><span class="lineNum">      85</span>              : #endif // CHIP_CONFIG_MRP_LOCAL_IDLE_RETRY_INTERVAL &amp;&amp; !CHIP_DEVICE_LAYER_TARGET_LINUX</span>
+<span id="L86"><span class="lineNum">      86</span>              : </span>
+<span id="L87"><span class="lineNum">      87</span>              : /**</span>
+<span id="L88"><span class="lineNum">      88</span>              :  *  @def CHIP_CONFIG_RMP_DEFAULT_ACK_TIMEOUT</span>
+<span id="L89"><span class="lineNum">      89</span>              :  *</span>
+<span id="L90"><span class="lineNum">      90</span>              :  *  @brief</span>
+<span id="L91"><span class="lineNum">      91</span>              :  *    The default acknowledgment timeout in milliseconds.</span>
+<span id="L92"><span class="lineNum">      92</span>              :  *</span>
+<span id="L93"><span class="lineNum">      93</span>              :  */</span>
+<span id="L94"><span class="lineNum">      94</span>              : #ifndef CHIP_CONFIG_RMP_DEFAULT_ACK_TIMEOUT</span>
+<span id="L95"><span class="lineNum">      95</span>              : #define CHIP_CONFIG_RMP_DEFAULT_ACK_TIMEOUT (200_ms32)</span>
+<span id="L96"><span class="lineNum">      96</span>              : #endif // CHIP_CONFIG_RMP_DEFAULT_ACK_TIMEOUT</span>
+<span id="L97"><span class="lineNum">      97</span>              : </span>
+<span id="L98"><span class="lineNum">      98</span>              : /**</span>
+<span id="L99"><span class="lineNum">      99</span>              :  *  @def CHIP_CONFIG_RESOLVE_PEER_ON_FIRST_TRANSMIT_FAILURE</span>
+<span id="L100"><span class="lineNum">     100</span>              :  *</span>
+<span id="L101"><span class="lineNum">     101</span>              :  *  @brief</span>
+<span id="L102"><span class="lineNum">     102</span>              :  *    Should an address lookup of the peer happen on every first message that fails</span>
+<span id="L103"><span class="lineNum">     103</span>              :  *    to send on the link.</span>
+<span id="L104"><span class="lineNum">     104</span>              :  *</span>
+<span id="L105"><span class="lineNum">     105</span>              :  *  The default value to not perform lookup was selected because most implementations</span>
+<span id="L106"><span class="lineNum">     106</span>              :  *  of address lookup are not cache the and a request is sent on the link. Failing</span>
+<span id="L107"><span class="lineNum">     107</span>              :  *  to deliver the first message is far more likely to happen due to lossy link</span>
+<span id="L108"><span class="lineNum">     108</span>              :  *  than an actual address change where the peer did not reset. In the lossy link</span>
+<span id="L109"><span class="lineNum">     109</span>              :  *  situation, doing further DNS resolutions on a degraded link can exacerbate that</span>
+<span id="L110"><span class="lineNum">     110</span>              :  *  problem greatly. Additionally, every message that arrives from a peer updates the</span>
+<span id="L111"><span class="lineNum">     111</span>              :  *  address. If the peer has fallen off the link due to any other reason, a re-resolve</span>
+<span id="L112"><span class="lineNum">     112</span>              :  *  may not achieve an address that is reachable, even if a resolve response occurs.</span>
+<span id="L113"><span class="lineNum">     113</span>              :  */</span>
+<span id="L114"><span class="lineNum">     114</span>              : #ifndef CHIP_CONFIG_RESOLVE_PEER_ON_FIRST_TRANSMIT_FAILURE</span>
+<span id="L115"><span class="lineNum">     115</span>              : #define CHIP_CONFIG_RESOLVE_PEER_ON_FIRST_TRANSMIT_FAILURE 0</span>
+<span id="L116"><span class="lineNum">     116</span>              : #endif // CHIP_CONFIG_RESOLVE_PEER_ON_FIRST_TRANSMIT_FAILURE</span>
+<span id="L117"><span class="lineNum">     117</span>              : </span>
+<span id="L118"><span class="lineNum">     118</span>              : /**</span>
+<span id="L119"><span class="lineNum">     119</span>              :  *  @def CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE</span>
+<span id="L120"><span class="lineNum">     120</span>              :  *</span>
+<span id="L121"><span class="lineNum">     121</span>              :  *  @brief</span>
+<span id="L122"><span class="lineNum">     122</span>              :  *    The default size of the ReliableMessageProtocol retransmission table.</span>
+<span id="L123"><span class="lineNum">     123</span>              :  *</span>
+<span id="L124"><span class="lineNum">     124</span>              :  */</span>
+<span id="L125"><span class="lineNum">     125</span>              : #ifndef CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE</span>
+<span id="L126"><span class="lineNum">     126</span>              : #if CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L127"><span class="lineNum">     127</span>              : </span>
+<span id="L128"><span class="lineNum">     128</span>              : #if !CHIP_SYSTEM_CONFIG_LWIP_PBUF_FROM_CUSTOM_POOL &amp;&amp; PBUF_POOL_SIZE != 0</span>
+<span id="L129"><span class="lineNum">     129</span>              : // Configure the table size to be less than the number of packet buffers to make sure</span>
+<span id="L130"><span class="lineNum">     130</span>              : // that not all buffers are held by the retransmission entries, in which case the device</span>
+<span id="L131"><span class="lineNum">     131</span>              : // is unable to receive an ACK and hence becomes unavailable until a message times out.</span>
+<span id="L132"><span class="lineNum">     132</span>              : #define CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE std::min(PBUF_POOL_SIZE - 1, CHIP_CONFIG_MAX_EXCHANGE_CONTEXTS)</span>
+<span id="L133"><span class="lineNum">     133</span>              : #else</span>
+<span id="L134"><span class="lineNum">     134</span>              : #define CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE CHIP_CONFIG_MAX_EXCHANGE_CONTEXTS</span>
+<span id="L135"><span class="lineNum">     135</span>              : #endif // !CHIP_SYSTEM_CONFIG_LWIP_PBUF_FROM_CUSTOM_POOL &amp;&amp; PBUF_POOL_SIZE != 0</span>
+<span id="L136"><span class="lineNum">     136</span>              : </span>
+<span id="L137"><span class="lineNum">     137</span>              : #else // CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L138"><span class="lineNum">     138</span>              : </span>
+<span id="L139"><span class="lineNum">     139</span>              : #if CHIP_SYSTEM_CONFIG_PACKETBUFFER_POOL_SIZE != 0</span>
+<span id="L140"><span class="lineNum">     140</span>              : // Configure the table size to be less than the number of packet buffers to make sure</span>
+<span id="L141"><span class="lineNum">     141</span>              : // that not all buffers are held by the retransmission entries, in which case the device</span>
+<span id="L142"><span class="lineNum">     142</span>              : // is unable to receive an ACK and hence becomes unavailable until a message times out.</span>
+<span id="L143"><span class="lineNum">     143</span>              : #define CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE                                                                                         \</span>
+<span id="L144"><span class="lineNum">     144</span>              :     std::min(CHIP_SYSTEM_CONFIG_PACKETBUFFER_POOL_SIZE - 1, CHIP_CONFIG_MAX_EXCHANGE_CONTEXTS)</span>
+<span id="L145"><span class="lineNum">     145</span>              : #else</span>
+<span id="L146"><span class="lineNum">     146</span>              : #define CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE CHIP_CONFIG_MAX_EXCHANGE_CONTEXTS</span>
+<span id="L147"><span class="lineNum">     147</span>              : #endif // CHIP_SYSTEM_CONFIG_PACKETBUFFER_POOL_SIZE != 0</span>
+<span id="L148"><span class="lineNum">     148</span>              : </span>
+<span id="L149"><span class="lineNum">     149</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L150"><span class="lineNum">     150</span>              : #endif // CHIP_CONFIG_RMP_RETRANS_TABLE_SIZE</span>
+<span id="L151"><span class="lineNum">     151</span>              : </span>
+<span id="L152"><span class="lineNum">     152</span>              : /**</span>
+<span id="L153"><span class="lineNum">     153</span>              :  *  @def CHIP_CONFIG_RMP_DEFAULT_MAX_RETRANS</span>
+<span id="L154"><span class="lineNum">     154</span>              :  *</span>
+<span id="L155"><span class="lineNum">     155</span>              :  *  @brief</span>
+<span id="L156"><span class="lineNum">     156</span>              :  *    The maximum number of retransmissions before giving up.</span>
+<span id="L157"><span class="lineNum">     157</span>              :  *</span>
+<span id="L158"><span class="lineNum">     158</span>              :  */</span>
+<span id="L159"><span class="lineNum">     159</span>              : #ifndef CHIP_CONFIG_RMP_DEFAULT_MAX_RETRANS</span>
+<span id="L160"><span class="lineNum">     160</span>              : #define CHIP_CONFIG_RMP_DEFAULT_MAX_RETRANS (4)</span>
+<span id="L161"><span class="lineNum">     161</span>              : #endif // CHIP_CONFIG_RMP_DEFAULT_MAX_RETRANS</span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span>              : /**</span>
+<span id="L164"><span class="lineNum">     164</span>              :  *  @def CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST</span>
+<span id="L165"><span class="lineNum">     165</span>              :  *</span>
+<span id="L166"><span class="lineNum">     166</span>              :  *  @brief</span>
+<span id="L167"><span class="lineNum">     167</span>              :  *    A constant value that should be added to the calculated retransmission</span>
+<span id="L168"><span class="lineNum">     168</span>              :  *    timeout when the present node transmits a message.</span>
+<span id="L169"><span class="lineNum">     169</span>              :  *</span>
+<span id="L170"><span class="lineNum">     170</span>              :  *  The purpose for this constant is to limit the possibility of spurious</span>
+<span id="L171"><span class="lineNum">     171</span>              :  *  retransmissions in the scenario in which a sender that operates in a high-</span>
+<span id="L172"><span class="lineNum">     172</span>              :  *  latency network (such as Thread) sends a message to a receiver that operates</span>
+<span id="L173"><span class="lineNum">     173</span>              :  *  in a low-latency network (such as Wi-Fi). In this scenario, the SAI and SII</span>
+<span id="L174"><span class="lineNum">     174</span>              :  *  parameters advertised by the receiver are low although the average round-</span>
+<span id="L175"><span class="lineNum">     175</span>              :  *  trip time of a big request-response pair is long due to the nature of the</span>
+<span id="L176"><span class="lineNum">     176</span>              :  *  sender.</span>
+<span id="L177"><span class="lineNum">     177</span>              :  */</span>
+<span id="L178"><span class="lineNum">     178</span>              : #ifndef CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST</span>
+<span id="L179"><span class="lineNum">     179</span>              : #if CHIP_ENABLE_OPENTHREAD &amp;&amp; !CHIP_DEVICE_LAYER_TARGET_LINUX</span>
+<span id="L180"><span class="lineNum">     180</span>              : #define CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST (1500_ms)</span>
+<span id="L181"><span class="lineNum">     181</span>              : #else</span>
+<span id="L182"><span class="lineNum">     182</span>              : #define CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST (0_ms)</span>
+<span id="L183"><span class="lineNum">     183</span>              : #endif</span>
+<span id="L184"><span class="lineNum">     184</span>              : #endif // CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST</span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span>              : inline constexpr System::Clock::Milliseconds32 kDefaultActiveTime = System::Clock::Milliseconds16(4000);</span>
+<span id="L187"><span class="lineNum">     187</span>              : </span>
+<span id="L188"><span class="lineNum">     188</span>              : /**</span>
+<span id="L189"><span class="lineNum">     189</span>              :  *  @brief</span>
+<span id="L190"><span class="lineNum">     190</span>              :  *    The ReliableMessageProtocol configuration.</span>
+<span id="L191"><span class="lineNum">     191</span>              :  */</span>
+<span id="L192"><span class="lineNum">     192</span>              : struct ReliableMessageProtocolConfig</span>
+<span id="L193"><span class="lineNum">     193</span>              : {</span>
+<span id="L194"><span class="lineNum">     194</span> <span class="tlaGNC tlaBgGNC">      157531 :     constexpr ReliableMessageProtocolConfig(System::Clock::Milliseconds32 idleInterval,</span></span>
+<span id="L195"><span class="lineNum">     195</span>              :                                             System::Clock::Milliseconds32 activeInterval,</span>
+<span id="L196"><span class="lineNum">     196</span> <span class="tlaGNC">      157531 :                                             System::Clock::Milliseconds16 activeThreshold = kDefaultActiveTime) :</span></span>
+<span id="L197"><span class="lineNum">     197</span> <span class="tlaGNC">      157531 :         mIdleRetransTimeout(idleInterval),</span></span>
+<span id="L198"><span class="lineNum">     198</span> <span class="tlaGNC">      157531 :         mActiveRetransTimeout(activeInterval), mActiveThresholdTime(activeThreshold)</span></span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC">      157531 :     {}</span></span>
+<span id="L200"><span class="lineNum">     200</span>              : </span>
+<span id="L201"><span class="lineNum">     201</span>              :     // Configurable timeout in msec for retransmission of the first sent message.</span>
+<span id="L202"><span class="lineNum">     202</span>              :     System::Clock::Milliseconds32 mIdleRetransTimeout;</span>
+<span id="L203"><span class="lineNum">     203</span>              : </span>
+<span id="L204"><span class="lineNum">     204</span>              :     // Configurable timeout in msec for retransmission of all subsequent messages.</span>
+<span id="L205"><span class="lineNum">     205</span>              :     System::Clock::Milliseconds32 mActiveRetransTimeout;</span>
+<span id="L206"><span class="lineNum">     206</span>              : </span>
+<span id="L207"><span class="lineNum">     207</span>              :     // Configurable amount of time the node SHOULD stay active after network activity.</span>
+<span id="L208"><span class="lineNum">     208</span>              :     System::Clock::Milliseconds16 mActiveThresholdTime;</span>
+<span id="L209"><span class="lineNum">     209</span>              : </span>
+<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">       11533 :     bool operator==(const ReliableMessageProtocolConfig &amp; that) const</span></span>
+<span id="L211"><span class="lineNum">     211</span>              :     {</span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">       22984 :         return mIdleRetransTimeout == that.mIdleRetransTimeout &amp;&amp; mActiveRetransTimeout == that.mActiveRetransTimeout &amp;&amp;</span></span>
+<span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">       22984 :             mActiveThresholdTime == that.mActiveThresholdTime;</span></span>
+<span id="L214"><span class="lineNum">     214</span>              :     }</span>
+<span id="L215"><span class="lineNum">     215</span>              : </span>
+<span id="L216"><span class="lineNum">     216</span>              : #if CHIP_DEVICE_CONFIG_ENABLE_DYNAMIC_MRP_CONFIG</span>
+<span id="L217"><span class="lineNum">     217</span>              :     /**</span>
+<span id="L218"><span class="lineNum">     218</span>              :      * Set the local MRP configuration for the node.</span>
+<span id="L219"><span class="lineNum">     219</span>              :      *</span>
+<span id="L220"><span class="lineNum">     220</span>              :      * Passing a &quot;no value&quot; optional resets to the compiled-in settings</span>
+<span id="L221"><span class="lineNum">     221</span>              :      * (CHIP_CONFIG_MRP_LOCAL_IDLE_RETRY_INTERVAL and</span>
+<span id="L222"><span class="lineNum">     222</span>              :      * CHIP_CONFIG_MRP_LOCAL_ACTIVE_RETRY_INTERVAL).</span>
+<span id="L223"><span class="lineNum">     223</span>              :      *</span>
+<span id="L224"><span class="lineNum">     224</span>              :      * Otherwise the value set via this function is used instead of the</span>
+<span id="L225"><span class="lineNum">     225</span>              :      * compiled-in settings, but can still be overridden by ICD configuration</span>
+<span id="L226"><span class="lineNum">     226</span>              :      * and other things that would override the compiled-in settings.</span>
+<span id="L227"><span class="lineNum">     227</span>              :      *</span>
+<span id="L228"><span class="lineNum">     228</span>              :      * Changing the value via this function does not affect any existing</span>
+<span id="L229"><span class="lineNum">     229</span>              :      * sessions or exchanges, but does affect the values we communicate to our</span>
+<span id="L230"><span class="lineNum">     230</span>              :      * peer during future session establishments.</span>
+<span id="L231"><span class="lineNum">     231</span>              :      *</span>
+<span id="L232"><span class="lineNum">     232</span>              :      * @return whether the local MRP configuration actually changed as a result</span>
+<span id="L233"><span class="lineNum">     233</span>              :      *         of this call.  If it did, callers may need to reset DNS-SD</span>
+<span id="L234"><span class="lineNum">     234</span>              :      *         advertising to advertise the updated values.</span>
+<span id="L235"><span class="lineNum">     235</span>              :      */</span>
+<span id="L236"><span class="lineNum">     236</span>              :     static bool SetLocalMRPConfig(const Optional&lt;ReliableMessageProtocolConfig&gt; &amp; localMRPConfig);</span>
+<span id="L237"><span class="lineNum">     237</span>              : #endif // CHIP_DEVICE_CONFIG_ENABLE_DYNAMIC_MRP_CONFIG</span>
+<span id="L238"><span class="lineNum">     238</span>              : };</span>
+<span id="L239"><span class="lineNum">     239</span>              : </span>
+<span id="L240"><span class="lineNum">     240</span>              : /// @brief The default MRP config. The value is defined by spec, and shall be same for all implementations,</span>
+<span id="L241"><span class="lineNum">     241</span>              : ReliableMessageProtocolConfig GetDefaultMRPConfig();</span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span>              : /**</span>
+<span id="L244"><span class="lineNum">     244</span>              :  *  @brief  The custom value of MRP config for the platform.</span>
+<span id="L245"><span class="lineNum">     245</span>              :  *  @return Missing   If the value is same as default value defined by spec</span>
+<span id="L246"><span class="lineNum">     246</span>              :  *          Value     The custom value for the platform</span>
+<span id="L247"><span class="lineNum">     247</span>              :  *</span>
+<span id="L248"><span class="lineNum">     248</span>              :  *  @note   This value is not used by our MRP manager. The value is advertised via mDNS or during PASE/CASE paring, and our peers</span>
+<span id="L249"><span class="lineNum">     249</span>              :  *          use it when communicating with us.</span>
+<span id="L250"><span class="lineNum">     250</span>              :  */</span>
+<span id="L251"><span class="lineNum">     251</span>              : Optional&lt;ReliableMessageProtocolConfig&gt; GetLocalMRPConfig();</span>
+<span id="L252"><span class="lineNum">     252</span>              : </span>
+<span id="L253"><span class="lineNum">     253</span>              : /**</span>
+<span id="L254"><span class="lineNum">     254</span>              :  * @brief</span>
+<span id="L255"><span class="lineNum">     255</span>              :  * Returns the maximum transmission time depending on the last activity time.</span>
+<span id="L256"><span class="lineNum">     256</span>              :  *</span>
+<span id="L257"><span class="lineNum">     257</span>              :  * @param[in] activeInterval    The active interval to use for the backoff calculation.</span>
+<span id="L258"><span class="lineNum">     258</span>              :  * @param[in] idleInterval      The idle interval to use for the backoff calculation.</span>
+<span id="L259"><span class="lineNum">     259</span>              :  * @param[in] lastActivityTime  The last time some activity has been recorded.</span>
+<span id="L260"><span class="lineNum">     260</span>              :  * @param[in] activityThreshold The activity threshold for a node to be considered active.</span>
+<span id="L261"><span class="lineNum">     261</span>              :  * @param[in] isFirstMessageOnExchange Indicates whether this is for the initial message on an exchange.</span>
+<span id="L262"><span class="lineNum">     262</span>              :  * @return The maximum transmission time</span>
+<span id="L263"><span class="lineNum">     263</span>              :  */</span>
+<span id="L264"><span class="lineNum">     264</span>              : System::Clock::Timeout GetRetransmissionTimeout(System::Clock::Timeout activeInterval, System::Clock::Timeout idleInterval,</span>
+<span id="L265"><span class="lineNum">     265</span>              :                                                 System::Clock::Timeout lastActivityTime, System::Clock::Timeout activityThreshold,</span>
+<span id="L266"><span class="lineNum">     266</span>              :                                                 bool isFirstMessageOnExchange);</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span>              : #if CONFIG_BUILD_FOR_HOST_UNIT_TEST</span>
+<span id="L269"><span class="lineNum">     269</span>              : </span>
+<span id="L270"><span class="lineNum">     270</span>              : /**</span>
+<span id="L271"><span class="lineNum">     271</span>              :  * @brief</span>
+<span id="L272"><span class="lineNum">     272</span>              :  *</span>
+<span id="L273"><span class="lineNum">     273</span>              :  * Overrides the local idle and active retransmission timeout parameters (which are usually set through compile</span>
+<span id="L274"><span class="lineNum">     274</span>              :  * time defines). This is reserved for tests that need the ability to set these at runtime to make certain test scenarios possible.</span>
+<span id="L275"><span class="lineNum">     275</span>              :  *</span>
+<span id="L276"><span class="lineNum">     276</span>              :  */</span>
+<span id="L277"><span class="lineNum">     277</span>              : void OverrideLocalMRPConfig(System::Clock::Timeout idleRetransTimeout, System::Clock::Timeout activeRetransTimeout,</span>
+<span id="L278"><span class="lineNum">     278</span>              :                             System::Clock::Timeout activeThresholdTime = kDefaultActiveTime);</span>
+<span id="L279"><span class="lineNum">     279</span>              : </span>
+<span id="L280"><span class="lineNum">     280</span>              : /**</span>
+<span id="L281"><span class="lineNum">     281</span>              :  * @brief</span>
+<span id="L282"><span class="lineNum">     282</span>              :  *</span>
+<span id="L283"><span class="lineNum">     283</span>              :  * Disables the overrides set previously in OverrideLocalMRPConfig().</span>
+<span id="L284"><span class="lineNum">     284</span>              :  *</span>
+<span id="L285"><span class="lineNum">     285</span>              :  */</span>
+<span id="L286"><span class="lineNum">     286</span>              : void ClearLocalMRPConfigOverride();</span>
+<span id="L287"><span class="lineNum">     287</span>              : #endif</span>
+<span id="L288"><span class="lineNum">     288</span>              : </span>
+<span id="L289"><span class="lineNum">     289</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

@@ -1,0 +1,679 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - messaging/ReliableMessageMgr.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">messaging</a> - ReliableMessageMgr.cpp<span style="font-size: 80%;"> (source / <a href="ReliableMessageMgr.cpp.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">95.0&nbsp;%</td>
+            <td class="headerCovTableEntry">221</td>
+            <td class="headerCovTableEntry">210</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">33</td>
+            <td class="headerCovTableEntry">33</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *    Copyright (c) 2020-2021 Project CHIP Authors</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    All rights reserved.</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : </span>
+<span id="L18"><span class="lineNum">      18</span>              : /**</span>
+<span id="L19"><span class="lineNum">      19</span>              :  *    @file</span>
+<span id="L20"><span class="lineNum">      20</span>              :  *      This file implements the CHIP reliable message protocol.</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *</span>
+<span id="L22"><span class="lineNum">      22</span>              :  */</span>
+<span id="L23"><span class="lineNum">      23</span>              : </span>
+<span id="L24"><span class="lineNum">      24</span>              : #include &lt;errno.h&gt;</span>
+<span id="L25"><span class="lineNum">      25</span>              : #include &lt;inttypes.h&gt;</span>
+<span id="L26"><span class="lineNum">      26</span>              : </span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;app/icd/server/ICDServerConfig.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/support/BitFlags.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;lib/support/CHIPFaultInjection.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;lib/support/CodeUtils.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;lib/support/logging/CHIPLogging.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;messaging/ErrorCategory.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;messaging/ExchangeMessageDispatch.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : #include &lt;messaging/ExchangeMgr.h&gt;</span>
+<span id="L35"><span class="lineNum">      35</span>              : #include &lt;messaging/Flags.h&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              : #include &lt;messaging/ReliableMessageContext.h&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : #include &lt;messaging/ReliableMessageMgr.h&gt;</span>
+<span id="L38"><span class="lineNum">      38</span>              : #include &lt;platform/ConnectivityManager.h&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              : #include &lt;tracing/metric_event.h&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : </span>
+<span id="L41"><span class="lineNum">      41</span>              : #if CHIP_CONFIG_ENABLE_ICD_SERVER</span>
+<span id="L42"><span class="lineNum">      42</span>              : #include &lt;app/icd/server/ICDConfigurationData.h&gt; // nogncheck</span>
+<span id="L43"><span class="lineNum">      43</span>              : #include &lt;app/icd/server/ICDNotifier.h&gt;          // nogncheck</span>
+<span id="L44"><span class="lineNum">      44</span>              : #endif</span>
+<span id="L45"><span class="lineNum">      45</span>              : </span>
+<span id="L46"><span class="lineNum">      46</span>              : using namespace chip::System::Clock::Literals;</span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              : namespace chip {</span>
+<span id="L49"><span class="lineNum">      49</span>              : namespace Messaging {</span>
+<span id="L50"><span class="lineNum">      50</span>              : </span>
+<span id="L51"><span class="lineNum">      51</span>              : System::Clock::Timeout ReliableMessageMgr::sAdditionalMRPBackoffTime = CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST;</span>
+<span id="L52"><span class="lineNum">      52</span>              : </span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC tlaBgGNC">       12715 : ReliableMessageMgr::RetransTableEntry::RetransTableEntry(ReliableMessageContext * rc) :</span></span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">       12715 :     ec(*rc-&gt;GetExchangeContext()), nextRetransTime(0), sendCount(0)</span></span>
+<span id="L55"><span class="lineNum">      55</span>              : {</span>
+<span id="L56"><span class="lineNum">      56</span> <span class="tlaGNC">       12715 :     ec-&gt;SetWaitingForAck(true);</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">       12715 : }</span></span>
+<span id="L58"><span class="lineNum">      58</span>              : </span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">       12715 : ReliableMessageMgr::RetransTableEntry::~RetransTableEntry()</span></span>
+<span id="L60"><span class="lineNum">      60</span>              : {</span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">       12715 :     ec-&gt;SetWaitingForAck(false);</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">       12715 : }</span></span>
+<span id="L63"><span class="lineNum">      63</span>              : </span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">         454 : ReliableMessageMgr::ReliableMessageMgr(ObjectPool&lt;ExchangeContext, CHIP_CONFIG_MAX_EXCHANGE_CONTEXTS&gt; &amp; contextPool) :</span></span>
+<span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">         454 :     mContextPool(contextPool), mSystemLayer(nullptr)</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">         454 : {}</span></span>
+<span id="L67"><span class="lineNum">      67</span>              : </span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">         454 : ReliableMessageMgr::~ReliableMessageMgr() {}</span></span>
+<span id="L69"><span class="lineNum">      69</span>              : </span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">         388 : void ReliableMessageMgr::Init(chip::System::Layer * systemLayer)</span></span>
+<span id="L71"><span class="lineNum">      71</span>              : {</span>
+<span id="L72"><span class="lineNum">      72</span> <span class="tlaGNC">         388 :     mSystemLayer = systemLayer;</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">         388 : }</span></span>
+<span id="L74"><span class="lineNum">      74</span>              : </span>
+<span id="L75"><span class="lineNum">      75</span> <span class="tlaGNC">         388 : void ReliableMessageMgr::Shutdown()</span></span>
+<span id="L76"><span class="lineNum">      76</span>              : {</span>
+<span id="L77"><span class="lineNum">      77</span> <span class="tlaGNC">         388 :     StopTimer();</span></span>
+<span id="L78"><span class="lineNum">      78</span>              : </span>
+<span id="L79"><span class="lineNum">      79</span>              :     // Clear the retransmit table</span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">         388 :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span></span>
+<span id="L81"><span class="lineNum">      81</span> <span class="tlaGNC">           8 :         mRetransTable.ReleaseObject(entry);</span></span>
+<span id="L82"><span class="lineNum">      82</span> <span class="tlaGNC">           8 :         return Loop::Continue;</span></span>
+<span id="L83"><span class="lineNum">      83</span>              :     });</span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">         388 :     mSystemLayer = nullptr;</span></span>
+<span id="L86"><span class="lineNum">      86</span> <span class="tlaGNC">         388 : }</span></span>
+<span id="L87"><span class="lineNum">      87</span>              : </span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC">       38252 : void ReliableMessageMgr::TicklessDebugDumpRetransTable(const char * log)</span></span>
+<span id="L89"><span class="lineNum">      89</span>              : {</span>
+<span id="L90"><span class="lineNum">      90</span>              : #if defined(RMP_TICKLESS_DEBUG)</span>
+<span id="L91"><span class="lineNum">      91</span>              :     ChipLogDetail(ExchangeManager, &quot;%s&quot;, log);</span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span>
+<span id="L94"><span class="lineNum">      94</span>              :         ChipLogDetail(ExchangeManager,</span>
+<span id="L95"><span class="lineNum">      95</span>              :                       &quot;EC:&quot; ChipLogFormatExchange &quot; MessageCounter:&quot; ChipLogFormatMessageCounter</span>
+<span id="L96"><span class="lineNum">      96</span>              :                       &quot; NextRetransTimeCtr: 0x&quot; ChipLogFormatX64,</span>
+<span id="L97"><span class="lineNum">      97</span>              :                       ChipLogValueExchange(&amp;entry-&gt;ec.Get()), entry-&gt;retainedBuf.GetMessageCounter(),</span>
+<span id="L98"><span class="lineNum">      98</span>              :                       ChipLogValueX64(entry-&gt;nextRetransTime.count()));</span>
+<span id="L99"><span class="lineNum">      99</span>              :         return Loop::Continue;</span>
+<span id="L100"><span class="lineNum">     100</span>              :     });</span>
+<span id="L101"><span class="lineNum">     101</span>              : #endif</span>
+<span id="L102"><span class="lineNum">     102</span> <span class="tlaGNC">       38252 : }</span></span>
+<span id="L103"><span class="lineNum">     103</span>              : </span>
+<span id="L104"><span class="lineNum">     104</span>              : #if CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L105"><span class="lineNum">     105</span> <span class="tlaGNC">       25371 : void ReliableMessageMgr::NotifyMessageSendAnalytics(const RetransTableEntry &amp; entry, const SessionHandle &amp; sessionHandle,</span></span>
+<span id="L106"><span class="lineNum">     106</span>              :                                                     const ReliableMessageAnalyticsDelegate::EventType &amp; eventType)</span>
+<span id="L107"><span class="lineNum">     107</span>              : {</span>
+<span id="L108"><span class="lineNum">     108</span>              :     // For now we only support sending analytics for messages being sent over an established CASE session.</span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">       25371 :     if (!mAnalyticsDelegate || !sessionHandle-&gt;IsSecureSession())</span></span>
+<span id="L110"><span class="lineNum">     110</span>              :     {</span>
+<span id="L111"><span class="lineNum">     111</span> <span class="tlaGNC">       25359 :         return;</span></span>
+<span id="L112"><span class="lineNum">     112</span>              :     }</span>
+<span id="L113"><span class="lineNum">     113</span>              : </span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaGNC">          14 :     auto secureSession = sessionHandle-&gt;AsSecureSession();</span></span>
+<span id="L115"><span class="lineNum">     115</span> <span class="tlaGNC">          14 :     if (!secureSession-&gt;IsCASESession())</span></span>
+<span id="L116"><span class="lineNum">     116</span>              :     {</span>
+<span id="L117"><span class="lineNum">     117</span> <span class="tlaGNC">           2 :         return;</span></span>
+<span id="L118"><span class="lineNum">     118</span>              :     }</span>
+<span id="L119"><span class="lineNum">     119</span>              : </span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">          12 :     uint32_t messageCounter                               = entry.retainedBuf.GetMessageCounter();</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">          12 :     auto fabricIndex                                      = sessionHandle-&gt;GetFabricIndex();</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">          12 :     auto destination                                      = secureSession-&gt;GetPeerNodeId();</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">          12 :     ReliableMessageAnalyticsDelegate::TransmitEvent event = { .nodeId      = destination,</span></span>
+<span id="L124"><span class="lineNum">     124</span>              :                                                               .fabricIndex = fabricIndex,</span>
+<span id="L125"><span class="lineNum">     125</span>              :                                                               .sessionType =</span>
+<span id="L126"><span class="lineNum">     126</span>              :                                                                   ReliableMessageAnalyticsDelegate::SessionType::kEstablishedCase,</span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          12 :                                                               .eventType      = eventType,</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">          12 :                                                               .messageCounter = messageCounter };</span></span>
+<span id="L129"><span class="lineNum">     129</span>              : </span>
+<span id="L130"><span class="lineNum">     130</span> <span class="tlaGNC">          12 :     if (eventType == ReliableMessageAnalyticsDelegate::EventType::kRetransmission)</span></span>
+<span id="L131"><span class="lineNum">     131</span>              :     {</span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">           8 :         event.retransmissionCount = entry.sendCount;</span></span>
+<span id="L133"><span class="lineNum">     133</span>              :     }</span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">          12 :     if (eventType == ReliableMessageAnalyticsDelegate::EventType::kAcknowledged)</span></span>
+<span id="L135"><span class="lineNum">     135</span>              :     {</span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">           1 :         auto now           = System::SystemClock().GetMonotonicTimestamp();</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">           1 :         event.ackLatencyMs = now - entry.initialSentTime;</span></span>
+<span id="L138"><span class="lineNum">     138</span>              :     }</span>
+<span id="L139"><span class="lineNum">     139</span>              : </span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">          12 :     mAnalyticsDelegate-&gt;OnTransmitEvent(event);</span></span>
+<span id="L141"><span class="lineNum">     141</span>              : }</span>
+<span id="L142"><span class="lineNum">     142</span>              : #endif // CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L143"><span class="lineNum">     143</span>              : </span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaGNC">          96 : void ReliableMessageMgr::ExecuteActions()</span></span>
+<span id="L145"><span class="lineNum">     145</span>              : {</span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC">          96 :     System::Clock::Timestamp now = System::SystemClock().GetMonotonicTimestamp();</span></span>
+<span id="L147"><span class="lineNum">     147</span>              : </span>
+<span id="L148"><span class="lineNum">     148</span>              : #if defined(RMP_TICKLESS_DEBUG)</span>
+<span id="L149"><span class="lineNum">     149</span>              :     ChipLogDetail(ExchangeManager, &quot;ReliableMessageMgr::ExecuteActions at 0x&quot; ChipLogFormatX64 &quot;ms&quot;, ChipLogValueX64(now.count()));</span>
+<span id="L150"><span class="lineNum">     150</span>              : #endif</span>
+<span id="L151"><span class="lineNum">     151</span>              : </span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">          96 :     ExecuteForAllContext([&amp;](ReliableMessageContext * rc) {</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">         147 :         if (rc-&gt;IsAckPending())</span></span>
+<span id="L154"><span class="lineNum">     154</span>              :         {</span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaUNC tlaBgUNC">           0 :             if (rc-&gt;mNextAckTime &lt;= now)</span></span>
+<span id="L156"><span class="lineNum">     156</span>              :             {</span>
+<span id="L157"><span class="lineNum">     157</span>              : #if defined(RMP_TICKLESS_DEBUG)</span>
+<span id="L158"><span class="lineNum">     158</span>              :                 ChipLogDetail(ExchangeManager, &quot;ReliableMessageMgr::ExecuteActions sending ACK %p&quot;, rc);</span>
+<span id="L159"><span class="lineNum">     159</span>              : #endif</span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaUNC">           0 :                 rc-&gt;SendStandaloneAckMessage();</span></span>
+<span id="L161"><span class="lineNum">     161</span>              :             }</span>
+<span id="L162"><span class="lineNum">     162</span>              :         }</span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC tlaBgGNC">         147 :     });</span></span>
+<span id="L164"><span class="lineNum">     164</span>              : </span>
+<span id="L165"><span class="lineNum">     165</span>              :     // Retransmit / cancel anything in the retrans table whose retrans timeout has expired</span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC">          96 :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span></span>
+<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">         124 :         if (entry-&gt;nextRetransTime &gt; now)</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">          23 :             return Loop::Continue;</span></span>
+<span id="L169"><span class="lineNum">     169</span>              : </span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">         101 :         VerifyOrDie(!entry-&gt;retainedBuf.IsNull());</span></span>
+<span id="L171"><span class="lineNum">     171</span>              : </span>
+<span id="L172"><span class="lineNum">     172</span>              :         // Don't check whether the session in the exchange is valid, because when the session is released, the retrans entry is</span>
+<span id="L173"><span class="lineNum">     173</span>              :         // cleared inside ExchangeContext::OnSessionReleased, so the session must be valid if the entry exists.</span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">         101 :         auto session      = entry-&gt;ec-&gt;GetSessionHandle();</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">         101 :         uint8_t sendCount = entry-&gt;sendCount;</span></span>
+<span id="L176"><span class="lineNum">     176</span>              : #if CHIP_ERROR_LOGGING || CHIP_PROGRESS_LOGGING</span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaGNC">         101 :         uint32_t messageCounter = entry-&gt;retainedBuf.GetMessageCounter();</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">         101 :         auto fabricIndex        = session-&gt;GetFabricIndex();</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">         101 :         auto destination        = kUndefinedNodeId;</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">         101 :         if (session-&gt;IsSecureSession())</span></span>
+<span id="L181"><span class="lineNum">     181</span>              :         {</span>
+<span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC">          98 :             destination = session-&gt;AsSecureSession()-&gt;GetPeerNodeId();</span></span>
+<span id="L183"><span class="lineNum">     183</span>              :         }</span>
+<span id="L184"><span class="lineNum">     184</span>              : #endif // CHIP_ERROR_LOGGING || CHIP_DETAIL_LOGGING</span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">         101 :         if (sendCount == CHIP_CONFIG_RMP_DEFAULT_MAX_RETRANS)</span></span>
+<span id="L187"><span class="lineNum">     187</span>              :         {</span>
+<span id="L188"><span class="lineNum">     188</span>              :             // Make sure our exchange stays alive until we are done working with it.</span>
+<span id="L189"><span class="lineNum">     189</span> <span class="tlaGNC">          15 :             ExchangeHandle ec(entry-&gt;ec);</span></span>
+<span id="L190"><span class="lineNum">     190</span>              : </span>
+<span id="L191"><span class="lineNum">     191</span> <span class="tlaGNC">          15 :             ChipLogError(ExchangeManager,</span></span>
+<span id="L192"><span class="lineNum">     192</span>              :                          &quot;&lt;&lt;%d [E:&quot; ChipLogFormatExchange &quot; S:%u M:&quot; ChipLogFormatMessageCounter</span>
+<span id="L193"><span class="lineNum">     193</span>              :                          &quot;] (%s) Msg Retransmission to %u:&quot; ChipLogFormatX64 &quot; failure (max retries:%d)&quot;,</span>
+<span id="L194"><span class="lineNum">     194</span>              :                          sendCount + 1, ChipLogValueExchange(&amp;entry-&gt;ec.Get()), session-&gt;SessionIdForLogging(), messageCounter,</span>
+<span id="L195"><span class="lineNum">     195</span>              :                          Transport::GetSessionTypeString(session), fabricIndex, ChipLogValueX64(destination),</span>
+<span id="L196"><span class="lineNum">     196</span>              :                          CHIP_CONFIG_RMP_DEFAULT_MAX_RETRANS);</span>
+<span id="L197"><span class="lineNum">     197</span>              : </span>
+<span id="L198"><span class="lineNum">     198</span>              : #if CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC">          15 :             NotifyMessageSendAnalytics(*entry, session, ReliableMessageAnalyticsDelegate::EventType::kFailed);</span></span>
+<span id="L200"><span class="lineNum">     200</span>              : #endif // CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L201"><span class="lineNum">     201</span>              : </span>
+<span id="L202"><span class="lineNum">     202</span>              :             // If the exchange is expecting a response, it will handle sending</span>
+<span id="L203"><span class="lineNum">     203</span>              :             // this notification once it detects that it has not gotten a</span>
+<span id="L204"><span class="lineNum">     204</span>              :             // response.  Otherwise, we need to do it.</span>
+<span id="L205"><span class="lineNum">     205</span> <span class="tlaGNC">          15 :             if (!ec-&gt;IsResponseExpected())</span></span>
+<span id="L206"><span class="lineNum">     206</span>              :             {</span>
+<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC">           4 :                 if (session-&gt;IsSecureSession() &amp;&amp; session-&gt;AsSecureSession()-&gt;IsCASESession())</span></span>
+<span id="L208"><span class="lineNum">     208</span>              :                 {</span>
+<span id="L209"><span class="lineNum">     209</span> <span class="tlaGNC">           3 :                     session-&gt;AsSecureSession()-&gt;MarkAsDefunct();</span></span>
+<span id="L210"><span class="lineNum">     210</span>              :                 }</span>
+<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">           4 :                 session-&gt;NotifySessionHang();</span></span>
+<span id="L212"><span class="lineNum">     212</span>              :             }</span>
+<span id="L213"><span class="lineNum">     213</span>              : </span>
+<span id="L214"><span class="lineNum">     214</span>              :             // Do not StartTimer, we will schedule the timer at the end of the timer handler.</span>
+<span id="L215"><span class="lineNum">     215</span> <span class="tlaGNC">          15 :             mRetransTable.ReleaseObject(entry);</span></span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC">          15 :             return Loop::Continue;</span></span>
+<span id="L218"><span class="lineNum">     218</span> <span class="tlaGNC">          15 :         }</span></span>
+<span id="L219"><span class="lineNum">     219</span>              : </span>
+<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">          86 :         entry-&gt;sendCount++;</span></span>
+<span id="L221"><span class="lineNum">     221</span>              : </span>
+<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC">          86 :         ChipLogProgress(ExchangeManager,</span></span>
+<span id="L223"><span class="lineNum">     223</span>              :                         &quot;&lt;&lt;%d [E:&quot; ChipLogFormatExchange &quot; S:%u M:&quot; ChipLogFormatMessageCounter</span>
+<span id="L224"><span class="lineNum">     224</span>              :                         &quot;] (%s) Msg Retransmission to %u:&quot; ChipLogFormatX64,</span>
+<span id="L225"><span class="lineNum">     225</span>              :                         entry-&gt;sendCount, ChipLogValueExchange(&amp;entry-&gt;ec.Get()), session-&gt;SessionIdForLogging(), messageCounter,</span>
+<span id="L226"><span class="lineNum">     226</span>              :                         Transport::GetSessionTypeString(session), fabricIndex, ChipLogValueX64(destination));</span>
+<span id="L227"><span class="lineNum">     227</span>              :         MATTER_LOG_METRIC(Tracing::kMetricDeviceRMPRetryCount, entry-&gt;sendCount);</span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">          86 :         SendFromRetransTable(entry);</span></span>
+<span id="L230"><span class="lineNum">     230</span>              : </span>
+<span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">          86 :         return Loop::Continue;</span></span>
+<span id="L232"><span class="lineNum">     232</span> <span class="tlaGNC">         101 :     });</span></span>
+<span id="L233"><span class="lineNum">     233</span>              : </span>
+<span id="L234"><span class="lineNum">     234</span> <span class="tlaGNC">          96 :     TicklessDebugDumpRetransTable(&quot;ReliableMessageMgr::ExecuteActions Dumping mRetransTable entries after processing&quot;);</span></span>
+<span id="L235"><span class="lineNum">     235</span> <span class="tlaGNC">          96 : }</span></span>
+<span id="L236"><span class="lineNum">     236</span>              : </span>
+<span id="L237"><span class="lineNum">     237</span> <span class="tlaGNC">          96 : void ReliableMessageMgr::Timeout(System::Layer * aSystemLayer, void * aAppState)</span></span>
+<span id="L238"><span class="lineNum">     238</span>              : {</span>
+<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">          96 :     ReliableMessageMgr * manager = reinterpret_cast&lt;ReliableMessageMgr *&gt;(aAppState);</span></span>
+<span id="L240"><span class="lineNum">     240</span>              : </span>
+<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">          96 :     VerifyOrDie((aSystemLayer != nullptr) &amp;&amp; (manager != nullptr));</span></span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span>              : #if defined(RMP_TICKLESS_DEBUG)</span>
+<span id="L244"><span class="lineNum">     244</span>              :     ChipLogDetail(ExchangeManager, &quot;ReliableMessageMgr::Timeout&quot;);</span>
+<span id="L245"><span class="lineNum">     245</span>              : #endif</span>
+<span id="L246"><span class="lineNum">     246</span>              : </span>
+<span id="L247"><span class="lineNum">     247</span>              :     // Execute any actions that are due this tick</span>
+<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC">          96 :     manager-&gt;ExecuteActions();</span></span>
+<span id="L249"><span class="lineNum">     249</span>              : </span>
+<span id="L250"><span class="lineNum">     250</span>              :     // Calculate next physical wakeup</span>
+<span id="L251"><span class="lineNum">     251</span> <span class="tlaGNC">          96 :     manager-&gt;StartTimer();</span></span>
+<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC">          96 : }</span></span>
+<span id="L253"><span class="lineNum">     253</span>              : </span>
+<span id="L254"><span class="lineNum">     254</span> <span class="tlaGNC">       12715 : CHIP_ERROR ReliableMessageMgr::AddToRetransTable(ReliableMessageContext * rc, RetransTableEntry ** rEntry)</span></span>
+<span id="L255"><span class="lineNum">     255</span>              : {</span>
+<span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">       12715 :     VerifyOrReturnError(!rc-&gt;IsWaitingForAck(), CHIP_ERROR_INCORRECT_STATE);</span></span>
+<span id="L257"><span class="lineNum">     257</span>              : </span>
+<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">       12715 :     *rEntry = mRetransTable.CreateObject(rc);</span></span>
+<span id="L259"><span class="lineNum">     259</span> <span class="tlaGNC">       12715 :     if (*rEntry == nullptr)</span></span>
+<span id="L260"><span class="lineNum">     260</span>              :     {</span>
+<span id="L261"><span class="lineNum">     261</span> <span class="tlaUNC tlaBgUNC">           0 :         ChipLogError(ExchangeManager, &quot;mRetransTable Already Full&quot;);</span></span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaUNC">           0 :         return CHIP_ERROR_RETRANS_TABLE_FULL;</span></span>
+<span id="L263"><span class="lineNum">     263</span>              :     }</span>
+<span id="L264"><span class="lineNum">     264</span>              : </span>
+<span id="L265"><span class="lineNum">     265</span> <span class="tlaGNC tlaBgGNC">       12715 :     return CHIP_NO_ERROR;</span></span>
+<span id="L266"><span class="lineNum">     266</span>              : }</span>
+<span id="L267"><span class="lineNum">     267</span>              : </span>
+<span id="L268"><span class="lineNum">     268</span> <span class="tlaGNC">      111386 : System::Clock::Timeout ReliableMessageMgr::GetBackoff(System::Clock::Timeout baseInterval, uint8_t sendCount,</span></span>
+<span id="L269"><span class="lineNum">     269</span>              :                                                       bool computeMaxPossible)</span>
+<span id="L270"><span class="lineNum">     270</span>              : {</span>
+<span id="L271"><span class="lineNum">     271</span>              :     // See section &quot;4.11.8. Parameters and Constants&quot; for the parameters below:</span>
+<span id="L272"><span class="lineNum">     272</span>              :     // MRP_BACKOFF_JITTER = 0.25</span>
+<span id="L273"><span class="lineNum">     273</span> <span class="tlaGNC">      111386 :     constexpr uint32_t MRP_BACKOFF_JITTER_BASE = 1024;</span></span>
+<span id="L274"><span class="lineNum">     274</span>              :     // MRP_BACKOFF_MARGIN = 1.1</span>
+<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">      111386 :     constexpr uint32_t MRP_BACKOFF_MARGIN_NUMERATOR   = 1127;</span></span>
+<span id="L276"><span class="lineNum">     276</span> <span class="tlaGNC">      111386 :     constexpr uint32_t MRP_BACKOFF_MARGIN_DENOMINATOR = 1024;</span></span>
+<span id="L277"><span class="lineNum">     277</span>              :     // MRP_BACKOFF_BASE = 1.6</span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">      111386 :     constexpr uint32_t MRP_BACKOFF_BASE_NUMERATOR   = 16;</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">      111386 :     constexpr uint32_t MRP_BACKOFF_BASE_DENOMINATOR = 10;</span></span>
+<span id="L280"><span class="lineNum">     280</span> <span class="tlaGNC">      111386 :     constexpr int MRP_BACKOFF_THRESHOLD             = 1;</span></span>
+<span id="L281"><span class="lineNum">     281</span>              : </span>
+<span id="L282"><span class="lineNum">     282</span>              :     // Implement `i = MRP_BACKOFF_MARGIN * i` from section &quot;4.12.2.1. Retransmissions&quot;, where:</span>
+<span id="L283"><span class="lineNum">     283</span>              :     //   i == interval</span>
+<span id="L284"><span class="lineNum">     284</span> <span class="tlaGNC">      111386 :     System::Clock::Milliseconds64 interval = baseInterval;</span></span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">      111386 :     interval *= MRP_BACKOFF_MARGIN_NUMERATOR;</span></span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">      111386 :     interval /= MRP_BACKOFF_MARGIN_DENOMINATOR;</span></span>
+<span id="L287"><span class="lineNum">     287</span>              : </span>
+<span id="L288"><span class="lineNum">     288</span>              :     // Implement:</span>
+<span id="L289"><span class="lineNum">     289</span>              :     //   mrpBackoffTime = i * MRP_BACKOFF_BASE^(max(0,n-MRP_BACKOFF_THRESHOLD)) * (1.0 + random(0,1) * MRP_BACKOFF_JITTER)</span>
+<span id="L290"><span class="lineNum">     290</span>              :     // from section &quot;4.12.2.1. Retransmissions&quot;, where:</span>
+<span id="L291"><span class="lineNum">     291</span>              :     //   i == interval</span>
+<span id="L292"><span class="lineNum">     292</span>              :     //   n == sendCount</span>
+<span id="L293"><span class="lineNum">     293</span>              : </span>
+<span id="L294"><span class="lineNum">     294</span>              :     // 1. Calculate exponent `max(0,n−MRP_BACKOFF_THRESHOLD)`</span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">      111386 :     int exponent = sendCount - MRP_BACKOFF_THRESHOLD;</span></span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">      111386 :     if (exponent &lt; 0)</span></span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">       32422 :         exponent = 0; // Enforce floor</span></span>
+<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">      111386 :     if (exponent &gt; 4)</span></span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">          12 :         exponent = 4; // Enforce reasonable maximum after 5 tries</span></span>
+<span id="L300"><span class="lineNum">     300</span>              : </span>
+<span id="L301"><span class="lineNum">     301</span>              :     // 2. Calculate `mrpBackoffTime = i * MRP_BACKOFF_BASE^(max(0,n-MRP_BACKOFF_THRESHOLD))`</span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">      111386 :     uint32_t backoffNum   = 1;</span></span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">      111386 :     uint32_t backoffDenom = 1;</span></span>
+<span id="L304"><span class="lineNum">     304</span>              : </span>
+<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">      229882 :     for (int i = 0; i &lt; exponent; i++)</span></span>
+<span id="L306"><span class="lineNum">     306</span>              :     {</span>
+<span id="L307"><span class="lineNum">     307</span> <span class="tlaGNC">      118496 :         backoffNum *= MRP_BACKOFF_BASE_NUMERATOR;</span></span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">      118496 :         backoffDenom *= MRP_BACKOFF_BASE_DENOMINATOR;</span></span>
+<span id="L309"><span class="lineNum">     309</span>              :     }</span>
+<span id="L310"><span class="lineNum">     310</span>              : </span>
+<span id="L311"><span class="lineNum">     311</span> <span class="tlaGNC">      111386 :     System::Clock::Milliseconds64 mrpBackoffTime = interval * backoffNum / backoffDenom;</span></span>
+<span id="L312"><span class="lineNum">     312</span>              : </span>
+<span id="L313"><span class="lineNum">     313</span>              :     // 3. Calculate `mrpBackoffTime *= (1.0 + random(0,1) * MRP_BACKOFF_JITTER)`</span>
+<span id="L314"><span class="lineNum">     314</span> <span class="tlaGNC">      111386 :     uint32_t jitter = MRP_BACKOFF_JITTER_BASE + (computeMaxPossible ? UINT8_MAX : Crypto::GetRandU8());</span></span>
+<span id="L315"><span class="lineNum">     315</span> <span class="tlaGNC">      111386 :     mrpBackoffTime  = mrpBackoffTime * jitter / MRP_BACKOFF_JITTER_BASE;</span></span>
+<span id="L316"><span class="lineNum">     316</span>              : </span>
+<span id="L317"><span class="lineNum">     317</span>              : #if CHIP_CONFIG_ENABLE_ICD_SERVER</span>
+<span id="L318"><span class="lineNum">     318</span>              :     // Implement:</span>
+<span id="L319"><span class="lineNum">     319</span>              :     //   &quot;An ICD sender SHOULD increase t to also account for its own sleepy interval</span>
+<span id="L320"><span class="lineNum">     320</span>              :     //   required to receive the acknowledgment&quot;</span>
+<span id="L321"><span class="lineNum">     321</span>              :     mrpBackoffTime += ICDConfigurationData::GetInstance().GetFastPollingInterval();</span>
+<span id="L322"><span class="lineNum">     322</span>              : #endif</span>
+<span id="L323"><span class="lineNum">     323</span>              : </span>
+<span id="L324"><span class="lineNum">     324</span> <span class="tlaGNC">      111386 :     mrpBackoffTime += sAdditionalMRPBackoffTime;</span></span>
+<span id="L325"><span class="lineNum">     325</span>              : </span>
+<span id="L326"><span class="lineNum">     326</span> <span class="tlaGNC">      111386 :     return std::chrono::duration_cast&lt;System::Clock::Timeout&gt;(mrpBackoffTime);</span></span>
+<span id="L327"><span class="lineNum">     327</span>              : }</span>
+<span id="L328"><span class="lineNum">     328</span>              : </span>
+<span id="L329"><span class="lineNum">     329</span> <span class="tlaGNC">       12710 : void ReliableMessageMgr::StartRetransmision(RetransTableEntry * entry)</span></span>
+<span id="L330"><span class="lineNum">     330</span>              : {</span>
+<span id="L331"><span class="lineNum">     331</span> <span class="tlaGNC">       12710 :     CalculateNextRetransTime(*entry);</span></span>
+<span id="L332"><span class="lineNum">     332</span>              : #if CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L333"><span class="lineNum">     333</span> <span class="tlaGNC">       12710 :     entry-&gt;initialSentTime = System::SystemClock().GetMonotonicTimestamp();</span></span>
+<span id="L334"><span class="lineNum">     334</span> <span class="tlaGNC">       12710 :     NotifyMessageSendAnalytics(*entry, entry-&gt;ec-&gt;GetSessionHandle(), ReliableMessageAnalyticsDelegate::EventType::kInitialSend);</span></span>
+<span id="L335"><span class="lineNum">     335</span>              : #endif // CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L336"><span class="lineNum">     336</span> <span class="tlaGNC">       12710 :     StartTimer();</span></span>
+<span id="L337"><span class="lineNum">     337</span> <span class="tlaGNC">       12710 : }</span></span>
+<span id="L338"><span class="lineNum">     338</span>              : </span>
+<span id="L339"><span class="lineNum">     339</span> <span class="tlaGNC">       12578 : bool ReliableMessageMgr::CheckAndRemRetransTable(ReliableMessageContext * rc, uint32_t ackMessageCounter)</span></span>
+<span id="L340"><span class="lineNum">     340</span>              : {</span>
+<span id="L341"><span class="lineNum">     341</span> <span class="tlaGNC">       12578 :     bool removed = false;</span></span>
+<span id="L342"><span class="lineNum">     342</span> <span class="tlaGNC">       12578 :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span></span>
+<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">       30674 :         if (entry-&gt;ec-&gt;GetReliableMessageContext() == rc &amp;&amp; entry-&gt;retainedBuf.GetMessageCounter() == ackMessageCounter)</span></span>
+<span id="L344"><span class="lineNum">     344</span>              :         {</span>
+<span id="L345"><span class="lineNum">     345</span>              : #if CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">       12560 :             auto session = entry-&gt;ec-&gt;GetSessionHandle();</span></span>
+<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">       12560 :             NotifyMessageSendAnalytics(*entry, session, ReliableMessageAnalyticsDelegate::EventType::kAcknowledged);</span></span>
+<span id="L348"><span class="lineNum">     348</span>              : #endif // CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L349"><span class="lineNum">     349</span>              : </span>
+<span id="L350"><span class="lineNum">     350</span>              :             // Clear the entry from the retransmision table.</span>
+<span id="L351"><span class="lineNum">     351</span> <span class="tlaGNC">       12560 :             ClearRetransTable(*entry);</span></span>
+<span id="L352"><span class="lineNum">     352</span>              : </span>
+<span id="L353"><span class="lineNum">     353</span> <span class="tlaGNC">       12560 :             ChipLogDetail(ExchangeManager,</span></span>
+<span id="L354"><span class="lineNum">     354</span>              :                           &quot;Rxd Ack; Removing MessageCounter:&quot; ChipLogFormatMessageCounter</span>
+<span id="L355"><span class="lineNum">     355</span>              :                           &quot; from Retrans Table on exchange &quot; ChipLogFormatExchange,</span>
+<span id="L356"><span class="lineNum">     356</span>              :                           ackMessageCounter, ChipLogValueExchange(rc-&gt;GetExchangeContext()));</span>
+<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">       12560 :             removed = true;</span></span>
+<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC">       12560 :             return Loop::Break;</span></span>
+<span id="L359"><span class="lineNum">     359</span> <span class="tlaGNC">       12560 :         }</span></span>
+<span id="L360"><span class="lineNum">     360</span> <span class="tlaGNC">       18114 :         return Loop::Continue;</span></span>
+<span id="L361"><span class="lineNum">     361</span>              :     });</span>
+<span id="L362"><span class="lineNum">     362</span>              : </span>
+<span id="L363"><span class="lineNum">     363</span> <span class="tlaGNC">       12578 :     return removed;</span></span>
+<span id="L364"><span class="lineNum">     364</span>              : }</span>
+<span id="L365"><span class="lineNum">     365</span>              : </span>
+<span id="L366"><span class="lineNum">     366</span> <span class="tlaGNC">          86 : CHIP_ERROR ReliableMessageMgr::SendFromRetransTable(RetransTableEntry * entry)</span></span>
+<span id="L367"><span class="lineNum">     367</span>              : {</span>
+<span id="L368"><span class="lineNum">     368</span> <span class="tlaGNC">          86 :     if (!entry-&gt;ec-&gt;HasSessionHandle())</span></span>
+<span id="L369"><span class="lineNum">     369</span>              :     {</span>
+<span id="L370"><span class="lineNum">     370</span>              :         // Using same error message for all errors to reduce code size.</span>
+<span id="L371"><span class="lineNum">     371</span> <span class="tlaUNC tlaBgUNC">           0 :         ChipLogError(ExchangeManager,</span></span>
+<span id="L372"><span class="lineNum">     372</span>              :                      &quot;Crit-err %&quot; CHIP_ERROR_FORMAT &quot; when sending CHIP MessageCounter:&quot; ChipLogFormatMessageCounter</span>
+<span id="L373"><span class="lineNum">     373</span>              :                      &quot; on exchange &quot; ChipLogFormatExchange &quot;, send tries: %d&quot;,</span>
+<span id="L374"><span class="lineNum">     374</span>              :                      CHIP_ERROR_INCORRECT_STATE.Format(), entry-&gt;retainedBuf.GetMessageCounter(),</span>
+<span id="L375"><span class="lineNum">     375</span>              :                      ChipLogValueExchange(&amp;entry-&gt;ec.Get()), entry-&gt;sendCount);</span>
+<span id="L376"><span class="lineNum">     376</span> <span class="tlaUNC">           0 :         ClearRetransTable(*entry);</span></span>
+<span id="L377"><span class="lineNum">     377</span> <span class="tlaUNC">           0 :         return CHIP_ERROR_INCORRECT_STATE;</span></span>
+<span id="L378"><span class="lineNum">     378</span>              :     }</span>
+<span id="L379"><span class="lineNum">     379</span>              : </span>
+<span id="L380"><span class="lineNum">     380</span> <span class="tlaGNC tlaBgGNC">          86 :     auto * sessionManager = entry-&gt;ec-&gt;GetExchangeMgr()-&gt;GetSessionManager();</span></span>
+<span id="L381"><span class="lineNum">     381</span> <span class="tlaGNC">          86 :     CHIP_ERROR err        = sessionManager-&gt;SendPreparedMessage(entry-&gt;ec-&gt;GetSessionHandle(), entry-&gt;retainedBuf);</span></span>
+<span id="L382"><span class="lineNum">     382</span> <span class="tlaGNC">          86 :     err                   = MapSendError(err, entry-&gt;ec-&gt;GetExchangeId(), entry-&gt;ec-&gt;IsInitiator());</span></span>
+<span id="L383"><span class="lineNum">     383</span>              : </span>
+<span id="L384"><span class="lineNum">     384</span> <span class="tlaGNC">          86 :     if (err == CHIP_NO_ERROR)</span></span>
+<span id="L385"><span class="lineNum">     385</span>              :     {</span>
+<span id="L386"><span class="lineNum">     386</span> <span class="tlaGNC">          86 :         CalculateNextRetransTime(*entry);</span></span>
+<span id="L387"><span class="lineNum">     387</span>              : </span>
+<span id="L388"><span class="lineNum">     388</span>              : #if CHIP_CONFIG_ENABLE_ICD_SERVER</span>
+<span id="L389"><span class="lineNum">     389</span>              :         app::ICDNotifier::GetInstance().NotifyNetworkActivityNotification();</span>
+<span id="L390"><span class="lineNum">     390</span>              : #endif // CHIP_CONFIG_ENABLE_ICD_SERVER</span>
+<span id="L391"><span class="lineNum">     391</span>              : #if CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L392"><span class="lineNum">     392</span> <span class="tlaGNC">          86 :         NotifyMessageSendAnalytics(*entry, entry-&gt;ec-&gt;GetSessionHandle(),</span></span>
+<span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC">         172 :                                    ReliableMessageAnalyticsDelegate::EventType::kRetransmission);</span></span>
+<span id="L394"><span class="lineNum">     394</span>              : #endif // CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L395"><span class="lineNum">     395</span>              : #if CHIP_CONFIG_RESOLVE_PEER_ON_FIRST_TRANSMIT_FAILURE</span>
+<span id="L396"><span class="lineNum">     396</span>              :         const ExchangeManager * exchangeMgr = entry-&gt;ec-&gt;GetExchangeMgr();</span>
+<span id="L397"><span class="lineNum">     397</span>              :         // TODO: investigate why in ReliableMessageMgr::CheckResendApplicationMessageWithPeerExchange unit test released exchange</span>
+<span id="L398"><span class="lineNum">     398</span>              :         // context with mExchangeMgr==nullptr is used.</span>
+<span id="L399"><span class="lineNum">     399</span>              :         if (exchangeMgr)</span>
+<span id="L400"><span class="lineNum">     400</span>              :         {</span>
+<span id="L401"><span class="lineNum">     401</span>              :             // After the first failure notify session manager to refresh device data</span>
+<span id="L402"><span class="lineNum">     402</span>              :             if (entry-&gt;sendCount == 1 &amp;&amp; mSessionUpdateDelegate != nullptr &amp;&amp; entry-&gt;ec-&gt;GetSessionHandle()-&gt;IsSecureSession() &amp;&amp;</span>
+<span id="L403"><span class="lineNum">     403</span>              :                 entry-&gt;ec-&gt;GetSessionHandle()-&gt;AsSecureSession()-&gt;IsCASESession())</span>
+<span id="L404"><span class="lineNum">     404</span>              :             {</span>
+<span id="L405"><span class="lineNum">     405</span>              :                 ChipLogDetail(ExchangeManager, &quot;Notify session manager to update peer address&quot;);</span>
+<span id="L406"><span class="lineNum">     406</span>              :                 mSessionUpdateDelegate-&gt;UpdatePeerAddress(entry-&gt;ec-&gt;GetSessionHandle()-&gt;GetPeer());</span>
+<span id="L407"><span class="lineNum">     407</span>              :             }</span>
+<span id="L408"><span class="lineNum">     408</span>              :         }</span>
+<span id="L409"><span class="lineNum">     409</span>              : #endif // CHIP_CONFIG_RESOLVE_PEER_ON_FIRST_TRANSMIT_FAILURE</span>
+<span id="L410"><span class="lineNum">     410</span>              :     }</span>
+<span id="L411"><span class="lineNum">     411</span>              :     else</span>
+<span id="L412"><span class="lineNum">     412</span>              :     {</span>
+<span id="L413"><span class="lineNum">     413</span>              :         // Remove from table</span>
+<span id="L414"><span class="lineNum">     414</span>              :         // Using same error message for all errors to reduce code size.</span>
+<span id="L415"><span class="lineNum">     415</span> <span class="tlaUNC tlaBgUNC">           0 :         ChipLogError(ExchangeManager,</span></span>
+<span id="L416"><span class="lineNum">     416</span>              :                      &quot;Crit-err %&quot; CHIP_ERROR_FORMAT &quot; when sending CHIP MessageCounter:&quot; ChipLogFormatMessageCounter</span>
+<span id="L417"><span class="lineNum">     417</span>              :                      &quot; on exchange &quot; ChipLogFormatExchange &quot;, send tries: %d&quot;,</span>
+<span id="L418"><span class="lineNum">     418</span>              :                      err.Format(), entry-&gt;retainedBuf.GetMessageCounter(), ChipLogValueExchange(&amp;entry-&gt;ec.Get()),</span>
+<span id="L419"><span class="lineNum">     419</span>              :                      entry-&gt;sendCount);</span>
+<span id="L420"><span class="lineNum">     420</span>              : </span>
+<span id="L421"><span class="lineNum">     421</span> <span class="tlaUNC">           0 :         ClearRetransTable(*entry);</span></span>
+<span id="L422"><span class="lineNum">     422</span>              :     }</span>
+<span id="L423"><span class="lineNum">     423</span> <span class="tlaGNC tlaBgGNC">          86 :     return err;</span></span>
+<span id="L424"><span class="lineNum">     424</span>              : }</span>
+<span id="L425"><span class="lineNum">     425</span>              : </span>
+<span id="L426"><span class="lineNum">     426</span> <span class="tlaGNC">         254 : void ReliableMessageMgr::ClearRetransTable(ReliableMessageContext * rc)</span></span>
+<span id="L427"><span class="lineNum">     427</span>              : {</span>
+<span id="L428"><span class="lineNum">     428</span> <span class="tlaGNC">         254 :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span></span>
+<span id="L429"><span class="lineNum">     429</span> <span class="tlaGNC">         227 :         if (entry-&gt;ec-&gt;GetReliableMessageContext() == rc)</span></span>
+<span id="L430"><span class="lineNum">     430</span>              :         {</span>
+<span id="L431"><span class="lineNum">     431</span> <span class="tlaGNC">         127 :             ClearRetransTable(*entry);</span></span>
+<span id="L432"><span class="lineNum">     432</span> <span class="tlaGNC">         127 :             return Loop::Break;</span></span>
+<span id="L433"><span class="lineNum">     433</span>              :         }</span>
+<span id="L434"><span class="lineNum">     434</span> <span class="tlaGNC">         100 :         return Loop::Continue;</span></span>
+<span id="L435"><span class="lineNum">     435</span>              :     });</span>
+<span id="L436"><span class="lineNum">     436</span> <span class="tlaGNC">         254 : }</span></span>
+<span id="L437"><span class="lineNum">     437</span>              : </span>
+<span id="L438"><span class="lineNum">     438</span> <span class="tlaGNC">       12692 : void ReliableMessageMgr::ClearRetransTable(RetransTableEntry &amp; entry)</span></span>
+<span id="L439"><span class="lineNum">     439</span>              : {</span>
+<span id="L440"><span class="lineNum">     440</span> <span class="tlaGNC">       12692 :     mRetransTable.ReleaseObject(&amp;entry);</span></span>
+<span id="L441"><span class="lineNum">     441</span>              :     // Expire any virtual ticks that have expired so all wakeup sources reflect the current time</span>
+<span id="L442"><span class="lineNum">     442</span> <span class="tlaGNC">       12692 :     StartTimer();</span></span>
+<span id="L443"><span class="lineNum">     443</span> <span class="tlaGNC">       12692 : }</span></span>
+<span id="L444"><span class="lineNum">     444</span>              : </span>
+<span id="L445"><span class="lineNum">     445</span> <span class="tlaGNC">       38156 : void ReliableMessageMgr::StartTimer()</span></span>
+<span id="L446"><span class="lineNum">     446</span>              : {</span>
+<span id="L447"><span class="lineNum">     447</span>              :     // When do we need to next wake up to send an ACK?</span>
+<span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">       38156 :     System::Clock::Timestamp nextWakeTime = System::Clock::Timestamp::max();</span></span>
+<span id="L449"><span class="lineNum">     449</span>              : </span>
+<span id="L450"><span class="lineNum">     450</span> <span class="tlaGNC">       38156 :     ExecuteForAllContext([&amp;](ReliableMessageContext * rc) {</span></span>
+<span id="L451"><span class="lineNum">     451</span> <span class="tlaGNC">      231670 :         if (rc-&gt;IsAckPending() &amp;&amp; rc-&gt;mNextAckTime &lt; nextWakeTime)</span></span>
+<span id="L452"><span class="lineNum">     452</span>              :         {</span>
+<span id="L453"><span class="lineNum">     453</span> <span class="tlaGNC">       15064 :             nextWakeTime = rc-&gt;mNextAckTime;</span></span>
+<span id="L454"><span class="lineNum">     454</span>              :         }</span>
+<span id="L455"><span class="lineNum">     455</span> <span class="tlaGNC">      231670 :     });</span></span>
+<span id="L456"><span class="lineNum">     456</span>              : </span>
+<span id="L457"><span class="lineNum">     457</span>              :     // When do we need to next wake up for ReliableMessageProtocol retransmit?</span>
+<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC">       38156 :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span></span>
+<span id="L459"><span class="lineNum">     459</span> <span class="tlaGNC">      138393 :         if (entry-&gt;nextRetransTime &lt; nextWakeTime)</span></span>
+<span id="L460"><span class="lineNum">     460</span>              :         {</span>
+<span id="L461"><span class="lineNum">     461</span> <span class="tlaGNC">       27090 :             nextWakeTime = entry-&gt;nextRetransTime;</span></span>
+<span id="L462"><span class="lineNum">     462</span>              :         }</span>
+<span id="L463"><span class="lineNum">     463</span> <span class="tlaGNC">      138393 :         return Loop::Continue;</span></span>
+<span id="L464"><span class="lineNum">     464</span>              :     });</span>
+<span id="L465"><span class="lineNum">     465</span>              : </span>
+<span id="L466"><span class="lineNum">     466</span> <span class="tlaGNC">       38156 :     StopTimer();</span></span>
+<span id="L467"><span class="lineNum">     467</span>              : </span>
+<span id="L468"><span class="lineNum">     468</span> <span class="tlaGNC">       38156 :     if (nextWakeTime != System::Clock::Timestamp::max())</span></span>
+<span id="L469"><span class="lineNum">     469</span>              :     {</span>
+<span id="L470"><span class="lineNum">     470</span> <span class="tlaGNC">       36177 :         const System::Clock::Timestamp now = System::SystemClock().GetMonotonicTimestamp();</span></span>
+<span id="L471"><span class="lineNum">     471</span> <span class="tlaGNC">       36177 :         const auto nextWakeDelay           = (nextWakeTime &gt; now) ? nextWakeTime - now : 0_ms;</span></span>
+<span id="L472"><span class="lineNum">     472</span>              : </span>
+<span id="L473"><span class="lineNum">     473</span>              : #if defined(RMP_TICKLESS_DEBUG)</span>
+<span id="L474"><span class="lineNum">     474</span>              :         ChipLogDetail(ExchangeManager,</span>
+<span id="L475"><span class="lineNum">     475</span>              :                       &quot;ReliableMessageMgr::StartTimer at 0x&quot; ChipLogFormatX64 &quot;ms wake at 0x&quot; ChipLogFormatX64</span>
+<span id="L476"><span class="lineNum">     476</span>              :                       &quot;ms (in 0x&quot; ChipLogFormatX64 &quot;ms)&quot;,</span>
+<span id="L477"><span class="lineNum">     477</span>              :                       ChipLogValueX64(now.count()), ChipLogValueX64(nextWakeTime.count()), ChipLogValueX64(nextWakeDelay.count()));</span>
+<span id="L478"><span class="lineNum">     478</span>              : #endif</span>
+<span id="L479"><span class="lineNum">     479</span> <span class="tlaGNC">       36177 :         VerifyOrDie(mSystemLayer-&gt;StartTimer(nextWakeDelay, Timeout, this) == CHIP_NO_ERROR);</span></span>
+<span id="L480"><span class="lineNum">     480</span>              :     }</span>
+<span id="L481"><span class="lineNum">     481</span>              :     else</span>
+<span id="L482"><span class="lineNum">     482</span>              :     {</span>
+<span id="L483"><span class="lineNum">     483</span>              : #if defined(RMP_TICKLESS_DEBUG)</span>
+<span id="L484"><span class="lineNum">     484</span>              :         ChipLogDetail(ExchangeManager, &quot;ReliableMessageMgr skipped timer&quot;);</span>
+<span id="L485"><span class="lineNum">     485</span>              : #endif</span>
+<span id="L486"><span class="lineNum">     486</span>              :     }</span>
+<span id="L487"><span class="lineNum">     487</span>              : </span>
+<span id="L488"><span class="lineNum">     488</span> <span class="tlaGNC">       38156 :     TicklessDebugDumpRetransTable(&quot;ReliableMessageMgr::StartTimer Dumping mRetransTable entries after setting wakeup times&quot;);</span></span>
+<span id="L489"><span class="lineNum">     489</span> <span class="tlaGNC">       38156 : }</span></span>
+<span id="L490"><span class="lineNum">     490</span>              : </span>
+<span id="L491"><span class="lineNum">     491</span> <span class="tlaGNC">       38550 : void ReliableMessageMgr::StopTimer()</span></span>
+<span id="L492"><span class="lineNum">     492</span>              : {</span>
+<span id="L493"><span class="lineNum">     493</span> <span class="tlaGNC">       38550 :     mSystemLayer-&gt;CancelTimer(Timeout, this);</span></span>
+<span id="L494"><span class="lineNum">     494</span> <span class="tlaGNC">       38550 : }</span></span>
+<span id="L495"><span class="lineNum">     495</span>              : </span>
+<span id="L496"><span class="lineNum">     496</span> <span class="tlaGNC">           6 : void ReliableMessageMgr::RegisterSessionUpdateDelegate(SessionUpdateDelegate * sessionUpdateDelegate)</span></span>
+<span id="L497"><span class="lineNum">     497</span>              : {</span>
+<span id="L498"><span class="lineNum">     498</span> <span class="tlaGNC">           6 :     mSessionUpdateDelegate = sessionUpdateDelegate;</span></span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaGNC">           6 : }</span></span>
+<span id="L500"><span class="lineNum">     500</span>              : </span>
+<span id="L501"><span class="lineNum">     501</span>              : #if CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L502"><span class="lineNum">     502</span> <span class="tlaGNC">           4 : void ReliableMessageMgr::RegisterAnalyticsDelegate(ReliableMessageAnalyticsDelegate * analyticsDelegate)</span></span>
+<span id="L503"><span class="lineNum">     503</span>              : {</span>
+<span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC">           4 :     mAnalyticsDelegate = analyticsDelegate;</span></span>
+<span id="L505"><span class="lineNum">     505</span> <span class="tlaGNC">           4 : }</span></span>
+<span id="L506"><span class="lineNum">     506</span>              : #endif // CHIP_CONFIG_MRP_ANALYTICS_ENABLED</span>
+<span id="L507"><span class="lineNum">     507</span>              : </span>
+<span id="L508"><span class="lineNum">     508</span> <span class="tlaGNC">       12800 : CHIP_ERROR ReliableMessageMgr::MapSendError(CHIP_ERROR error, uint16_t exchangeId, bool isInitiator)</span></span>
+<span id="L509"><span class="lineNum">     509</span>              : {</span>
+<span id="L510"><span class="lineNum">     510</span> <span class="tlaGNC">       12800 :     if (</span></span>
+<span id="L511"><span class="lineNum">     511</span>              : #if CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L512"><span class="lineNum">     512</span>              :         error == System::MapErrorLwIP(ERR_MEM)</span>
+<span id="L513"><span class="lineNum">     513</span>              : #else</span>
+<span id="L514"><span class="lineNum">     514</span> <span class="tlaGNC">       12800 :         error == CHIP_ERROR_POSIX(ENOBUFS)</span></span>
+<span id="L515"><span class="lineNum">     515</span>              : #endif // CHIP_SYSTEM_CONFIG_USE_LWIP</span>
+<span id="L516"><span class="lineNum">     516</span>              :     )</span>
+<span id="L517"><span class="lineNum">     517</span>              :     {</span>
+<span id="L518"><span class="lineNum">     518</span>              :         // sendmsg on BSD-based systems never blocks, no matter how the</span>
+<span id="L519"><span class="lineNum">     519</span>              :         // socket is configured, and will return ENOBUFS in situation in</span>
+<span id="L520"><span class="lineNum">     520</span>              :         // which Linux, for example, blocks.</span>
+<span id="L521"><span class="lineNum">     521</span>              :         //</span>
+<span id="L522"><span class="lineNum">     522</span>              :         // This is typically a transient situation, so we pretend like this</span>
+<span id="L523"><span class="lineNum">     523</span>              :         // packet drop happened somewhere on the network instead of inside</span>
+<span id="L524"><span class="lineNum">     524</span>              :         // sendmsg and will just resend it in the normal MRP way later.</span>
+<span id="L525"><span class="lineNum">     525</span>              :         //</span>
+<span id="L526"><span class="lineNum">     526</span>              :         // Similarly, on LwIP an ERR_MEM on send indicates a likely</span>
+<span id="L527"><span class="lineNum">     527</span>              :         // temporary lack of TX buffers.</span>
+<span id="L528"><span class="lineNum">     528</span> <span class="tlaUNC tlaBgUNC">           0 :         ChipLogError(ExchangeManager, &quot;Ignoring transient send error: %&quot; CHIP_ERROR_FORMAT &quot; on exchange &quot; ChipLogFormatExchangeId,</span></span>
+<span id="L529"><span class="lineNum">     529</span>              :                      error.Format(), ChipLogValueExchangeId(exchangeId, isInitiator));</span>
+<span id="L530"><span class="lineNum">     530</span> <span class="tlaUNC">           0 :         error = CHIP_NO_ERROR;</span></span>
+<span id="L531"><span class="lineNum">     531</span>              :     }</span>
+<span id="L532"><span class="lineNum">     532</span>              : </span>
+<span id="L533"><span class="lineNum">     533</span> <span class="tlaGNC tlaBgGNC">       12800 :     return error;</span></span>
+<span id="L534"><span class="lineNum">     534</span>              : }</span>
+<span id="L535"><span class="lineNum">     535</span>              : </span>
+<span id="L536"><span class="lineNum">     536</span> <span class="tlaGNC">         774 : void ReliableMessageMgr::SetAdditionalMRPBackoffTime(const Optional&lt;System::Clock::Timeout&gt; &amp; additionalTime)</span></span>
+<span id="L537"><span class="lineNum">     537</span>              : {</span>
+<span id="L538"><span class="lineNum">     538</span> <span class="tlaGNC">         774 :     sAdditionalMRPBackoffTime = additionalTime.ValueOr(CHIP_CONFIG_MRP_RETRY_INTERVAL_SENDER_BOOST);</span></span>
+<span id="L539"><span class="lineNum">     539</span> <span class="tlaGNC">         774 : }</span></span>
+<span id="L540"><span class="lineNum">     540</span>              : </span>
+<span id="L541"><span class="lineNum">     541</span> <span class="tlaGNC">       12796 : void ReliableMessageMgr::CalculateNextRetransTime(RetransTableEntry &amp; entry)</span></span>
+<span id="L542"><span class="lineNum">     542</span>              : {</span>
+<span id="L543"><span class="lineNum">     543</span> <span class="tlaGNC">       12796 :     System::Clock::Timeout baseTimeout = System::Clock::Timeout(0);</span></span>
+<span id="L544"><span class="lineNum">     544</span> <span class="tlaGNC">       12796 :     const auto sessionHandle           = entry.ec-&gt;GetSessionHandle();</span></span>
+<span id="L545"><span class="lineNum">     545</span>              : </span>
+<span id="L546"><span class="lineNum">     546</span>              :     // Check if we have received at least one application-level message</span>
+<span id="L547"><span class="lineNum">     547</span> <span class="tlaGNC">       12796 :     if (entry.ec-&gt;HasReceivedAtLeastOneMessage())</span></span>
+<span id="L548"><span class="lineNum">     548</span>              :     {</span>
+<span id="L549"><span class="lineNum">     549</span>              :         // If we have received at least one message, assume peer is active and use ActiveRetransTimeout</span>
+<span id="L550"><span class="lineNum">     550</span> <span class="tlaGNC">       10440 :         baseTimeout = sessionHandle-&gt;GetRemoteMRPConfig().mActiveRetransTimeout;</span></span>
+<span id="L551"><span class="lineNum">     551</span>              :     }</span>
+<span id="L552"><span class="lineNum">     552</span>              :     else</span>
+<span id="L553"><span class="lineNum">     553</span>              :     {</span>
+<span id="L554"><span class="lineNum">     554</span>              :         // If we haven't received at least one message</span>
+<span id="L555"><span class="lineNum">     555</span>              :         // Choose active/idle timeout from PeerActiveMode of session per 4.11.2.1. Retransmissions.</span>
+<span id="L556"><span class="lineNum">     556</span> <span class="tlaGNC">        2356 :         baseTimeout = sessionHandle-&gt;GetMRPBaseTimeout();</span></span>
+<span id="L557"><span class="lineNum">     557</span>              :     }</span>
+<span id="L558"><span class="lineNum">     558</span>              : </span>
+<span id="L559"><span class="lineNum">     559</span> <span class="tlaGNC">       12796 :     System::Clock::Timeout backoff = ReliableMessageMgr::GetBackoff(baseTimeout, entry.sendCount);</span></span>
+<span id="L560"><span class="lineNum">     560</span> <span class="tlaGNC">       12796 :     entry.nextRetransTime          = System::SystemClock().GetMonotonicTimestamp() + backoff;</span></span>
+<span id="L561"><span class="lineNum">     561</span>              : </span>
+<span id="L562"><span class="lineNum">     562</span>              : #if CHIP_PROGRESS_LOGGING</span>
+<span id="L563"><span class="lineNum">     563</span> <span class="tlaGNC">       12796 :     const auto config       = sessionHandle-&gt;GetRemoteMRPConfig();</span></span>
+<span id="L564"><span class="lineNum">     564</span> <span class="tlaGNC">       12796 :     uint32_t messageCounter = entry.retainedBuf.GetMessageCounter();</span></span>
+<span id="L565"><span class="lineNum">     565</span> <span class="tlaGNC">       12796 :     auto fabricIndex        = sessionHandle-&gt;GetFabricIndex();</span></span>
+<span id="L566"><span class="lineNum">     566</span> <span class="tlaGNC">       12796 :     auto destination        = kUndefinedNodeId;</span></span>
+<span id="L567"><span class="lineNum">     567</span> <span class="tlaGNC">       12796 :     bool peerIsActive       = false;</span></span>
+<span id="L568"><span class="lineNum">     568</span>              : </span>
+<span id="L569"><span class="lineNum">     569</span> <span class="tlaGNC">       12796 :     if (sessionHandle-&gt;IsSecureSession())</span></span>
+<span id="L570"><span class="lineNum">     570</span>              :     {</span>
+<span id="L571"><span class="lineNum">     571</span> <span class="tlaGNC">       12702 :         peerIsActive = sessionHandle-&gt;AsSecureSession()-&gt;IsPeerActive();</span></span>
+<span id="L572"><span class="lineNum">     572</span> <span class="tlaGNC">       12702 :         destination  = sessionHandle-&gt;AsSecureSession()-&gt;GetPeerNodeId();</span></span>
+<span id="L573"><span class="lineNum">     573</span>              :     }</span>
+<span id="L574"><span class="lineNum">     574</span> <span class="tlaGNC">          94 :     else if (sessionHandle-&gt;IsUnauthenticatedSession())</span></span>
+<span id="L575"><span class="lineNum">     575</span>              :     {</span>
+<span id="L576"><span class="lineNum">     576</span> <span class="tlaGNC">          94 :         peerIsActive = sessionHandle-&gt;AsUnauthenticatedSession()-&gt;IsPeerActive();</span></span>
+<span id="L577"><span class="lineNum">     577</span>              :     }</span>
+<span id="L578"><span class="lineNum">     578</span>              : </span>
+<span id="L579"><span class="lineNum">     579</span> <span class="tlaGNC">       12796 :     ChipLogProgress(ExchangeManager,</span></span>
+<span id="L580"><span class="lineNum">     580</span>              :                     &quot;??%d [E:&quot; ChipLogFormatExchange &quot; S:%u M:&quot; ChipLogFormatMessageCounter</span>
+<span id="L581"><span class="lineNum">     581</span>              :                     &quot;] (%s) Msg Retransmission to %u:&quot; ChipLogFormatX64 &quot; scheduled for %&quot; PRIu32</span>
+<span id="L582"><span class="lineNum">     582</span>              :                     &quot;ms from now [State:%s II:%&quot; PRIu32 &quot; AI:%&quot; PRIu32 &quot; AT:%u]&quot;,</span>
+<span id="L583"><span class="lineNum">     583</span>              :                     entry.sendCount + 1, ChipLogValueExchange(&amp;entry.ec.Get()), sessionHandle-&gt;SessionIdForLogging(),</span>
+<span id="L584"><span class="lineNum">     584</span>              :                     messageCounter, Transport::GetSessionTypeString(sessionHandle), fabricIndex, ChipLogValueX64(destination),</span>
+<span id="L585"><span class="lineNum">     585</span>              :                     backoff.count(), peerIsActive ? &quot;Active&quot; : &quot;Idle&quot;, config.mIdleRetransTimeout.count(),</span>
+<span id="L586"><span class="lineNum">     586</span>              :                     config.mActiveRetransTimeout.count(), config.mActiveThresholdTime.count());</span>
+<span id="L587"><span class="lineNum">     587</span>              : #endif // CHIP_PROGRESS_LOGGING</span>
+<span id="L588"><span class="lineNum">     588</span> <span class="tlaGNC">       12796 : }</span></span>
+<span id="L589"><span class="lineNum">     589</span>              : </span>
+<span id="L590"><span class="lineNum">     590</span>              : #if CHIP_CONFIG_TEST</span>
+<span id="L591"><span class="lineNum">     591</span> <span class="tlaGNC">      126539 : int ReliableMessageMgr::TestGetCountRetransTable()</span></span>
+<span id="L592"><span class="lineNum">     592</span>              : {</span>
+<span id="L593"><span class="lineNum">     593</span> <span class="tlaGNC">      126539 :     int count = 0;</span></span>
+<span id="L594"><span class="lineNum">     594</span> <span class="tlaGNC">      126539 :     mRetransTable.ForEachActiveObject([&amp;](auto * entry) {</span></span>
+<span id="L595"><span class="lineNum">     595</span> <span class="tlaGNC">      133692 :         count++;</span></span>
+<span id="L596"><span class="lineNum">     596</span> <span class="tlaGNC">      133692 :         return Loop::Continue;</span></span>
+<span id="L597"><span class="lineNum">     597</span>              :     });</span>
+<span id="L598"><span class="lineNum">     598</span> <span class="tlaGNC">      126539 :     return count;</span></span>
+<span id="L599"><span class="lineNum">     599</span>              : }</span>
+<span id="L600"><span class="lineNum">     600</span>              : #endif // CHIP_CONFIG_TEST</span>
+<span id="L601"><span class="lineNum">     601</span>              : </span>
+<span id="L602"><span class="lineNum">     602</span>              : } // namespace Messaging</span>
+<span id="L603"><span class="lineNum">     603</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

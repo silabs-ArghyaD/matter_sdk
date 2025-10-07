@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - app/server-cluster/testing/EmptyProvider.h</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">app/server-cluster/testing</a> - EmptyProvider.h<span style="font-size: 80%;"> (source / <a href="EmptyProvider.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryLo">0.0&nbsp;%</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">0</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">0.0&nbsp;%</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">0</td>
+          </tr>
+                  <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *    Copyright (c) 2025 Project CHIP Authors</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    All rights reserved.</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : #pragma once</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : #include &lt;app/data-model-provider/Provider.h&gt;</span>
+<span id="L20"><span class="lineNum">      20</span>              : #include &lt;protocols/interaction_model/StatusCode.h&gt;</span>
+<span id="L21"><span class="lineNum">      21</span>              : </span>
+<span id="L22"><span class="lineNum">      22</span>              : namespace chip {</span>
+<span id="L23"><span class="lineNum">      23</span>              : namespace Test {</span>
+<span id="L24"><span class="lineNum">      24</span>              : </span>
+<span id="L25"><span class="lineNum">      25</span>              : /// A provider that is emtpy - it contains no endpoints and most</span>
+<span id="L26"><span class="lineNum">      26</span>              : /// calls fail with `Unsupported Endpoint`</span>
+<span id="L27"><span class="lineNum">      27</span>              : ///</span>
+<span id="L28"><span class="lineNum">      28</span>              : /// This is a bare minimum implentation to have somethign that claims to be a `Provider`</span>
+<span id="L29"><span class="lineNum">      29</span>              : /// however it has no real implementation that is useful. Over time this should be replaced</span>
+<span id="L30"><span class="lineNum">      30</span>              : /// with some code-generated/controllable provider to allow for better testing.</span>
+<span id="L31"><span class="lineNum">      31</span>              : class EmptyProvider : public app::DataModel::Provider</span>
+<span id="L32"><span class="lineNum">      32</span>              : {</span>
+<span id="L33"><span class="lineNum">      33</span>              : public:</span>
+<span id="L34"><span class="lineNum">      34</span>              :     using ActionReturnStatus = app::DataModel::ActionReturnStatus;</span>
+<span id="L35"><span class="lineNum">      35</span>              : </span>
+<span id="L36"><span class="lineNum">      36</span>              :     CHIP_ERROR Endpoints(ReadOnlyBufferBuilder&lt;app::DataModel::EndpointEntry&gt; &amp; builder) override;</span>
+<span id="L37"><span class="lineNum">      37</span>              : </span>
+<span id="L38"><span class="lineNum">      38</span>              :     CHIP_ERROR SemanticTags(EndpointId endpointId, ReadOnlyBufferBuilder&lt;SemanticTag&gt; &amp; builder) override;</span>
+<span id="L39"><span class="lineNum">      39</span>              :     CHIP_ERROR DeviceTypes(EndpointId endpointId, ReadOnlyBufferBuilder&lt;app::DataModel::DeviceTypeEntry&gt; &amp; builder) override;</span>
+<span id="L40"><span class="lineNum">      40</span>              :     CHIP_ERROR ClientClusters(EndpointId endpointId, ReadOnlyBufferBuilder&lt;ClusterId&gt; &amp; builder) override;</span>
+<span id="L41"><span class="lineNum">      41</span>              :     CHIP_ERROR ServerClusters(EndpointId endpointId, ReadOnlyBufferBuilder&lt;app::DataModel::ServerClusterEntry&gt; &amp; builder) override;</span>
+<span id="L42"><span class="lineNum">      42</span>              : #if CHIP_CONFIG_USE_ENDPOINT_UNIQUE_ID</span>
+<span id="L43"><span class="lineNum">      43</span>              :     CHIP_ERROR EndpointUniqueID(EndpointId endpointId, MutableCharSpan &amp; epUniqueId) override;</span>
+<span id="L44"><span class="lineNum">      44</span>              : #endif</span>
+<span id="L45"><span class="lineNum">      45</span>              :     CHIP_ERROR EventInfo(const app::ConcreteEventPath &amp; path, app::DataModel::EventEntry &amp; eventInfo) override;</span>
+<span id="L46"><span class="lineNum">      46</span>              :     CHIP_ERROR Attributes(const app::ConcreteClusterPath &amp; path,</span>
+<span id="L47"><span class="lineNum">      47</span>              :                           ReadOnlyBufferBuilder&lt;app::DataModel::AttributeEntry&gt; &amp; builder) override;</span>
+<span id="L48"><span class="lineNum">      48</span>              :     CHIP_ERROR GeneratedCommands(const app::ConcreteClusterPath &amp; path, ReadOnlyBufferBuilder&lt;CommandId&gt; &amp; builder) override;</span>
+<span id="L49"><span class="lineNum">      49</span>              :     CHIP_ERROR AcceptedCommands(const app::ConcreteClusterPath &amp; path,</span>
+<span id="L50"><span class="lineNum">      50</span>              :                                 ReadOnlyBufferBuilder&lt;app::DataModel::AcceptedCommandEntry&gt; &amp; builder) override;</span>
+<span id="L51"><span class="lineNum">      51</span> <span class="tlaUNC tlaBgUNC">           0 :     void ListAttributeWriteNotification(const app::ConcreteAttributePath &amp; aPath,</span></span>
+<span id="L52"><span class="lineNum">      52</span>              :                                         app::DataModel::ListWriteOperation opType) override</span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaUNC">           0 :     {}</span></span>
+<span id="L54"><span class="lineNum">      54</span>              : </span>
+<span id="L55"><span class="lineNum">      55</span>              :     void Temporary_ReportAttributeChanged(const app::AttributePathParams &amp; path) override;</span>
+<span id="L56"><span class="lineNum">      56</span>              : </span>
+<span id="L57"><span class="lineNum">      57</span>              :     ActionReturnStatus ReadAttribute(const app::DataModel::ReadAttributeRequest &amp; request,</span>
+<span id="L58"><span class="lineNum">      58</span>              :                                      app::AttributeValueEncoder &amp; encoder) override;</span>
+<span id="L59"><span class="lineNum">      59</span>              :     ActionReturnStatus WriteAttribute(const app::DataModel::WriteAttributeRequest &amp; request,</span>
+<span id="L60"><span class="lineNum">      60</span>              :                                       app::AttributeValueDecoder &amp; decoder) override;</span>
+<span id="L61"><span class="lineNum">      61</span>              :     std::optional&lt;ActionReturnStatus&gt; InvokeCommand(const app::DataModel::InvokeRequest &amp; request,</span>
+<span id="L62"><span class="lineNum">      62</span>              :                                                     chip::TLV::TLVReader &amp; input_arguments, app::CommandHandler * handler) override;</span>
+<span id="L63"><span class="lineNum">      63</span>              : };</span>
+<span id="L64"><span class="lineNum">      64</span>              : </span>
+<span id="L65"><span class="lineNum">      65</span>              : } // namespace Test</span>
+<span id="L66"><span class="lineNum">      66</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

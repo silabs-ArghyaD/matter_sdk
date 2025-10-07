@@ -1,0 +1,685 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - app/ReadHandler.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">app</a> - ReadHandler.h<span style="font-size: 80%;"> (source / <a href="ReadHandler.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">93.2&nbsp;%</td>
+            <td class="headerCovTableEntry">59</td>
+            <td class="headerCovTableEntry">55</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryMed">85.7&nbsp;%</td>
+            <td class="headerCovTableEntry">42</td>
+            <td class="headerCovTableEntry">36</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2020 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    All rights reserved.</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L16"><span class="lineNum">      16</span>              :  *    limitations under the License.</span>
+<span id="L17"><span class="lineNum">      17</span>              :  */</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : /**</span>
+<span id="L20"><span class="lineNum">      20</span>              :  *    @file</span>
+<span id="L21"><span class="lineNum">      21</span>              :  *     This file defines read handler for a CHIP Interaction Data model</span>
+<span id="L22"><span class="lineNum">      22</span>              :  *</span>
+<span id="L23"><span class="lineNum">      23</span>              :  */</span>
+<span id="L24"><span class="lineNum">      24</span>              : </span>
+<span id="L25"><span class="lineNum">      25</span>              : #pragma once</span>
+<span id="L26"><span class="lineNum">      26</span>              : </span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;access/AccessControl.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;app/AttributePathExpandIterator.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;app/AttributePathParams.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;app/AttributeValueEncoder.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;app/CASESessionManager.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;app/DataVersionFilter.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;app/EventManagement.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : #include &lt;app/EventPathParams.h&gt;</span>
+<span id="L35"><span class="lineNum">      35</span>              : #include &lt;app/MessageDef/AttributePathIBs.h&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              : #include &lt;app/MessageDef/DataVersionFilterIBs.h&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : #include &lt;app/MessageDef/EventFilterIBs.h&gt;</span>
+<span id="L38"><span class="lineNum">      38</span>              : #include &lt;app/MessageDef/EventPathIBs.h&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              : #include &lt;app/OperationalSessionSetup.h&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : #include &lt;app/SubscriptionResumptionSessionEstablisher.h&gt;</span>
+<span id="L41"><span class="lineNum">      41</span>              : #include &lt;app/SubscriptionResumptionStorage.h&gt;</span>
+<span id="L42"><span class="lineNum">      42</span>              : #include &lt;lib/core/CHIPCallback.h&gt;</span>
+<span id="L43"><span class="lineNum">      43</span>              : #include &lt;lib/core/CHIPCore.h&gt;</span>
+<span id="L44"><span class="lineNum">      44</span>              : #include &lt;lib/core/TLVDebug.h&gt;</span>
+<span id="L45"><span class="lineNum">      45</span>              : #include &lt;lib/support/CodeUtils.h&gt;</span>
+<span id="L46"><span class="lineNum">      46</span>              : #include &lt;lib/support/DLLUtil.h&gt;</span>
+<span id="L47"><span class="lineNum">      47</span>              : #include &lt;lib/support/LinkedList.h&gt;</span>
+<span id="L48"><span class="lineNum">      48</span>              : #include &lt;lib/support/logging/CHIPLogging.h&gt;</span>
+<span id="L49"><span class="lineNum">      49</span>              : #include &lt;messaging/ExchangeHolder.h&gt;</span>
+<span id="L50"><span class="lineNum">      50</span>              : #include &lt;messaging/ExchangeMgr.h&gt;</span>
+<span id="L51"><span class="lineNum">      51</span>              : #include &lt;messaging/Flags.h&gt;</span>
+<span id="L52"><span class="lineNum">      52</span>              : #include &lt;protocols/Protocols.h&gt;</span>
+<span id="L53"><span class="lineNum">      53</span>              : #include &lt;system/SystemPacketBuffer.h&gt;</span>
+<span id="L54"><span class="lineNum">      54</span>              : </span>
+<span id="L55"><span class="lineNum">      55</span>              : // https://github.com/CHIP-Specifications/connectedhomeip-spec/blob/61a9d19e6af12fdfb0872bcff26d19de6c680a1a/src/Ch02_Architecture.adoc#1122-subscribe-interaction-limits</span>
+<span id="L56"><span class="lineNum">      56</span>              : inline constexpr uint16_t kSubscriptionMaxIntervalPublisherLimit = 3600; // seconds (60 minutes)</span>
+<span id="L57"><span class="lineNum">      57</span>              : </span>
+<span id="L58"><span class="lineNum">      58</span>              : namespace chip {</span>
+<span id="L59"><span class="lineNum">      59</span>              : namespace app {</span>
+<span id="L60"><span class="lineNum">      60</span>              : </span>
+<span id="L61"><span class="lineNum">      61</span>              : //</span>
+<span id="L62"><span class="lineNum">      62</span>              : // Forward declare the Engine (which is in a different namespace) to be able to use</span>
+<span id="L63"><span class="lineNum">      63</span>              : // it as a friend class below.</span>
+<span id="L64"><span class="lineNum">      64</span>              : //</span>
+<span id="L65"><span class="lineNum">      65</span>              : namespace reporting {</span>
+<span id="L66"><span class="lineNum">      66</span>              : class Engine;</span>
+<span id="L67"><span class="lineNum">      67</span>              : class TestReportingEngine;</span>
+<span id="L68"><span class="lineNum">      68</span>              : class ReportScheduler;</span>
+<span id="L69"><span class="lineNum">      69</span>              : class TestReportScheduler;</span>
+<span id="L70"><span class="lineNum">      70</span>              : } // namespace reporting</span>
+<span id="L71"><span class="lineNum">      71</span>              : </span>
+<span id="L72"><span class="lineNum">      72</span>              : class InteractionModelEngine;</span>
+<span id="L73"><span class="lineNum">      73</span>              : class TestInteractionModelEngine;</span>
+<span id="L74"><span class="lineNum">      74</span>              : </span>
+<span id="L75"><span class="lineNum">      75</span>              : /**</span>
+<span id="L76"><span class="lineNum">      76</span>              :  *  @class ReadHandler</span>
+<span id="L77"><span class="lineNum">      77</span>              :  *</span>
+<span id="L78"><span class="lineNum">      78</span>              :  *  @brief The read handler is responsible for processing a read request, asking the attribute/event store</span>
+<span id="L79"><span class="lineNum">      79</span>              :  *         for the relevant data, and sending a reply.</span>
+<span id="L80"><span class="lineNum">      80</span>              :  *</span>
+<span id="L81"><span class="lineNum">      81</span>              :  */</span>
+<span id="L82"><span class="lineNum">      82</span>              : class ReadHandler : public Messaging::ExchangeDelegate</span>
+<span id="L83"><span class="lineNum">      83</span>              : {</span>
+<span id="L84"><span class="lineNum">      84</span>              : public:</span>
+<span id="L85"><span class="lineNum">      85</span>              :     using SubjectDescriptor = Access::SubjectDescriptor;</span>
+<span id="L86"><span class="lineNum">      86</span>              : </span>
+<span id="L87"><span class="lineNum">      87</span>              :     enum class InteractionType : uint8_t</span>
+<span id="L88"><span class="lineNum">      88</span>              :     {</span>
+<span id="L89"><span class="lineNum">      89</span>              :         Read,</span>
+<span id="L90"><span class="lineNum">      90</span>              :         Subscribe,</span>
+<span id="L91"><span class="lineNum">      91</span>              :     };</span>
+<span id="L92"><span class="lineNum">      92</span>              : </span>
+<span id="L93"><span class="lineNum">      93</span>              :     /*</span>
+<span id="L94"><span class="lineNum">      94</span>              :      * A callback used to interact with the application.</span>
+<span id="L95"><span class="lineNum">      95</span>              :      */</span>
+<span id="L96"><span class="lineNum">      96</span>              :     class ApplicationCallback</span>
+<span id="L97"><span class="lineNum">      97</span>              :     {</span>
+<span id="L98"><span class="lineNum">      98</span>              :     public:</span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC tlaBgGNC">          46 :         virtual ~ApplicationCallback() = default;</span></span>
+<span id="L100"><span class="lineNum">     100</span>              : </span>
+<span id="L101"><span class="lineNum">     101</span>              :         /*</span>
+<span id="L102"><span class="lineNum">     102</span>              :          * Called right after a SubscribeRequest has been parsed and processed. This notifies an interested application</span>
+<span id="L103"><span class="lineNum">     103</span>              :          * of a subscription that is about to be established. It also provides an avenue for altering the parameters of the</span>
+<span id="L104"><span class="lineNum">     104</span>              :          * subscription (specifically, the min/max negotiated intervals) or even outright rejecting the subscription for</span>
+<span id="L105"><span class="lineNum">     105</span>              :          * application-specific reasons.</span>
+<span id="L106"><span class="lineNum">     106</span>              :          *</span>
+<span id="L107"><span class="lineNum">     107</span>              :          * TODO: Need a new IM status code to convey application-rejected subscribes. Currently, a Failure IM status code is sent</span>
+<span id="L108"><span class="lineNum">     108</span>              :          * back to the subscriber, which isn't sufficient.</span>
+<span id="L109"><span class="lineNum">     109</span>              :          *</span>
+<span id="L110"><span class="lineNum">     110</span>              :          * To reject the subscription, a CHIP_ERROR code that is not equivalent to CHIP_NO_ERROR should be returned.</span>
+<span id="L111"><span class="lineNum">     111</span>              :          *</span>
+<span id="L112"><span class="lineNum">     112</span>              :          * More information about the set of paths associated with this subscription can be retrieved by calling the appropriate</span>
+<span id="L113"><span class="lineNum">     113</span>              :          * Get* methods below.</span>
+<span id="L114"><span class="lineNum">     114</span>              :          *</span>
+<span id="L115"><span class="lineNum">     115</span>              :          * aReadHandler:            Reference to the ReadHandler associated with the subscription.</span>
+<span id="L116"><span class="lineNum">     116</span>              :          * aSecureSession:          A reference to the underlying secure session associated with the subscription.</span>
+<span id="L117"><span class="lineNum">     117</span>              :          *</span>
+<span id="L118"><span class="lineNum">     118</span>              :          */</span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaUNC tlaBgUNC">           0 :         virtual CHIP_ERROR OnSubscriptionRequested(ReadHandler &amp; aReadHandler, Transport::SecureSession &amp; aSecureSession)</span></span>
+<span id="L120"><span class="lineNum">     120</span>              :         {</span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaUNC">           0 :             return CHIP_NO_ERROR;</span></span>
+<span id="L122"><span class="lineNum">     122</span>              :         }</span>
+<span id="L123"><span class="lineNum">     123</span>              : </span>
+<span id="L124"><span class="lineNum">     124</span>              :         /*</span>
+<span id="L125"><span class="lineNum">     125</span>              :          * Called after a subscription has been fully established.</span>
+<span id="L126"><span class="lineNum">     126</span>              :          */</span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaUNC">           0 :         virtual void OnSubscriptionEstablished(ReadHandler &amp; aReadHandler){};</span></span>
+<span id="L128"><span class="lineNum">     128</span>              : </span>
+<span id="L129"><span class="lineNum">     129</span>              :         /*</span>
+<span id="L130"><span class="lineNum">     130</span>              :          * Called right before a subscription is about to get terminated. This is only called on subscriptions that were terminated</span>
+<span id="L131"><span class="lineNum">     131</span>              :          * after they had been fully established (and therefore had called OnSubscriptionEstablished).</span>
+<span id="L132"><span class="lineNum">     132</span>              :          * OnSubscriptionEstablishment().</span>
+<span id="L133"><span class="lineNum">     133</span>              :          */</span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaUNC">           0 :         virtual void OnSubscriptionTerminated(ReadHandler &amp; aReadHandler){};</span></span>
+<span id="L135"><span class="lineNum">     135</span>              :     };</span>
+<span id="L136"><span class="lineNum">     136</span>              : </span>
+<span id="L137"><span class="lineNum">     137</span>              :     /*</span>
+<span id="L138"><span class="lineNum">     138</span>              :      * A callback used to manage the lifetime of the ReadHandler object.</span>
+<span id="L139"><span class="lineNum">     139</span>              :      */</span>
+<span id="L140"><span class="lineNum">     140</span>              :     class ManagementCallback</span>
+<span id="L141"><span class="lineNum">     141</span>              :     {</span>
+<span id="L142"><span class="lineNum">     142</span>              :     public:</span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC tlaBgGNC">         102 :         virtual ~ManagementCallback() = default;</span></span>
+<span id="L144"><span class="lineNum">     144</span>              : </span>
+<span id="L145"><span class="lineNum">     145</span>              :         /*</span>
+<span id="L146"><span class="lineNum">     146</span>              :          * Method that signals to a registered callback that this object</span>
+<span id="L147"><span class="lineNum">     147</span>              :          * has completed doing useful work and is now safe for release/destruction.</span>
+<span id="L148"><span class="lineNum">     148</span>              :          */</span>
+<span id="L149"><span class="lineNum">     149</span>              :         virtual void OnDone(ReadHandler &amp; apReadHandlerObj) = 0;</span>
+<span id="L150"><span class="lineNum">     150</span>              : </span>
+<span id="L151"><span class="lineNum">     151</span>              :         /*</span>
+<span id="L152"><span class="lineNum">     152</span>              :          * Retrieve the ApplicationCallback (if a valid one exists) from our management entity. This avoids</span>
+<span id="L153"><span class="lineNum">     153</span>              :          * storing multiple references to the application provided callback and having to subsequently manage lifetime</span>
+<span id="L154"><span class="lineNum">     154</span>              :          * issues w.r.t the ReadHandler itself.</span>
+<span id="L155"><span class="lineNum">     155</span>              :          */</span>
+<span id="L156"><span class="lineNum">     156</span>              :         virtual ApplicationCallback * GetAppCallback() = 0;</span>
+<span id="L157"><span class="lineNum">     157</span>              : </span>
+<span id="L158"><span class="lineNum">     158</span>              :         /*</span>
+<span id="L159"><span class="lineNum">     159</span>              :          * Retrieve the InteractionalModelEngine that holds this ReadHandler.</span>
+<span id="L160"><span class="lineNum">     160</span>              :          */</span>
+<span id="L161"><span class="lineNum">     161</span>              :         virtual InteractionModelEngine * GetInteractionModelEngine() = 0;</span>
+<span id="L162"><span class="lineNum">     162</span>              :     };</span>
+<span id="L163"><span class="lineNum">     163</span>              : </span>
+<span id="L164"><span class="lineNum">     164</span>              :     // TODO (#27675) : Merge existing callback and observer into one class and have an observer pool in the Readhandler to notify</span>
+<span id="L165"><span class="lineNum">     165</span>              :     // every</span>
+<span id="L166"><span class="lineNum">     166</span>              :     /*</span>
+<span id="L167"><span class="lineNum">     167</span>              :      * Observer class for ReadHandler, meant to allow multiple objects to observe the ReadHandler. Currently only one observer is</span>
+<span id="L168"><span class="lineNum">     168</span>              :      * supported but all above callbacks should be merged into observer type and an observer pool should be added to allow multiple</span>
+<span id="L169"><span class="lineNum">     169</span>              :      * objects to observe ReadHandler</span>
+<span id="L170"><span class="lineNum">     170</span>              :      */</span>
+<span id="L171"><span class="lineNum">     171</span>              :     class Observer</span>
+<span id="L172"><span class="lineNum">     172</span>              :     {</span>
+<span id="L173"><span class="lineNum">     173</span>              :     public:</span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">          70 :         virtual ~Observer() = default;</span></span>
+<span id="L175"><span class="lineNum">     175</span>              : </span>
+<span id="L176"><span class="lineNum">     176</span>              :         /// @brief Callback invoked to notify a subscription was successfully established for the ReadHandler</span>
+<span id="L177"><span class="lineNum">     177</span>              :         /// @param[in] apReadHandler  ReadHandler that completed its subscription</span>
+<span id="L178"><span class="lineNum">     178</span>              :         virtual void OnSubscriptionEstablished(ReadHandler * apReadHandler) = 0;</span>
+<span id="L179"><span class="lineNum">     179</span>              : </span>
+<span id="L180"><span class="lineNum">     180</span>              :         /// @brief Callback invoked when a ReadHandler went from a non reportable state to a reportable state. Indicates to the</span>
+<span id="L181"><span class="lineNum">     181</span>              :         /// observer that a report should be emitted when the min interval allows it.</span>
+<span id="L182"><span class="lineNum">     182</span>              :         ///</span>
+<span id="L183"><span class="lineNum">     183</span>              :         /// This will only be invoked for subscribe-type ReadHandler objects, and only after</span>
+<span id="L184"><span class="lineNum">     184</span>              :         /// OnSubscriptionEstablished has been called.</span>
+<span id="L185"><span class="lineNum">     185</span>              :         ///</span>
+<span id="L186"><span class="lineNum">     186</span>              :         /// @param[in] apReadHandler  ReadHandler that became dirty and in HandlerState::CanStartReporting state</span>
+<span id="L187"><span class="lineNum">     187</span>              :         virtual void OnBecameReportable(ReadHandler * apReadHandler) = 0;</span>
+<span id="L188"><span class="lineNum">     188</span>              : </span>
+<span id="L189"><span class="lineNum">     189</span>              :         /// @brief Callback invoked when the read handler needs to make sure to send a message to the subscriber within the next</span>
+<span id="L190"><span class="lineNum">     190</span>              :         /// maxInterval time period.</span>
+<span id="L191"><span class="lineNum">     191</span>              :         /// @param[in] apReadHandler ReadHandler that has generated a report</span>
+<span id="L192"><span class="lineNum">     192</span>              :         virtual void OnSubscriptionReportSent(ReadHandler * apReadHandler) = 0;</span>
+<span id="L193"><span class="lineNum">     193</span>              : </span>
+<span id="L194"><span class="lineNum">     194</span>              :         /// @brief Callback invoked when a ReadHandler is getting removed so it can be unregistered</span>
+<span id="L195"><span class="lineNum">     195</span>              :         /// @param[in] apReadHandler  ReadHandler getting destroyed</span>
+<span id="L196"><span class="lineNum">     196</span>              :         virtual void OnReadHandlerDestroyed(ReadHandler * apReadHandler) = 0;</span>
+<span id="L197"><span class="lineNum">     197</span>              :     };</span>
+<span id="L198"><span class="lineNum">     198</span>              : </span>
+<span id="L199"><span class="lineNum">     199</span>              :     /*</span>
+<span id="L200"><span class="lineNum">     200</span>              :      * Destructor - as part of destruction, it will abort the exchange context</span>
+<span id="L201"><span class="lineNum">     201</span>              :      * if a valid one still exists.</span>
+<span id="L202"><span class="lineNum">     202</span>              :      *</span>
+<span id="L203"><span class="lineNum">     203</span>              :      * See Abort() for details on when that might occur.</span>
+<span id="L204"><span class="lineNum">     204</span>              :      */</span>
+<span id="L205"><span class="lineNum">     205</span>              :     ~ReadHandler() override;</span>
+<span id="L206"><span class="lineNum">     206</span>              : </span>
+<span id="L207"><span class="lineNum">     207</span>              :     /**</span>
+<span id="L208"><span class="lineNum">     208</span>              :      *</span>
+<span id="L209"><span class="lineNum">     209</span>              :      *  Constructor.</span>
+<span id="L210"><span class="lineNum">     210</span>              :      *</span>
+<span id="L211"><span class="lineNum">     211</span>              :      *  The callback passed in has to outlive this handler object.</span>
+<span id="L212"><span class="lineNum">     212</span>              :      *</span>
+<span id="L213"><span class="lineNum">     213</span>              :      */</span>
+<span id="L214"><span class="lineNum">     214</span>              :     ReadHandler(ManagementCallback &amp; apCallback, Messaging::ExchangeContext * apExchangeContext, InteractionType aInteractionType,</span>
+<span id="L215"><span class="lineNum">     215</span>              :                 Observer * observer);</span>
+<span id="L216"><span class="lineNum">     216</span>              : </span>
+<span id="L217"><span class="lineNum">     217</span>              : #if CHIP_CONFIG_PERSIST_SUBSCRIPTIONS</span>
+<span id="L218"><span class="lineNum">     218</span>              :     /**</span>
+<span id="L219"><span class="lineNum">     219</span>              :      *</span>
+<span id="L220"><span class="lineNum">     220</span>              :      *  Constructor in preparation for resuming a persisted subscription</span>
+<span id="L221"><span class="lineNum">     221</span>              :      *</span>
+<span id="L222"><span class="lineNum">     222</span>              :      *  The callback passed in has to outlive this handler object.</span>
+<span id="L223"><span class="lineNum">     223</span>              :      *</span>
+<span id="L224"><span class="lineNum">     224</span>              :      */</span>
+<span id="L225"><span class="lineNum">     225</span>              :     ReadHandler(ManagementCallback &amp; apCallback, Observer * observer);</span>
+<span id="L226"><span class="lineNum">     226</span>              : #endif</span>
+<span id="L227"><span class="lineNum">     227</span>              : </span>
+<span id="L228"><span class="lineNum">     228</span> <span class="tlaGNC">         477 :     const SingleLinkedListNode&lt;AttributePathParams&gt; * GetAttributePathList() const { return mpAttributePathList; }</span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">        2895 :     const SingleLinkedListNode&lt;EventPathParams&gt; * GetEventPathList() const { return mpEventPathList; }</span></span>
+<span id="L230"><span class="lineNum">     230</span> <span class="tlaGNC">        4756 :     const SingleLinkedListNode&lt;DataVersionFilter&gt; * GetDataVersionFilterList() const { return mpDataVersionFilterList; }</span></span>
+<span id="L231"><span class="lineNum">     231</span>              : </span>
+<span id="L232"><span class="lineNum">     232</span>              :     /**</span>
+<span id="L233"><span class="lineNum">     233</span>              :      * @brief Returns the reporting intervals that will used by the ReadHandler for the subscription being requested.</span>
+<span id="L234"><span class="lineNum">     234</span>              :      *        After the subscription is established, these will be the set reporting intervals and cannot be changed.</span>
+<span id="L235"><span class="lineNum">     235</span>              :      *</span>
+<span id="L236"><span class="lineNum">     236</span>              :      * @param[out] aMinInterval minimum time delta between two reports for the subscription</span>
+<span id="L237"><span class="lineNum">     237</span>              :      * @param[in] aMaxInterval maximum time delta between two reports for the subscription</span>
+<span id="L238"><span class="lineNum">     238</span>              :      */</span>
+<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">         455 :     void GetReportingIntervals(uint16_t &amp; aMinInterval, uint16_t &amp; aMaxInterval) const</span></span>
+<span id="L240"><span class="lineNum">     240</span>              :     {</span>
+<span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">         455 :         aMinInterval = mMinIntervalFloorSeconds;</span></span>
+<span id="L242"><span class="lineNum">     242</span> <span class="tlaGNC">         455 :         aMaxInterval = mMaxInterval;</span></span>
+<span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">         455 :     }</span></span>
+<span id="L244"><span class="lineNum">     244</span>              : </span>
+<span id="L245"><span class="lineNum">     245</span>              :     /**</span>
+<span id="L246"><span class="lineNum">     246</span>              :      * @brief Returns the maximum reporting interval that was initially requested by the subscriber</span>
+<span id="L247"><span class="lineNum">     247</span>              :      *        This is the same value as the mMaxInterval member if the max interval is not changed by the publisher.</span>
+<span id="L248"><span class="lineNum">     248</span>              :      *</span>
+<span id="L249"><span class="lineNum">     249</span>              :      * @note If the device is an ICD, the MaxInterval of a subscription is automatically set to a multiple of the IdleModeDuration.</span>
+<span id="L250"><span class="lineNum">     250</span>              :      *       This function is the only way to get the requested max interval once the OnSubscriptionRequested application callback</span>
+<span id="L251"><span class="lineNum">     251</span>              :      *       is called.</span>
+<span id="L252"><span class="lineNum">     252</span>              :      *</span>
+<span id="L253"><span class="lineNum">     253</span>              :      * @return uint16_t subscriber requested maximum reporting interval</span>
+<span id="L254"><span class="lineNum">     254</span>              :      */</span>
+<span id="L255"><span class="lineNum">     255</span> <span class="tlaGNC">          10 :     inline uint16_t GetSubscriberRequestedMaxInterval() const { return mSubscriberRequestedMaxInterval; }</span></span>
+<span id="L256"><span class="lineNum">     256</span>              : </span>
+<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC">          10 :     CHIP_ERROR SetMinReportingIntervalForTests(uint16_t aMinInterval)</span></span>
+<span id="L258"><span class="lineNum">     258</span>              :     {</span>
+<span id="L259"><span class="lineNum">     259</span> <span class="tlaGNC">          10 :         VerifyOrReturnError(IsIdle(), CHIP_ERROR_INCORRECT_STATE);</span></span>
+<span id="L260"><span class="lineNum">     260</span> <span class="tlaGNC">          10 :         VerifyOrReturnError(aMinInterval &lt;= mMaxInterval, CHIP_ERROR_INVALID_ARGUMENT);</span></span>
+<span id="L261"><span class="lineNum">     261</span>              :         // Ensures the new min interval is higher than the subscriber established one.</span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">          10 :         mMinIntervalFloorSeconds = std::max(mMinIntervalFloorSeconds, aMinInterval);</span></span>
+<span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">          10 :         return CHIP_NO_ERROR;</span></span>
+<span id="L264"><span class="lineNum">     264</span>              :     }</span>
+<span id="L265"><span class="lineNum">     265</span>              : </span>
+<span id="L266"><span class="lineNum">     266</span>              :     /*</span>
+<span id="L267"><span class="lineNum">     267</span>              :      * Set the maximum reporting interval for the subscription. This SHALL only be called</span>
+<span id="L268"><span class="lineNum">     268</span>              :      * from the OnSubscriptionRequested callback above. The restriction is as below</span>
+<span id="L269"><span class="lineNum">     269</span>              :      * MinIntervalFloor ≤ MaxInterval ≤ MAX(SUBSCRIPTION_MAX_INTERVAL_PUBLISHER_LIMIT, MaxIntervalCeiling)</span>
+<span id="L270"><span class="lineNum">     270</span>              :      * Where SUBSCRIPTION_MAX_INTERVAL_PUBLISHER_LIMIT is set to 60m in the spec.</span>
+<span id="L271"><span class="lineNum">     271</span>              :      */</span>
+<span id="L272"><span class="lineNum">     272</span> <span class="tlaGNC">          31 :     CHIP_ERROR SetMaxReportingInterval(uint16_t aMaxInterval)</span></span>
+<span id="L273"><span class="lineNum">     273</span>              :     {</span>
+<span id="L274"><span class="lineNum">     274</span> <span class="tlaGNC">          31 :         VerifyOrReturnError(IsIdle(), CHIP_ERROR_INCORRECT_STATE);</span></span>
+<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC">          29 :         VerifyOrReturnError(mMinIntervalFloorSeconds &lt;= aMaxInterval, CHIP_ERROR_INVALID_ARGUMENT);</span></span>
+<span id="L276"><span class="lineNum">     276</span> <span class="tlaGNC">          27 :         VerifyOrReturnError(aMaxInterval &lt;= std::max(GetPublisherSelectedIntervalLimit(), mSubscriberRequestedMaxInterval),</span></span>
+<span id="L277"><span class="lineNum">     277</span>              :                             CHIP_ERROR_INVALID_ARGUMENT);</span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">          21 :         mMaxInterval = aMaxInterval;</span></span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">          21 :         return CHIP_NO_ERROR;</span></span>
+<span id="L280"><span class="lineNum">     280</span>              :     }</span>
+<span id="L281"><span class="lineNum">     281</span>              : </span>
+<span id="L282"><span class="lineNum">     282</span>              : #if CHIP_CONFIG_PERSIST_SUBSCRIPTIONS</span>
+<span id="L283"><span class="lineNum">     283</span>              :     /**</span>
+<span id="L284"><span class="lineNum">     284</span>              :      *</span>
+<span id="L285"><span class="lineNum">     285</span>              :      *  @brief Initialize a ReadHandler for a resumed subsciption</span>
+<span id="L286"><span class="lineNum">     286</span>              :      *</span>
+<span id="L287"><span class="lineNum">     287</span>              :      *  Used after the SubscriptionResumptionSessionEstablisher establishs the CASE session</span>
+<span id="L288"><span class="lineNum">     288</span>              :      */</span>
+<span id="L289"><span class="lineNum">     289</span>              :     void OnSubscriptionResumed(const SessionHandle &amp; sessionHandle, SubscriptionResumptionSessionEstablisher &amp; sessionEstablisher);</span>
+<span id="L290"><span class="lineNum">     290</span>              : #endif</span>
+<span id="L291"><span class="lineNum">     291</span>              : </span>
+<span id="L292"><span class="lineNum">     292</span>              : private:</span>
+<span id="L293"><span class="lineNum">     293</span>              :     PriorityLevel GetCurrentPriority() const { return mCurrentPriority; }</span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">        1991 :     EventNumber &amp; GetEventMin() { return mEventMin; }</span></span>
+<span id="L295"><span class="lineNum">     295</span>              : </span>
+<span id="L296"><span class="lineNum">     296</span>              :     /**</span>
+<span id="L297"><span class="lineNum">     297</span>              :      * Returns SUBSCRIPTION_MAX_INTERVAL_PUBLISHER_LIMIT</span>
+<span id="L298"><span class="lineNum">     298</span>              :      * For an ICD publisher, this SHALL be set to the idle mode duration.</span>
+<span id="L299"><span class="lineNum">     299</span>              :      * Otherwise, this SHALL be set to 60 minutes.</span>
+<span id="L300"><span class="lineNum">     300</span>              :      */</span>
+<span id="L301"><span class="lineNum">     301</span>              :     uint16_t GetPublisherSelectedIntervalLimit();</span>
+<span id="L302"><span class="lineNum">     302</span>              : </span>
+<span id="L303"><span class="lineNum">     303</span>              :     enum class ReadHandlerFlags : uint8_t</span>
+<span id="L304"><span class="lineNum">     304</span>              :     {</span>
+<span id="L305"><span class="lineNum">     305</span>              :         // The flag indicating we are in the middle of a series of chunked report messages, this flag will be cleared during</span>
+<span id="L306"><span class="lineNum">     306</span>              :         // sending last chunked message.</span>
+<span id="L307"><span class="lineNum">     307</span>              :         ChunkedReport = (1 &lt;&lt; 0),</span>
+<span id="L308"><span class="lineNum">     308</span>              : </span>
+<span id="L309"><span class="lineNum">     309</span>              :         // Tracks whether we're in the initial phase of receiving priming</span>
+<span id="L310"><span class="lineNum">     310</span>              :         // reports, which is always true for reads and true for subscriptions</span>
+<span id="L311"><span class="lineNum">     311</span>              :         // prior to receiving a subscribe response.</span>
+<span id="L312"><span class="lineNum">     312</span>              :         PrimingReports     = (1 &lt;&lt; 1),</span>
+<span id="L313"><span class="lineNum">     313</span>              :         ActiveSubscription = (1 &lt;&lt; 2),</span>
+<span id="L314"><span class="lineNum">     314</span>              :         FabricFiltered     = (1 &lt;&lt; 3),</span>
+<span id="L315"><span class="lineNum">     315</span>              :         // For subscriptions, we record the dirty set generation when we started to generate the last report.</span>
+<span id="L316"><span class="lineNum">     316</span>              :         // The mCurrentReportsBeginGeneration records the generation at the start of the current report.  This only/</span>
+<span id="L317"><span class="lineNum">     317</span>              :         // has a meaningful value while IsReporting() is true.</span>
+<span id="L318"><span class="lineNum">     318</span>              :         //</span>
+<span id="L319"><span class="lineNum">     319</span>              :         // mPreviousReportsBeginGeneration will be set to mCurrentReportsBeginGeneration after we send the last</span>
+<span id="L320"><span class="lineNum">     320</span>              :         // chunk of the current report.  Anything that was dirty with a generation earlier than</span>
+<span id="L321"><span class="lineNum">     321</span>              :         // mPreviousReportsBeginGeneration has had its value sent to the client.</span>
+<span id="L322"><span class="lineNum">     322</span>              :         // when receiving initial request, it needs mark current handler as dirty.</span>
+<span id="L323"><span class="lineNum">     323</span>              :         // when there is urgent event, it needs mark current handler as dirty.</span>
+<span id="L324"><span class="lineNum">     324</span>              :         ForceDirty = (1 &lt;&lt; 4),</span>
+<span id="L325"><span class="lineNum">     325</span>              : </span>
+<span id="L326"><span class="lineNum">     326</span>              :         // Don't need the response for report data if true</span>
+<span id="L327"><span class="lineNum">     327</span>              :         SuppressResponse = (1 &lt;&lt; 5),</span>
+<span id="L328"><span class="lineNum">     328</span>              :     };</span>
+<span id="L329"><span class="lineNum">     329</span>              : </span>
+<span id="L330"><span class="lineNum">     330</span>              :     /**</span>
+<span id="L331"><span class="lineNum">     331</span>              :      *  Process a read/subscribe request.  Parts of the processing may end up being asynchronous, but the ReadHandler</span>
+<span id="L332"><span class="lineNum">     332</span>              :      *  guarantees that it will call Shutdown on itself when processing is done (including if OnReadInitialRequest</span>
+<span id="L333"><span class="lineNum">     333</span>              :      *  returns an error).</span>
+<span id="L334"><span class="lineNum">     334</span>              :      *</span>
+<span id="L335"><span class="lineNum">     335</span>              :      *  @retval #Others If fails to process read request</span>
+<span id="L336"><span class="lineNum">     336</span>              :      *  @retval #CHIP_NO_ERROR On success.</span>
+<span id="L337"><span class="lineNum">     337</span>              :      *</span>
+<span id="L338"><span class="lineNum">     338</span>              :      */</span>
+<span id="L339"><span class="lineNum">     339</span>              :     void OnInitialRequest(System::PacketBufferHandle &amp;&amp; aPayload);</span>
+<span id="L340"><span class="lineNum">     340</span>              : </span>
+<span id="L341"><span class="lineNum">     341</span>              :     /**</span>
+<span id="L342"><span class="lineNum">     342</span>              :      *  Send ReportData to initiator</span>
+<span id="L343"><span class="lineNum">     343</span>              :      *</span>
+<span id="L344"><span class="lineNum">     344</span>              :      *  @param[in]    aPayload             A payload that has read request data</span>
+<span id="L345"><span class="lineNum">     345</span>              :      *  @param[in]    aMoreChunks          A flags indicating there will be more chunks expected to be sent for this read request</span>
+<span id="L346"><span class="lineNum">     346</span>              :      *</span>
+<span id="L347"><span class="lineNum">     347</span>              :      *  @retval #Others If fails to send report data</span>
+<span id="L348"><span class="lineNum">     348</span>              :      *  @retval #CHIP_NO_ERROR On success.</span>
+<span id="L349"><span class="lineNum">     349</span>              :      *</span>
+<span id="L350"><span class="lineNum">     350</span>              :      *  If an error is returned, the ReadHandler guarantees that it is not in</span>
+<span id="L351"><span class="lineNum">     351</span>              :      *  a state where it's waiting for a response.</span>
+<span id="L352"><span class="lineNum">     352</span>              :      */</span>
+<span id="L353"><span class="lineNum">     353</span>              :     CHIP_ERROR SendReportData(System::PacketBufferHandle &amp;&amp; aPayload, bool aMoreChunks);</span>
+<span id="L354"><span class="lineNum">     354</span>              : </span>
+<span id="L355"><span class="lineNum">     355</span>              :     /*</span>
+<span id="L356"><span class="lineNum">     356</span>              :      * Get the appropriate size of a packet buffer to allocate for encoding a Report message.</span>
+<span id="L357"><span class="lineNum">     357</span>              :      * This size might depend on the underlying session used by the ReadHandler.</span>
+<span id="L358"><span class="lineNum">     358</span>              :      *</span>
+<span id="L359"><span class="lineNum">     359</span>              :      * The size returned here is the size not including the various prepended headers</span>
+<span id="L360"><span class="lineNum">     360</span>              :      * (what System::PacketBuffer calls the &quot;available size&quot;).</span>
+<span id="L361"><span class="lineNum">     361</span>              :      */</span>
+<span id="L362"><span class="lineNum">     362</span>              :     size_t GetReportBufferMaxSize();</span>
+<span id="L363"><span class="lineNum">     363</span>              : </span>
+<span id="L364"><span class="lineNum">     364</span>              :     /**</span>
+<span id="L365"><span class="lineNum">     365</span>              :      *  Returns whether this ReadHandler represents a subscription that was created by the other side of the provided exchange.</span>
+<span id="L366"><span class="lineNum">     366</span>              :      */</span>
+<span id="L367"><span class="lineNum">     367</span>              :     bool IsFromSubscriber(Messaging::ExchangeContext &amp; apExchangeContext) const;</span>
+<span id="L368"><span class="lineNum">     368</span>              : </span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">          41 :     bool IsIdle() const { return mState == HandlerState::Idle; }</span></span>
+<span id="L370"><span class="lineNum">     370</span>              : </span>
+<span id="L371"><span class="lineNum">     371</span>              :     /// @brief Returns whether the ReadHandler is in a state where it can send a report and there is data to report.</span>
+<span id="L372"><span class="lineNum">     372</span> <span class="tlaGNC">       10871 :     bool ShouldStartReporting() const</span></span>
+<span id="L373"><span class="lineNum">     373</span>              :     {</span>
+<span id="L374"><span class="lineNum">     374</span>              :         // Important: Anything that changes ShouldStartReporting() from false to true</span>
+<span id="L375"><span class="lineNum">     375</span>              :         // (which can only happen for subscriptions) must call</span>
+<span id="L376"><span class="lineNum">     376</span>              :         // mObserver-&gt;OnBecameReportable(this).</span>
+<span id="L377"><span class="lineNum">     377</span> <span class="tlaGNC">       10871 :         return CanStartReporting() &amp;&amp; (ShouldReportUnscheduled() || IsDirty());</span></span>
+<span id="L378"><span class="lineNum">     378</span>              :     }</span>
+<span id="L379"><span class="lineNum">     379</span>              :     /// @brief CanStartReporting() is true if the ReadHandler is in a state where it could generate</span>
+<span id="L380"><span class="lineNum">     380</span>              :     /// a (possibly empty) report if someone asked it to.</span>
+<span id="L381"><span class="lineNum">     381</span> <span class="tlaGNC">       21441 :     bool CanStartReporting() const { return mState == HandlerState::CanStartReporting; }</span></span>
+<span id="L382"><span class="lineNum">     382</span>              :     /// @brief ShouldReportUnscheduled() is true if the ReadHandler should be asked to generate reports</span>
+<span id="L383"><span class="lineNum">     383</span>              :     /// without consulting the report scheduler.</span>
+<span id="L384"><span class="lineNum">     384</span> <span class="tlaGNC">        8878 :     bool ShouldReportUnscheduled() const</span></span>
+<span id="L385"><span class="lineNum">     385</span>              :     {</span>
+<span id="L386"><span class="lineNum">     386</span> <span class="tlaGNC">        8878 :         return CanStartReporting() &amp;&amp; (IsType(ReadHandler::InteractionType::Read) || IsPriming());</span></span>
+<span id="L387"><span class="lineNum">     387</span>              :     }</span>
+<span id="L388"><span class="lineNum">     388</span> <span class="tlaGNC">        7824 :     bool IsAwaitingReportResponse() const { return mState == HandlerState::AwaitingReportResponse; }</span></span>
+<span id="L389"><span class="lineNum">     389</span>              : </span>
+<span id="L390"><span class="lineNum">     390</span>              :     // Resets the path iterator to the beginning of the whole report for generating a series of new reports.</span>
+<span id="L391"><span class="lineNum">     391</span>              :     void ResetPathIterator();</span>
+<span id="L392"><span class="lineNum">     392</span>              : </span>
+<span id="L393"><span class="lineNum">     393</span>              :     CHIP_ERROR ProcessDataVersionFilterList(DataVersionFilterIBs::Parser &amp; aDataVersionFilterListParser);</span>
+<span id="L394"><span class="lineNum">     394</span>              : </span>
+<span id="L395"><span class="lineNum">     395</span>              :     // if current priority is in the middle, it has valid snapshoted last event number, it check cleaness via comparing</span>
+<span id="L396"><span class="lineNum">     396</span>              :     // with snapshotted last event number. if current priority  is in the end, no valid</span>
+<span id="L397"><span class="lineNum">     397</span>              :     // sanpshotted last event, check with latest last event number, re-setup snapshoted checkpoint, and compare again.</span>
+<span id="L398"><span class="lineNum">     398</span>              :     bool CheckEventClean(EventManagement &amp; aEventManager);</span>
+<span id="L399"><span class="lineNum">     399</span>              : </span>
+<span id="L400"><span class="lineNum">     400</span> <span class="tlaGNC">       28037 :     bool IsType(InteractionType type) const { return (mInteractionType == type); }</span></span>
+<span id="L401"><span class="lineNum">     401</span> <span class="tlaGNC">        1525 :     bool IsChunkedReport() const { return mFlags.Has(ReadHandlerFlags::ChunkedReport); }</span></span>
+<span id="L402"><span class="lineNum">     402</span>              :     // Is reporting indicates whether we are in the middle of a series chunks. As we will set mIsChunkedReport on the first chunk</span>
+<span id="L403"><span class="lineNum">     403</span>              :     // and clear that flag on the last chunk, we can use mIsChunkedReport to indicate this state.</span>
+<span id="L404"><span class="lineNum">     404</span> <span class="tlaGNC">        3949 :     bool IsReporting() const { return mFlags.Has(ReadHandlerFlags::ChunkedReport); }</span></span>
+<span id="L405"><span class="lineNum">     405</span> <span class="tlaGNC">       10927 :     bool IsPriming() const { return mFlags.Has(ReadHandlerFlags::PrimingReports); }</span></span>
+<span id="L406"><span class="lineNum">     406</span> <span class="tlaGNC">          42 :     bool IsActiveSubscription() const { return mFlags.Has(ReadHandlerFlags::ActiveSubscription); }</span></span>
+<span id="L407"><span class="lineNum">     407</span> <span class="tlaGNC">        4959 :     bool IsFabricFiltered() const { return mFlags.Has(ReadHandlerFlags::FabricFiltered); }</span></span>
+<span id="L408"><span class="lineNum">     408</span>              :     CHIP_ERROR OnSubscribeRequest(Messaging::ExchangeContext * apExchangeContext, System::PacketBufferHandle &amp;&amp; aPayload);</span>
+<span id="L409"><span class="lineNum">     409</span> <span class="tlaGNC">         447 :     void GetSubscriptionId(SubscriptionId &amp; aSubscriptionId) const { aSubscriptionId = mSubscriptionId; }</span></span>
+<span id="L410"><span class="lineNum">     410</span> <span class="tlaGNC">        1991 :     AttributePathExpandIterator::Position &amp; AttributeIterationPosition() { return mAttributePathExpandPosition; }</span></span>
+<span id="L411"><span class="lineNum">     411</span>              : </span>
+<span id="L412"><span class="lineNum">     412</span>              :     /// @brief Notifies the read handler that a set of attribute paths has been marked dirty. This will schedule a reporting engine</span>
+<span id="L413"><span class="lineNum">     413</span>              :     /// run if the change to the attribute path makes the ReadHandler reportable.</span>
+<span id="L414"><span class="lineNum">     414</span>              :     /// @param aAttributeChanged Path to the attribute that was changed.</span>
+<span id="L415"><span class="lineNum">     415</span>              :     void AttributePathIsDirty(DataModel::Provider * apDataModel, const AttributePathParams &amp; aAttributeChanged);</span>
+<span id="L416"><span class="lineNum">     416</span> <span class="tlaGNC">        4528 :     bool IsDirty() const</span></span>
+<span id="L417"><span class="lineNum">     417</span>              :     {</span>
+<span id="L418"><span class="lineNum">     418</span> <span class="tlaGNC">        4528 :         return (mDirtyGeneration &gt; mPreviousReportsBeginGeneration) || mFlags.Has(ReadHandlerFlags::ForceDirty);</span></span>
+<span id="L419"><span class="lineNum">     419</span>              :     }</span>
+<span id="L420"><span class="lineNum">     420</span> <span class="tlaGNC">        1099 :     void ClearForceDirtyFlag() { ClearStateFlag(ReadHandlerFlags::ForceDirty); }</span></span>
+<span id="L421"><span class="lineNum">     421</span> <span class="tlaGNC">         142 :     NodeId GetInitiatorNodeId() const</span></span>
+<span id="L422"><span class="lineNum">     422</span>              :     {</span>
+<span id="L423"><span class="lineNum">     423</span> <span class="tlaGNC">         142 :         auto session = GetSession();</span></span>
+<span id="L424"><span class="lineNum">     424</span> <span class="tlaGNC">         142 :         return session == nullptr ? kUndefinedNodeId : session-&gt;GetPeerNodeId();</span></span>
+<span id="L425"><span class="lineNum">     425</span>              :     }</span>
+<span id="L426"><span class="lineNum">     426</span>              : </span>
+<span id="L427"><span class="lineNum">     427</span> <span class="tlaGNC">         298 :     FabricIndex GetAccessingFabricIndex() const</span></span>
+<span id="L428"><span class="lineNum">     428</span>              :     {</span>
+<span id="L429"><span class="lineNum">     429</span> <span class="tlaGNC">         298 :         auto session = GetSession();</span></span>
+<span id="L430"><span class="lineNum">     430</span> <span class="tlaGNC">         298 :         return session == nullptr ? kUndefinedFabricIndex : session-&gt;GetFabricIndex();</span></span>
+<span id="L431"><span class="lineNum">     431</span>              :     }</span>
+<span id="L432"><span class="lineNum">     432</span>              : </span>
+<span id="L433"><span class="lineNum">     433</span>              :     Transport::SecureSession * GetSession() const;</span>
+<span id="L434"><span class="lineNum">     434</span> <span class="tlaGNC">        5950 :     SubjectDescriptor GetSubjectDescriptor() const { return GetSession()-&gt;GetSubjectDescriptor(); }</span></span>
+<span id="L435"><span class="lineNum">     435</span> <span class="tlaGNC">        4959 :     bool AllowsLargePayload() const { return GetSession()-&gt;AllowsLargePayload(); }</span></span>
+<span id="L436"><span class="lineNum">     436</span>              : </span>
+<span id="L437"><span class="lineNum">     437</span> <span class="tlaGNC">          82 :     auto GetTransactionStartGeneration() const { return mTransactionStartGeneration; }</span></span>
+<span id="L438"><span class="lineNum">     438</span>              : </span>
+<span id="L439"><span class="lineNum">     439</span>              :     /// @brief Forces the read handler into a dirty state, regardless of what's going on with attributes.</span>
+<span id="L440"><span class="lineNum">     440</span>              :     /// This can lead to scheduling of a reporting run immediately, if the min interval has been reached,</span>
+<span id="L441"><span class="lineNum">     441</span>              :     /// or after the min interval is reached if it has not yet been reached.</span>
+<span id="L442"><span class="lineNum">     442</span>              :     void ForceDirtyState();</span>
+<span id="L443"><span class="lineNum">     443</span>              : </span>
+<span id="L444"><span class="lineNum">     444</span> <span class="tlaGNC">        4959 :     const AttributeEncodeState &amp; GetAttributeEncodeState() const { return mAttributeEncoderState; }</span></span>
+<span id="L445"><span class="lineNum">     445</span> <span class="tlaGNC">        4967 :     void SetAttributeEncodeState(const AttributeEncodeState &amp; aState) { mAttributeEncoderState = aState; }</span></span>
+<span id="L446"><span class="lineNum">     446</span> <span class="tlaGNC">          20 :     uint32_t GetLastWrittenEventsBytes() const { return mLastWrittenEventsBytes; }</span></span>
+<span id="L447"><span class="lineNum">     447</span>              : </span>
+<span id="L448"><span class="lineNum">     448</span>              :     // Returns the number of interested paths, including wildcard and concrete paths.</span>
+<span id="L449"><span class="lineNum">     449</span> <span class="tlaGNC">        6593 :     size_t GetAttributePathCount() const { return mpAttributePathList == nullptr ? 0 : mpAttributePathList-&gt;Count(); };</span></span>
+<span id="L450"><span class="lineNum">     450</span> <span class="tlaGNC">        6593 :     size_t GetEventPathCount() const { return mpEventPathList == nullptr ? 0 : mpEventPathList-&gt;Count(); };</span></span>
+<span id="L451"><span class="lineNum">     451</span>              :     size_t GetDataVersionFilterCount() const { return mpDataVersionFilterList == nullptr ? 0 : mpDataVersionFilterList-&gt;Count(); };</span>
+<span id="L452"><span class="lineNum">     452</span>              : </span>
+<span id="L453"><span class="lineNum">     453</span>              :     CHIP_ERROR SendStatusReport(Protocols::InteractionModel::Status aStatus);</span>
+<span id="L454"><span class="lineNum">     454</span>              : </span>
+<span id="L455"><span class="lineNum">     455</span>              :     friend class TestReadInteraction;</span>
+<span id="L456"><span class="lineNum">     456</span>              :     friend class chip::app::reporting::TestReportingEngine;</span>
+<span id="L457"><span class="lineNum">     457</span>              :     friend class chip::app::reporting::TestReportScheduler;</span>
+<span id="L458"><span class="lineNum">     458</span>              : </span>
+<span id="L459"><span class="lineNum">     459</span>              :     //</span>
+<span id="L460"><span class="lineNum">     460</span>              :     // The engine needs to be able to Abort/Close a ReadHandler instance upon completion of work for a given read/subscribe</span>
+<span id="L461"><span class="lineNum">     461</span>              :     // interaction. We do not want to make these methods public just to give an adjacent class in the IM access, since public</span>
+<span id="L462"><span class="lineNum">     462</span>              :     // should really be taking application usage considerations as well. Hence, make it a friend.</span>
+<span id="L463"><span class="lineNum">     463</span>              :     //</span>
+<span id="L464"><span class="lineNum">     464</span>              :     friend class chip::app::reporting::Engine;</span>
+<span id="L465"><span class="lineNum">     465</span>              :     friend class chip::app::InteractionModelEngine;</span>
+<span id="L466"><span class="lineNum">     466</span>              :     friend class TestInteractionModelEngine;</span>
+<span id="L467"><span class="lineNum">     467</span>              : </span>
+<span id="L468"><span class="lineNum">     468</span>              :     // The report scheduler needs to be able to access StateFlag private functions ShouldStartReporting(), CanStartReporting(),</span>
+<span id="L469"><span class="lineNum">     469</span>              :     // ForceDirtyState() and IsDirty() to know when to schedule a run so it is declared as a friend class.</span>
+<span id="L470"><span class="lineNum">     470</span>              :     friend class chip::app::reporting::ReportScheduler;</span>
+<span id="L471"><span class="lineNum">     471</span>              : </span>
+<span id="L472"><span class="lineNum">     472</span>              :     enum class HandlerState : uint8_t</span>
+<span id="L473"><span class="lineNum">     473</span>              :     {</span>
+<span id="L474"><span class="lineNum">     474</span>              :         Idle,                   ///&lt; The handler has been initialized and is ready</span>
+<span id="L475"><span class="lineNum">     475</span>              :         CanStartReporting,      ///&lt; The handler has is now capable of generating reports and may generate one immediately</span>
+<span id="L476"><span class="lineNum">     476</span>              :                                 ///&lt; or later when other criteria are satisfied (e.g hold-off for min reporting interval).</span>
+<span id="L477"><span class="lineNum">     477</span>              :         AwaitingReportResponse, ///&lt; The handler has sent the report to the client and is awaiting a status response.</span>
+<span id="L478"><span class="lineNum">     478</span>              :         AwaitingDestruction,    ///&lt; The object has completed its work and is awaiting destruction by the application.</span>
+<span id="L479"><span class="lineNum">     479</span>              :     };</span>
+<span id="L480"><span class="lineNum">     480</span>              : </span>
+<span id="L481"><span class="lineNum">     481</span>              :     enum class CloseOptions</span>
+<span id="L482"><span class="lineNum">     482</span>              :     {</span>
+<span id="L483"><span class="lineNum">     483</span>              :         kDropPersistedSubscription,</span>
+<span id="L484"><span class="lineNum">     484</span>              :         kKeepPersistedSubscription</span>
+<span id="L485"><span class="lineNum">     485</span>              :     };</span>
+<span id="L486"><span class="lineNum">     486</span>              :     /**</span>
+<span id="L487"><span class="lineNum">     487</span>              :      * Called internally to signal the completion of all work on this objecta and signal to a registered callback that it's</span>
+<span id="L488"><span class="lineNum">     488</span>              :      * safe to release this object.</span>
+<span id="L489"><span class="lineNum">     489</span>              :      *</span>
+<span id="L490"><span class="lineNum">     490</span>              :      *  @param    options             This specifies whether to drop or keep the subscription</span>
+<span id="L491"><span class="lineNum">     491</span>              :      *</span>
+<span id="L492"><span class="lineNum">     492</span>              :      */</span>
+<span id="L493"><span class="lineNum">     493</span>              :     void Close(CloseOptions options = CloseOptions::kDropPersistedSubscription);</span>
+<span id="L494"><span class="lineNum">     494</span>              : </span>
+<span id="L495"><span class="lineNum">     495</span>              :     CHIP_ERROR SendSubscribeResponse();</span>
+<span id="L496"><span class="lineNum">     496</span>              :     CHIP_ERROR ProcessSubscribeRequest(System::PacketBufferHandle &amp;&amp; aPayload);</span>
+<span id="L497"><span class="lineNum">     497</span>              :     CHIP_ERROR ProcessReadRequest(System::PacketBufferHandle &amp;&amp; aPayload);</span>
+<span id="L498"><span class="lineNum">     498</span>              :     CHIP_ERROR ProcessAttributePaths(AttributePathIBs::Parser &amp; aAttributePathListParser);</span>
+<span id="L499"><span class="lineNum">     499</span>              :     CHIP_ERROR ProcessEventPaths(EventPathIBs::Parser &amp; aEventPathsParser);</span>
+<span id="L500"><span class="lineNum">     500</span>              :     CHIP_ERROR ProcessEventFilters(EventFilterIBs::Parser &amp; aEventFiltersParser);</span>
+<span id="L501"><span class="lineNum">     501</span>              :     CHIP_ERROR OnStatusResponse(Messaging::ExchangeContext * apExchangeContext, System::PacketBufferHandle &amp;&amp; aPayload,</span>
+<span id="L502"><span class="lineNum">     502</span>              :                                 bool &amp; aSendStatusResponse);</span>
+<span id="L503"><span class="lineNum">     503</span>              :     CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * apExchangeContext, const PayloadHeader &amp; aPayloadHeader,</span>
+<span id="L504"><span class="lineNum">     504</span>              :                                  System::PacketBufferHandle &amp;&amp; aPayload) override;</span>
+<span id="L505"><span class="lineNum">     505</span>              :     void OnResponseTimeout(Messaging::ExchangeContext * apExchangeContext) override;</span>
+<span id="L506"><span class="lineNum">     506</span>              :     void MoveToState(const HandlerState aTargetState);</span>
+<span id="L507"><span class="lineNum">     507</span>              : </span>
+<span id="L508"><span class="lineNum">     508</span>              :     const char * GetStateStr() const;</span>
+<span id="L509"><span class="lineNum">     509</span>              : </span>
+<span id="L510"><span class="lineNum">     510</span>              :     void PersistSubscription();</span>
+<span id="L511"><span class="lineNum">     511</span>              : </span>
+<span id="L512"><span class="lineNum">     512</span>              :     /// @brief Modifies a state flag in the read handler. If the read handler went from a</span>
+<span id="L513"><span class="lineNum">     513</span>              :     /// non-reportable state to a reportable state, schedules a reporting engine run.</span>
+<span id="L514"><span class="lineNum">     514</span>              :     /// @param aFlag Flag to set</span>
+<span id="L515"><span class="lineNum">     515</span>              :     /// @param aValue Flag new value</span>
+<span id="L516"><span class="lineNum">     516</span>              :     void SetStateFlag(ReadHandlerFlags aFlag, bool aValue = true);</span>
+<span id="L517"><span class="lineNum">     517</span>              : </span>
+<span id="L518"><span class="lineNum">     518</span>              :     /// @brief This function call SetStateFlag with the flag value set to false, thus possibly emitting a report</span>
+<span id="L519"><span class="lineNum">     519</span>              :     /// generation.</span>
+<span id="L520"><span class="lineNum">     520</span>              :     /// @param aFlag Flag to clear</span>
+<span id="L521"><span class="lineNum">     521</span>              :     void ClearStateFlag(ReadHandlerFlags aFlag);</span>
+<span id="L522"><span class="lineNum">     522</span>              : </span>
+<span id="L523"><span class="lineNum">     523</span>              :     SubscriptionId mSubscriptionId = 0;</span>
+<span id="L524"><span class="lineNum">     524</span>              : </span>
+<span id="L525"><span class="lineNum">     525</span>              :     // The current generation of the reporting engine dirty set the last time we were notified that a path we're interested in was</span>
+<span id="L526"><span class="lineNum">     526</span>              :     // marked dirty.</span>
+<span id="L527"><span class="lineNum">     527</span>              :     //</span>
+<span id="L528"><span class="lineNum">     528</span>              :     // This allows us to detemine whether any paths we care about might have</span>
+<span id="L529"><span class="lineNum">     529</span>              :     // been marked dirty after we had already sent reports for them, which would</span>
+<span id="L530"><span class="lineNum">     530</span>              :     // mean we should report those paths again, by comparing this generation to the</span>
+<span id="L531"><span class="lineNum">     531</span>              :     // current generation when we started sending the last set reports that we completed.</span>
+<span id="L532"><span class="lineNum">     532</span>              :     //</span>
+<span id="L533"><span class="lineNum">     533</span>              :     // This allows us to reset the iterator to the beginning of the current</span>
+<span id="L534"><span class="lineNum">     534</span>              :     // cluster instead of the beginning of the whole report in AttributePathIsDirty, without</span>
+<span id="L535"><span class="lineNum">     535</span>              :     // permanently missing dirty any paths.</span>
+<span id="L536"><span class="lineNum">     536</span>              :     uint64_t mDirtyGeneration = 0;</span>
+<span id="L537"><span class="lineNum">     537</span>              : </span>
+<span id="L538"><span class="lineNum">     538</span>              :     // For subscriptions, we record the timestamp when we started to generate the last report.</span>
+<span id="L539"><span class="lineNum">     539</span>              :     // The mCurrentReportsBeginGeneration records the timestamp for the current report, which won;t be used for checking if this</span>
+<span id="L540"><span class="lineNum">     540</span>              :     // ReadHandler is dirty.</span>
+<span id="L541"><span class="lineNum">     541</span>              :     // mPreviousReportsBeginGeneration will be set to mCurrentReportsBeginGeneration after we sent the last chunk of the current</span>
+<span id="L542"><span class="lineNum">     542</span>              :     // report.</span>
+<span id="L543"><span class="lineNum">     543</span>              :     uint64_t mPreviousReportsBeginGeneration = 0;</span>
+<span id="L544"><span class="lineNum">     544</span>              :     uint64_t mCurrentReportsBeginGeneration  = 0;</span>
+<span id="L545"><span class="lineNum">     545</span>              :     /*</span>
+<span id="L546"><span class="lineNum">     546</span>              :      *           (mDirtyGeneration = b &gt; a, this is a dirty read handler)</span>
+<span id="L547"><span class="lineNum">     547</span>              :      *        +- Start Report -&gt; mCurrentReportsBeginGeneration = c</span>
+<span id="L548"><span class="lineNum">     548</span>              :      *        |      +- AttributePathIsDirty (Attribute Y) -&gt; mDirtyGeneration = d</span>
+<span id="L549"><span class="lineNum">     549</span>              :      *        |      |     +- Last Chunk -&gt; mPreviousReportsBeginGeneration = mCurrentReportsBeginGeneration = c</span>
+<span id="L550"><span class="lineNum">     550</span>              :      *        |      |     |   +- (mDirtyGeneration = d) &gt; (mPreviousReportsBeginGeneration = c), this is a dirty read handler</span>
+<span id="L551"><span class="lineNum">     551</span>              :      *        |      |     |   |  Attribute X has a dirty generation less than c, Attribute Y has a dirty generation larger than c</span>
+<span id="L552"><span class="lineNum">     552</span>              :      *        |      |     |   |  So Y will be included in the report but X will not be inclued in this report.</span>
+<span id="L553"><span class="lineNum">     553</span>              :      * -a--b--c------d-----e---f---&gt; Generation</span>
+<span id="L554"><span class="lineNum">     554</span>              :      *  |  |</span>
+<span id="L555"><span class="lineNum">     555</span>              :      *  |  +- AttributePathIsDirty (Attribute X) (mDirtyGeneration = b)</span>
+<span id="L556"><span class="lineNum">     556</span>              :      *  +- mPreviousReportsBeginGeneration</span>
+<span id="L557"><span class="lineNum">     557</span>              :      * For read handler, if mDirtyGeneration &gt; mPreviousReportsBeginGeneration, then we regard it as a dirty read handler, and it</span>
+<span id="L558"><span class="lineNum">     558</span>              :      * should generate report on timeout reached.</span>
+<span id="L559"><span class="lineNum">     559</span>              :      */</span>
+<span id="L560"><span class="lineNum">     560</span>              : </span>
+<span id="L561"><span class="lineNum">     561</span>              :     // When we don't have enough resources for a new subscription, the oldest subscription might be evicted by interaction model</span>
+<span id="L562"><span class="lineNum">     562</span>              :     // engine, the &quot;oldest&quot; subscription is the subscription with the smallest generation.</span>
+<span id="L563"><span class="lineNum">     563</span>              :     uint64_t mTransactionStartGeneration = 0;</span>
+<span id="L564"><span class="lineNum">     564</span>              : </span>
+<span id="L565"><span class="lineNum">     565</span>              :     EventNumber mEventMin = 0;</span>
+<span id="L566"><span class="lineNum">     566</span>              : </span>
+<span id="L567"><span class="lineNum">     567</span>              :     // The last schedule event number snapshoted in the beginning when preparing to fill new events to reports</span>
+<span id="L568"><span class="lineNum">     568</span>              :     EventNumber mLastScheduledEventNumber = 0;</span>
+<span id="L569"><span class="lineNum">     569</span>              : </span>
+<span id="L570"><span class="lineNum">     570</span>              :     /// Iterator position state for any ongoing path expansion for handling wildcard reads/subscriptions.</span>
+<span id="L571"><span class="lineNum">     571</span>              :     AttributePathExpandIterator::Position mAttributePathExpandPosition;</span>
+<span id="L572"><span class="lineNum">     572</span>              : </span>
+<span id="L573"><span class="lineNum">     573</span>              :     Messaging::ExchangeHolder mExchangeCtx;</span>
+<span id="L574"><span class="lineNum">     574</span>              : #if CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE</span>
+<span id="L575"><span class="lineNum">     575</span>              :     // TODO: this should be replaced by a pointer to the InteractionModelEngine that created the ReadHandler</span>
+<span id="L576"><span class="lineNum">     576</span>              :     // once InteractionModelEngine is no longer a singleton (see issue 23625)</span>
+<span id="L577"><span class="lineNum">     577</span>              :     Messaging::ExchangeManager * mExchangeMgr = nullptr;</span>
+<span id="L578"><span class="lineNum">     578</span>              : #endif // CHIP_CONFIG_UNSAFE_SUBSCRIPTION_EXCHANGE_MANAGER_USE</span>
+<span id="L579"><span class="lineNum">     579</span>              : </span>
+<span id="L580"><span class="lineNum">     580</span>              :     SingleLinkedListNode&lt;AttributePathParams&gt; * mpAttributePathList   = nullptr;</span>
+<span id="L581"><span class="lineNum">     581</span>              :     SingleLinkedListNode&lt;EventPathParams&gt; * mpEventPathList           = nullptr;</span>
+<span id="L582"><span class="lineNum">     582</span>              :     SingleLinkedListNode&lt;DataVersionFilter&gt; * mpDataVersionFilterList = nullptr;</span>
+<span id="L583"><span class="lineNum">     583</span>              : </span>
+<span id="L584"><span class="lineNum">     584</span>              :     ManagementCallback &amp; mManagementCallback;</span>
+<span id="L585"><span class="lineNum">     585</span>              : </span>
+<span id="L586"><span class="lineNum">     586</span>              :     // TODO (#27675): Merge all observers into one and that one will dispatch the callbacks to the right place.</span>
+<span id="L587"><span class="lineNum">     587</span>              :     Observer * mObserver = nullptr;</span>
+<span id="L588"><span class="lineNum">     588</span>              : </span>
+<span id="L589"><span class="lineNum">     589</span>              :     uint32_t mLastWrittenEventsBytes = 0;</span>
+<span id="L590"><span class="lineNum">     590</span>              : </span>
+<span id="L591"><span class="lineNum">     591</span>              :     // The detailed encoding state for a single attribute, used by list chunking feature.</span>
+<span id="L592"><span class="lineNum">     592</span>              :     // The size of AttributeEncoderState is 2 bytes for now.</span>
+<span id="L593"><span class="lineNum">     593</span>              :     AttributeEncodeState mAttributeEncoderState;</span>
+<span id="L594"><span class="lineNum">     594</span>              : </span>
+<span id="L595"><span class="lineNum">     595</span>              :     uint16_t mMinIntervalFloorSeconds        = 0;</span>
+<span id="L596"><span class="lineNum">     596</span>              :     uint16_t mMaxInterval                    = 0;</span>
+<span id="L597"><span class="lineNum">     597</span>              :     uint16_t mSubscriberRequestedMaxInterval = 0;</span>
+<span id="L598"><span class="lineNum">     598</span>              : </span>
+<span id="L599"><span class="lineNum">     599</span>              :     // Current Handler state</span>
+<span id="L600"><span class="lineNum">     600</span>              :     HandlerState mState            = HandlerState::Idle;</span>
+<span id="L601"><span class="lineNum">     601</span>              :     PriorityLevel mCurrentPriority = PriorityLevel::Invalid;</span>
+<span id="L602"><span class="lineNum">     602</span>              :     BitFlags&lt;ReadHandlerFlags&gt; mFlags;</span>
+<span id="L603"><span class="lineNum">     603</span>              :     InteractionType mInteractionType = InteractionType::Read;</span>
+<span id="L604"><span class="lineNum">     604</span>              : </span>
+<span id="L605"><span class="lineNum">     605</span>              :     SessionHolder mSessionHandle;</span>
+<span id="L606"><span class="lineNum">     606</span>              : };</span>
+<span id="L607"><span class="lineNum">     607</span>              : </span>
+<span id="L608"><span class="lineNum">     608</span>              : } // namespace app</span>
+<span id="L609"><span class="lineNum">     609</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

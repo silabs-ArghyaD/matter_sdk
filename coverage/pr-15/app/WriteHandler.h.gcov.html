@@ -1,0 +1,331 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - app/WriteHandler.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">app</a> - WriteHandler.h<span style="font-size: 80%;"> (source / <a href="WriteHandler.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryMed">77.8&nbsp;%</td>
+            <td class="headerCovTableEntry">9</td>
+            <td class="headerCovTableEntry">7</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">66.7&nbsp;%</td>
+            <td class="headerCovTableEntry">9</td>
+            <td class="headerCovTableEntry">6</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2021 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *    All rights reserved.</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L16"><span class="lineNum">      16</span>              :  *    limitations under the License.</span>
+<span id="L17"><span class="lineNum">      17</span>              :  */</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : #pragma once</span>
+<span id="L20"><span class="lineNum">      20</span>              : </span>
+<span id="L21"><span class="lineNum">      21</span>              : #include &lt;app/AppConfig.h&gt;</span>
+<span id="L22"><span class="lineNum">      22</span>              : #include &lt;app/AttributeAccessToken.h&gt;</span>
+<span id="L23"><span class="lineNum">      23</span>              : #include &lt;app/AttributePathParams.h&gt;</span>
+<span id="L24"><span class="lineNum">      24</span>              : #include &lt;app/ConcreteAttributePath.h&gt;</span>
+<span id="L25"><span class="lineNum">      25</span>              : #include &lt;app/InteractionModelDelegatePointers.h&gt;</span>
+<span id="L26"><span class="lineNum">      26</span>              : #include &lt;app/MessageDef/WriteResponseMessage.h&gt;</span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;app/data-model-provider/ActionReturnStatus.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;app/data-model-provider/Provider.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;lib/core/CHIPCore.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;lib/core/TLVDebug.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;lib/support/BitFlags.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;lib/support/CodeUtils.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;lib/support/DLLUtil.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : #include &lt;lib/support/logging/CHIPLogging.h&gt;</span>
+<span id="L35"><span class="lineNum">      35</span>              : #include &lt;messaging/ExchangeHolder.h&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              : #include &lt;messaging/ExchangeMgr.h&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : #include &lt;messaging/Flags.h&gt;</span>
+<span id="L38"><span class="lineNum">      38</span>              : #include &lt;protocols/Protocols.h&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              : #include &lt;protocols/interaction_model/Constants.h&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : #include &lt;protocols/interaction_model/StatusCode.h&gt;</span>
+<span id="L41"><span class="lineNum">      41</span>              : #include &lt;system/SystemPacketBuffer.h&gt;</span>
+<span id="L42"><span class="lineNum">      42</span>              : #include &lt;system/TLVPacketBufferBackingStore.h&gt;</span>
+<span id="L43"><span class="lineNum">      43</span>              : </span>
+<span id="L44"><span class="lineNum">      44</span>              : namespace chip {</span>
+<span id="L45"><span class="lineNum">      45</span>              : namespace app {</span>
+<span id="L46"><span class="lineNum">      46</span>              : </span>
+<span id="L47"><span class="lineNum">      47</span>              : class WriteHandler;</span>
+<span id="L48"><span class="lineNum">      48</span>              : </span>
+<span id="L49"><span class="lineNum">      49</span>              : class WriteHandlerDelegate</span>
+<span id="L50"><span class="lineNum">      50</span>              : {</span>
+<span id="L51"><span class="lineNum">      51</span>              : public:</span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC tlaBgGNC">          86 :     virtual ~WriteHandlerDelegate() = default;</span></span>
+<span id="L53"><span class="lineNum">      53</span>              : </span>
+<span id="L54"><span class="lineNum">      54</span>              :     /**</span>
+<span id="L55"><span class="lineNum">      55</span>              :      * Returns whether the write operation to the given path is in conflict with another write operation.</span>
+<span id="L56"><span class="lineNum">      56</span>              :      * (i.e. another write transaction is in the middle of processing a chunked write to the given path.)</span>
+<span id="L57"><span class="lineNum">      57</span>              :      */</span>
+<span id="L58"><span class="lineNum">      58</span>              :     virtual bool HasConflictWriteRequests(const WriteHandler * apWriteHandler, const ConcreteAttributePath &amp; aPath) = 0;</span>
+<span id="L59"><span class="lineNum">      59</span>              : };</span>
+<span id="L60"><span class="lineNum">      60</span>              : </span>
+<span id="L61"><span class="lineNum">      61</span>              : /**</span>
+<span id="L62"><span class="lineNum">      62</span>              :  *  @brief The write handler is responsible for processing a write request and sending a write reply.</span>
+<span id="L63"><span class="lineNum">      63</span>              :  */</span>
+<span id="L64"><span class="lineNum">      64</span>              : class WriteHandler : public Messaging::ExchangeDelegate</span>
+<span id="L65"><span class="lineNum">      65</span>              : {</span>
+<span id="L66"><span class="lineNum">      66</span>              : public:</span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">         348 :     WriteHandler() : mExchangeCtx(*this) {}</span></span>
+<span id="L68"><span class="lineNum">      68</span>              : </span>
+<span id="L69"><span class="lineNum">      69</span>              :     /**</span>
+<span id="L70"><span class="lineNum">      70</span>              :      *  Initialize the WriteHandler. Within the lifetime</span>
+<span id="L71"><span class="lineNum">      71</span>              :      *  of this instance, this method is invoked once after object</span>
+<span id="L72"><span class="lineNum">      72</span>              :      *  construction until a call to Close is made to terminate the</span>
+<span id="L73"><span class="lineNum">      73</span>              :      *  instance.</span>
+<span id="L74"><span class="lineNum">      74</span>              :      *</span>
+<span id="L75"><span class="lineNum">      75</span>              :      *  @param[in] apProvider              A valid pointer to the model used to forward writes towards</span>
+<span id="L76"><span class="lineNum">      76</span>              :      *  @param[in] apWriteHandlerDelegate  A Valid pointer to the WriteHandlerDelegate.</span>
+<span id="L77"><span class="lineNum">      77</span>              :      *</span>
+<span id="L78"><span class="lineNum">      78</span>              :      *  @retval #CHIP_ERROR_INVALID_ARGUMENT on invalid pointers</span>
+<span id="L79"><span class="lineNum">      79</span>              :      *  @retval #CHIP_ERROR_INCORRECT_STATE If the state is not equal to</span>
+<span id="L80"><span class="lineNum">      80</span>              :      *          kState_NotInitialized.</span>
+<span id="L81"><span class="lineNum">      81</span>              :      *  @retval #CHIP_NO_ERROR On success.</span>
+<span id="L82"><span class="lineNum">      82</span>              :      *</span>
+<span id="L83"><span class="lineNum">      83</span>              :      */</span>
+<span id="L84"><span class="lineNum">      84</span>              :     CHIP_ERROR Init(DataModel::Provider * apProvider, WriteHandlerDelegate * apWriteHandlerDelegate);</span>
+<span id="L85"><span class="lineNum">      85</span>              : </span>
+<span id="L86"><span class="lineNum">      86</span>              :     /**</span>
+<span id="L87"><span class="lineNum">      87</span>              :      *  Process a write request.  Parts of the processing may end up being asynchronous, but the WriteHandler</span>
+<span id="L88"><span class="lineNum">      88</span>              :      *  guarantees that it will call Close on itself when processing is done (including if OnWriteRequest</span>
+<span id="L89"><span class="lineNum">      89</span>              :      *  returns an error).</span>
+<span id="L90"><span class="lineNum">      90</span>              :      *</span>
+<span id="L91"><span class="lineNum">      91</span>              :      *  @param[in]    apExchangeContext    A pointer to the ExchangeContext.</span>
+<span id="L92"><span class="lineNum">      92</span>              :      *  @param[in]    aPayload             A payload that has read request data</span>
+<span id="L93"><span class="lineNum">      93</span>              :      *  @param[in]    aIsTimedWrite        Whether write is part of a timed interaction.</span>
+<span id="L94"><span class="lineNum">      94</span>              :      *</span>
+<span id="L95"><span class="lineNum">      95</span>              :      *  @retval Status.  Callers are expected to send a status response if the</span>
+<span id="L96"><span class="lineNum">      96</span>              :      *  return status is not Status::Success.</span>
+<span id="L97"><span class="lineNum">      97</span>              :      */</span>
+<span id="L98"><span class="lineNum">      98</span>              :     Protocols::InteractionModel::Status OnWriteRequest(Messaging::ExchangeContext * apExchangeContext,</span>
+<span id="L99"><span class="lineNum">      99</span>              :                                                        System::PacketBufferHandle &amp;&amp; aPayload, bool aIsTimedWrite);</span>
+<span id="L100"><span class="lineNum">     100</span>              : </span>
+<span id="L101"><span class="lineNum">     101</span>              :     /**</span>
+<span id="L102"><span class="lineNum">     102</span>              :      *  Clean up state when we are done sending the write response.</span>
+<span id="L103"><span class="lineNum">     103</span>              :      */</span>
+<span id="L104"><span class="lineNum">     104</span>              :     void Close();</span>
+<span id="L105"><span class="lineNum">     105</span>              : </span>
+<span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">       23190 :     bool IsFree() const { return mState == State::Uninitialized; }</span></span>
+<span id="L107"><span class="lineNum">     107</span>              : </span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">         348 :     ~WriteHandler() override = default;</span></span>
+<span id="L109"><span class="lineNum">     109</span>              : </span>
+<span id="L110"><span class="lineNum">     110</span>              :     CHIP_ERROR ProcessAttributeDataIBs(TLV::TLVReader &amp; aAttributeDataIBsReader);</span>
+<span id="L111"><span class="lineNum">     111</span>              :     CHIP_ERROR ProcessGroupAttributeDataIBs(TLV::TLVReader &amp; aAttributeDataIBsReader);</span>
+<span id="L112"><span class="lineNum">     112</span>              : </span>
+<span id="L113"><span class="lineNum">     113</span>              :     CHIP_ERROR AddStatus(const ConcreteDataAttributePath &amp; aPath, const Protocols::InteractionModel::ClusterStatusCode &amp; aStatus);</span>
+<span id="L114"><span class="lineNum">     114</span> <span class="tlaUNC tlaBgUNC">           0 :     CHIP_ERROR AddStatus(const ConcreteDataAttributePath &amp; aPath, const Protocols::InteractionModel::Status aStatus)</span></span>
+<span id="L115"><span class="lineNum">     115</span>              :     {</span>
+<span id="L116"><span class="lineNum">     116</span> <span class="tlaUNC">           0 :         return AddStatus(aPath, Protocols::InteractionModel::ClusterStatusCode{ aStatus });</span></span>
+<span id="L117"><span class="lineNum">     117</span>              :     }</span>
+<span id="L118"><span class="lineNum">     118</span>              : </span>
+<span id="L119"><span class="lineNum">     119</span>              :     CHIP_ERROR AddClusterSpecificSuccess(const ConcreteDataAttributePath &amp; aAttributePathParams, ClusterStatus aClusterStatus);</span>
+<span id="L120"><span class="lineNum">     120</span>              :     CHIP_ERROR AddClusterSpecificFailure(const ConcreteDataAttributePath &amp; aAttributePathParams, ClusterStatus aClusterStatus);</span>
+<span id="L121"><span class="lineNum">     121</span>              : </span>
+<span id="L122"><span class="lineNum">     122</span>              :     FabricIndex GetAccessingFabricIndex() const;</span>
+<span id="L123"><span class="lineNum">     123</span>              : </span>
+<span id="L124"><span class="lineNum">     124</span>              :     /**</span>
+<span id="L125"><span class="lineNum">     125</span>              :      * Check whether the WriteRequest we are handling is a timed write.</span>
+<span id="L126"><span class="lineNum">     126</span>              :      */</span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC tlaBgGNC">       10412 :     bool IsTimedWrite() const { return mStateFlags.Has(StateBits::kIsTimedRequest); }</span></span>
+<span id="L128"><span class="lineNum">     128</span>              : </span>
+<span id="L129"><span class="lineNum">     129</span>              :     bool MatchesExchangeContext(Messaging::ExchangeContext * apExchangeContext) const</span>
+<span id="L130"><span class="lineNum">     130</span>              :     {</span>
+<span id="L131"><span class="lineNum">     131</span>              :         return !IsFree() &amp;&amp; mExchangeCtx.Get() == apExchangeContext;</span>
+<span id="L132"><span class="lineNum">     132</span>              :     }</span>
+<span id="L133"><span class="lineNum">     133</span>              : </span>
+<span id="L134"><span class="lineNum">     134</span>              :     void CacheACLCheckResult(const AttributeAccessToken &amp; aToken) { mACLCheckCache.SetValue(aToken); }</span>
+<span id="L135"><span class="lineNum">     135</span>              : </span>
+<span id="L136"><span class="lineNum">     136</span>              :     bool ACLCheckCacheHit(const AttributeAccessToken &amp; aToken)</span>
+<span id="L137"><span class="lineNum">     137</span>              :     {</span>
+<span id="L138"><span class="lineNum">     138</span>              :         return mACLCheckCache.HasValue() &amp;&amp; mACLCheckCache.Value() == aToken;</span>
+<span id="L139"><span class="lineNum">     139</span>              :     }</span>
+<span id="L140"><span class="lineNum">     140</span>              : </span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">          22 :     bool IsCurrentlyProcessingWritePath(const ConcreteAttributePath &amp; aPath)</span></span>
+<span id="L142"><span class="lineNum">     142</span>              :     {</span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">          22 :         return mProcessingAttributePath.HasValue() &amp;&amp; mProcessingAttributePath.Value() == aPath;</span></span>
+<span id="L144"><span class="lineNum">     144</span>              :     }</span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span>              : private:</span>
+<span id="L147"><span class="lineNum">     147</span>              :     friend class TestWriteInteraction;</span>
+<span id="L148"><span class="lineNum">     148</span>              :     enum class State : uint8_t</span>
+<span id="L149"><span class="lineNum">     149</span>              :     {</span>
+<span id="L150"><span class="lineNum">     150</span>              :         Uninitialized = 0, // The handler has not been initialized</span>
+<span id="L151"><span class="lineNum">     151</span>              :         Initialized,       // The handler has been initialized and is ready</span>
+<span id="L152"><span class="lineNum">     152</span>              :         AddStatus,         // The handler has added status code</span>
+<span id="L153"><span class="lineNum">     153</span>              :         Sending,           // The handler has sent out the write response</span>
+<span id="L154"><span class="lineNum">     154</span>              :     };</span>
+<span id="L155"><span class="lineNum">     155</span>              :     using Status = Protocols::InteractionModel::Status;</span>
+<span id="L156"><span class="lineNum">     156</span>              :     Status ProcessWriteRequest(System::PacketBufferHandle &amp;&amp; aPayload, bool aIsTimedWrite);</span>
+<span id="L157"><span class="lineNum">     157</span>              :     Status HandleWriteRequestMessage(Messaging::ExchangeContext * apExchangeContext, System::PacketBufferHandle &amp;&amp; aPayload,</span>
+<span id="L158"><span class="lineNum">     158</span>              :                                      bool aIsTimedWrite);</span>
+<span id="L159"><span class="lineNum">     159</span>              : </span>
+<span id="L160"><span class="lineNum">     160</span>              :     CHIP_ERROR FinalizeMessage(System::PacketBufferTLVWriter &amp;&amp; aMessageWriter, System::PacketBufferHandle &amp; packet);</span>
+<span id="L161"><span class="lineNum">     161</span>              :     CHIP_ERROR SendWriteResponse(System::PacketBufferTLVWriter &amp;&amp; aMessageWriter);</span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span>              :     void MoveToState(const State aTargetState);</span>
+<span id="L164"><span class="lineNum">     164</span>              :     const char * GetStateStr() const;</span>
+<span id="L165"><span class="lineNum">     165</span>              : </span>
+<span id="L166"><span class="lineNum">     166</span>              :     void DeliverListWriteBegin(const ConcreteAttributePath &amp; aPath);</span>
+<span id="L167"><span class="lineNum">     167</span>              :     void DeliverListWriteEnd(const ConcreteAttributePath &amp; aPath, bool writeWasSuccessful);</span>
+<span id="L168"><span class="lineNum">     168</span>              : </span>
+<span id="L169"><span class="lineNum">     169</span>              :     // Deliver the signal that we have delivered all list entries to the AttributeAccessInterface. This function will be called</span>
+<span id="L170"><span class="lineNum">     170</span>              :     // after handling the last chunk of a series of write requests. Or the write handler was shutdown (usually due to transport</span>
+<span id="L171"><span class="lineNum">     171</span>              :     // timeout).</span>
+<span id="L172"><span class="lineNum">     172</span>              :     // This function will become no-op on group writes, since DeliverFinalListWriteEndForGroupWrite will clear the</span>
+<span id="L173"><span class="lineNum">     173</span>              :     // mProcessingAttributePath after processing the AttributeDataIBs from the request.</span>
+<span id="L174"><span class="lineNum">     174</span>              :     void DeliverFinalListWriteEnd(bool writeWasSuccessful);</span>
+<span id="L175"><span class="lineNum">     175</span>              : </span>
+<span id="L176"><span class="lineNum">     176</span>              :     // Deliver the signal that we have delivered all list entries to the AttributeAccessInterface. This function will be called</span>
+<span id="L177"><span class="lineNum">     177</span>              :     // after handling the last attribute in a group write request (since group writes will never be chunked writes). Or we failed to</span>
+<span id="L178"><span class="lineNum">     178</span>              :     // process the group write request (usually due to malformed messages). This function should only be called by</span>
+<span id="L179"><span class="lineNum">     179</span>              :     // ProcessGroupAttributeDataIBs.</span>
+<span id="L180"><span class="lineNum">     180</span>              :     CHIP_ERROR DeliverFinalListWriteEndForGroupWrite(bool writeWasSuccessful);</span>
+<span id="L181"><span class="lineNum">     181</span>              : </span>
+<span id="L182"><span class="lineNum">     182</span>              :     CHIP_ERROR AddStatusInternal(const ConcreteDataAttributePath &amp; aPath, const StatusIB &amp; aStatus);</span>
+<span id="L183"><span class="lineNum">     183</span>              : </span>
+<span id="L184"><span class="lineNum">     184</span>              :     // ExchangeDelegate</span>
+<span id="L185"><span class="lineNum">     185</span>              :     CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * apExchangeContext, const PayloadHeader &amp; aPayloadHeader,</span>
+<span id="L186"><span class="lineNum">     186</span>              :                                  System::PacketBufferHandle &amp;&amp; aPayload) override;</span>
+<span id="L187"><span class="lineNum">     187</span>              :     void OnResponseTimeout(Messaging::ExchangeContext * apExchangeContext) override;</span>
+<span id="L188"><span class="lineNum">     188</span>              : </span>
+<span id="L189"><span class="lineNum">     189</span>              :     /// Validate that a write is acceptable on the given path.</span>
+<span id="L190"><span class="lineNum">     190</span>              :     ///</span>
+<span id="L191"><span class="lineNum">     191</span>              :     /// Validates that ACL, writability and Timed interaction settings are ok.</span>
+<span id="L192"><span class="lineNum">     192</span>              :     ///</span>
+<span id="L193"><span class="lineNum">     193</span>              :     /// Returns a success status if all is ok, failure otherwise.</span>
+<span id="L194"><span class="lineNum">     194</span>              :     DataModel::ActionReturnStatus CheckWriteAllowed(const Access::SubjectDescriptor &amp; aSubject,</span>
+<span id="L195"><span class="lineNum">     195</span>              :                                                     const ConcreteDataAttributePath &amp; aPath);</span>
+<span id="L196"><span class="lineNum">     196</span>              : </span>
+<span id="L197"><span class="lineNum">     197</span>              :     /// Validate that a write on the given path has aRequiredPrivilege.</span>
+<span id="L198"><span class="lineNum">     198</span>              :     ///</span>
+<span id="L199"><span class="lineNum">     199</span>              :     /// Returns a success status if the ACL check is successful, otherwise the relevant status will be returned.</span>
+<span id="L200"><span class="lineNum">     200</span>              :     Status CheckWriteAccess(const Access::SubjectDescriptor &amp; aSubject, const ConcreteAttributePath &amp; aPath,</span>
+<span id="L201"><span class="lineNum">     201</span>              :                             const Access::Privilege aRequiredPrivilege);</span>
+<span id="L202"><span class="lineNum">     202</span>              : </span>
+<span id="L203"><span class="lineNum">     203</span>              :     // Write the given data to the given path</span>
+<span id="L204"><span class="lineNum">     204</span>              :     CHIP_ERROR WriteClusterData(const Access::SubjectDescriptor &amp; aSubject, const ConcreteDataAttributePath &amp; aPath,</span>
+<span id="L205"><span class="lineNum">     205</span>              :                                 TLV::TLVReader &amp; aData);</span>
+<span id="L206"><span class="lineNum">     206</span>              : </span>
+<span id="L207"><span class="lineNum">     207</span>              :     /// Checks whether the given path corresponds to a list attribute</span>
+<span id="L208"><span class="lineNum">     208</span>              :     /// Return values:</span>
+<span id="L209"><span class="lineNum">     209</span>              :     ///    true/false: valid attribute path, known if list or not</span>
+<span id="L210"><span class="lineNum">     210</span>              :     ///    std::nulloptr - path not available/valid, unknown if attribute is a list or not</span>
+<span id="L211"><span class="lineNum">     211</span>              :     std::optional&lt;bool&gt; IsListAttributePath(const ConcreteAttributePath &amp; path);</span>
+<span id="L212"><span class="lineNum">     212</span>              : </span>
+<span id="L213"><span class="lineNum">     213</span>              :     Messaging::ExchangeHolder mExchangeCtx;</span>
+<span id="L214"><span class="lineNum">     214</span>              :     WriteResponseMessage::Builder mWriteResponseBuilder;</span>
+<span id="L215"><span class="lineNum">     215</span>              :     Optional&lt;ConcreteAttributePath&gt; mProcessingAttributePath;</span>
+<span id="L216"><span class="lineNum">     216</span>              :     Optional&lt;AttributeAccessToken&gt; mACLCheckCache = NullOptional;</span>
+<span id="L217"><span class="lineNum">     217</span>              : </span>
+<span id="L218"><span class="lineNum">     218</span>              :     DataModel::Provider * mDataModelProvider = nullptr;</span>
+<span id="L219"><span class="lineNum">     219</span>              :     std::optional&lt;ConcreteAttributePath&gt; mLastSuccessfullyWrittenPath;</span>
+<span id="L220"><span class="lineNum">     220</span>              : </span>
+<span id="L221"><span class="lineNum">     221</span>              :     // This may be a &quot;fake&quot; pointer or a real delegate pointer, depending</span>
+<span id="L222"><span class="lineNum">     222</span>              :     // on CHIP_CONFIG_STATIC_GLOBAL_INTERACTION_MODEL_ENGINE setting.</span>
+<span id="L223"><span class="lineNum">     223</span>              :     //</span>
+<span id="L224"><span class="lineNum">     224</span>              :     // When this is not a real pointer, it checks that the value is always</span>
+<span id="L225"><span class="lineNum">     225</span>              :     // set to the global InteractionModelEngine and the size of this</span>
+<span id="L226"><span class="lineNum">     226</span>              :     // member is 1 byte.</span>
+<span id="L227"><span class="lineNum">     227</span>              :     InteractionModelDelegatePointer&lt;WriteHandlerDelegate&gt; mDelegate;</span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span>              :     // bit level enums to save storage for this object. InteractionModelEngine maintains</span>
+<span id="L230"><span class="lineNum">     230</span>              :     // several of these objects, so every bit of storage multiplies storage usage.</span>
+<span id="L231"><span class="lineNum">     231</span>              :     enum class StateBits : uint8_t</span>
+<span id="L232"><span class="lineNum">     232</span>              :     {</span>
+<span id="L233"><span class="lineNum">     233</span>              :         kIsTimedRequest            = 0x01,</span>
+<span id="L234"><span class="lineNum">     234</span>              :         kSuppressResponse          = 0x02,</span>
+<span id="L235"><span class="lineNum">     235</span>              :         kHasMoreChunks             = 0x04,</span>
+<span id="L236"><span class="lineNum">     236</span>              :         kProcessingAttributeIsList = 0x08,</span>
+<span id="L237"><span class="lineNum">     237</span>              :         // We record the Status when AddStatus is called to determine whether all data of a list write is accepted.</span>
+<span id="L238"><span class="lineNum">     238</span>              :         // This value will be used by DeliverListWriteEnd and DeliverFinalListWriteEnd but it won't be used by group writes based on</span>
+<span id="L239"><span class="lineNum">     239</span>              :         // the fact that the errors that won't be delivered to AttributeAccessInterface are:</span>
+<span id="L240"><span class="lineNum">     240</span>              :         //  (1) Attribute not found</span>
+<span id="L241"><span class="lineNum">     241</span>              :         //  (2) Access control failed</span>
+<span id="L242"><span class="lineNum">     242</span>              :         //  (3) Write request to a read-only attribute</span>
+<span id="L243"><span class="lineNum">     243</span>              :         //  (4) Data version mismatch</span>
+<span id="L244"><span class="lineNum">     244</span>              :         //  (5) Not using timed write.</span>
+<span id="L245"><span class="lineNum">     245</span>              :         //  Where (1)-(3) will be consistent among the whole list write request, while (4) and (5) are not appliable to group</span>
+<span id="L246"><span class="lineNum">     246</span>              :         //  writes.</span>
+<span id="L247"><span class="lineNum">     247</span>              :         kAttributeWriteSuccessful = 0x10,</span>
+<span id="L248"><span class="lineNum">     248</span>              :     };</span>
+<span id="L249"><span class="lineNum">     249</span>              : </span>
+<span id="L250"><span class="lineNum">     250</span>              :     BitFlags&lt;StateBits&gt; mStateFlags;</span>
+<span id="L251"><span class="lineNum">     251</span>              :     State mState = State::Uninitialized;</span>
+<span id="L252"><span class="lineNum">     252</span>              : };</span>
+<span id="L253"><span class="lineNum">     253</span>              : </span>
+<span id="L254"><span class="lineNum">     254</span>              : } // namespace app</span>
+<span id="L255"><span class="lineNum">     255</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - lib/support/Span.h</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">lib/support</a> - Span.h<span style="font-size: 80%;"> (source / <a href="Span.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">96.8&nbsp;%</td>
+            <td class="headerCovTableEntry">93</td>
+            <td class="headerCovTableEntry">90</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryMed">88.3&nbsp;%</td>
+            <td class="headerCovTableEntry">830</td>
+            <td class="headerCovTableEntry">733</td>
+          </tr>
+                  <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    Copyright (c) 2021 Project CHIP Authors</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : </span>
+<span id="L18"><span class="lineNum">      18</span>              : #pragma once</span>
+<span id="L19"><span class="lineNum">      19</span>              : </span>
+<span id="L20"><span class="lineNum">      20</span>              : #include &lt;array&gt;</span>
+<span id="L21"><span class="lineNum">      21</span>              : #include &lt;cstddef&gt;</span>
+<span id="L22"><span class="lineNum">      22</span>              : #include &lt;cstdint&gt;</span>
+<span id="L23"><span class="lineNum">      23</span>              : #include &lt;cstdlib&gt;</span>
+<span id="L24"><span class="lineNum">      24</span>              : #include &lt;cstring&gt;</span>
+<span id="L25"><span class="lineNum">      25</span>              : #include &lt;type_traits&gt;</span>
+<span id="L26"><span class="lineNum">      26</span>              : </span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;lib/core/Unchecked.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/support/CodeUtils.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : </span>
+<span id="L30"><span class="lineNum">      30</span>              : namespace chip {</span>
+<span id="L31"><span class="lineNum">      31</span>              : </span>
+<span id="L32"><span class="lineNum">      32</span>              : template &lt;class T, size_t N&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : class FixedSpan;</span>
+<span id="L34"><span class="lineNum">      34</span>              : </span>
+<span id="L35"><span class="lineNum">      35</span>              : /**</span>
+<span id="L36"><span class="lineNum">      36</span>              :  * @brief A wrapper class for holding objects and its length, without the ownership of it.</span>
+<span id="L37"><span class="lineNum">      37</span>              :  * We can use C++20 std::span once we support it, the data() and size() come from C++20 std::span.</span>
+<span id="L38"><span class="lineNum">      38</span>              :  */</span>
+<span id="L39"><span class="lineNum">      39</span>              : template &lt;class T&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              : class Span</span>
+<span id="L41"><span class="lineNum">      41</span>              : {</span>
+<span id="L42"><span class="lineNum">      42</span>              : public:</span>
+<span id="L43"><span class="lineNum">      43</span>              :     using pointer   = T *;</span>
+<span id="L44"><span class="lineNum">      44</span>              :     using reference = T &amp;;</span>
+<span id="L45"><span class="lineNum">      45</span>              : </span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC tlaBgGNC">      245695 :     constexpr Span() : mDataBuf(nullptr), mDataLen(0) {}</span></span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              :     // Note: VerifyOrDie cannot be used inside a constexpr function, because it uses</span>
+<span id="L49"><span class="lineNum">      49</span>              :     // &quot;static&quot; on some platforms (e.g. when CHIP_PW_TOKENIZER_LOGGING is true)</span>
+<span id="L50"><span class="lineNum">      50</span>              :     // and that's not allowed in constexpr functions.</span>
+<span id="L51"><span class="lineNum">      51</span>              : </span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">     1871812 :     Span(pointer databuf, size_t datalen) : mDataBuf(databuf), mDataLen(datalen)</span></span>
+<span id="L53"><span class="lineNum">      53</span>              :     {</span>
+<span id="L54"><span class="lineNum">      54</span> <span class="tlaGNC">     1871812 :         VerifyOrDie(databuf != nullptr || datalen == 0); // not constexpr on some platforms</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">     1871812 :     }</span></span>
+<span id="L56"><span class="lineNum">      56</span>              : </span>
+<span id="L57"><span class="lineNum">      57</span>              :     // The only valid length for a span pointing to null is 0 (i.e. it's an empty span).  Disallow</span>
+<span id="L58"><span class="lineNum">      58</span>              :     // construction of spans from compile-time-known null.  The default constructor should be used</span>
+<span id="L59"><span class="lineNum">      59</span>              :     // to construct empty Spans. All other cases involving null are invalid.</span>
+<span id="L60"><span class="lineNum">      60</span>              :     Span(std::nullptr_t null, size_t size) = delete;</span>
+<span id="L61"><span class="lineNum">      61</span>              : </span>
+<span id="L62"><span class="lineNum">      62</span>              :     // Creates a Span view of a plain array.</span>
+<span id="L63"><span class="lineNum">      63</span>              :     //</span>
+<span id="L64"><span class="lineNum">      64</span>              :     // Note that this constructor template explicitly excludes `const char[]`, see below.</span>
+<span id="L65"><span class="lineNum">      65</span>              :     template &lt;</span>
+<span id="L66"><span class="lineNum">      66</span>              :         class U, size_t N,</span>
+<span id="L67"><span class="lineNum">      67</span>              :         std::enable_if_t&lt;!std::is_same_v&lt;U, const char&gt; &amp;&amp; sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible_v&lt;U *, T *&gt;, bool&gt; = true&gt;</span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">       17007 :     constexpr explicit Span(U (&amp;databuf)[N]) : mDataBuf(databuf), mDataLen(N)</span></span>
+<span id="L69"><span class="lineNum">      69</span> <span class="tlaGNC">       17007 :     {}</span></span>
+<span id="L70"><span class="lineNum">      70</span>              : </span>
+<span id="L71"><span class="lineNum">      71</span>              :     // Explicitly disallow the creation of a CharSpan from a `const char[]` to prevent the</span>
+<span id="L72"><span class="lineNum">      72</span>              :     // creation of spans from string literals that incorrectly include the trailing '\0' byte.</span>
+<span id="L73"><span class="lineNum">      73</span>              :     // If CharSpan(&quot;Hi!&quot;) were allowed, it would be a span of length 4, not 3 as intended.</span>
+<span id="L74"><span class="lineNum">      74</span>              :     //</span>
+<span id="L75"><span class="lineNum">      75</span>              :     // To create a CharSpan literal, use the `_span` operator instead, e.g. &quot;Hi!&quot;_span.</span>
+<span id="L76"><span class="lineNum">      76</span>              :     template &lt;</span>
+<span id="L77"><span class="lineNum">      77</span>              :         class U, size_t N,</span>
+<span id="L78"><span class="lineNum">      78</span>              :         std::enable_if_t&lt;std::is_same_v&lt;U, const char&gt; &amp;&amp; 1 == sizeof(T) &amp;&amp; std::is_convertible_v&lt;const char *, T *&gt;, bool&gt; = true&gt;</span>
+<span id="L79"><span class="lineNum">      79</span>              :     constexpr explicit Span(U (&amp;databuf)[N]) = delete;</span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span>              :     // Creates a (potentially mutable) Span view of an std::array</span>
+<span id="L82"><span class="lineNum">      82</span>              :     template &lt;class U, size_t N, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">         732 :     constexpr Span(std::array&lt;U, N&gt; &amp; arr) : mDataBuf(arr.data()), mDataLen(N)</span></span>
+<span id="L84"><span class="lineNum">      84</span> <span class="tlaGNC">         732 :     {}</span></span>
+<span id="L85"><span class="lineNum">      85</span>              : </span>
+<span id="L86"><span class="lineNum">      86</span>              :     template &lt;class U, size_t N, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L87"><span class="lineNum">      87</span>              :     constexpr Span(std::array&lt;U, N&gt; &amp;&amp; arr) = delete; // would be a view of an rvalue</span>
+<span id="L88"><span class="lineNum">      88</span>              : </span>
+<span id="L89"><span class="lineNum">      89</span>              :     // Creates a Span view of an std::array</span>
+<span id="L90"><span class="lineNum">      90</span>              :     template &lt;class U, size_t N, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;const U *, T *&gt;::value&gt;&gt;</span>
+<span id="L91"><span class="lineNum">      91</span> <span class="tlaGNC">          40 :     constexpr Span(const std::array&lt;U, N&gt; &amp; arr) : mDataBuf(arr.data()), mDataLen(N)</span></span>
+<span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">          40 :     {}</span></span>
+<span id="L93"><span class="lineNum">      93</span>              : </span>
+<span id="L94"><span class="lineNum">      94</span>              :     template &lt;size_t N&gt;</span>
+<span id="L95"><span class="lineNum">      95</span> <span class="tlaGNC">         865 :     constexpr Span &amp; operator=(T (&amp;databuf)[N])</span></span>
+<span id="L96"><span class="lineNum">      96</span>              :     {</span>
+<span id="L97"><span class="lineNum">      97</span> <span class="tlaGNC">         865 :         mDataBuf = databuf;</span></span>
+<span id="L98"><span class="lineNum">      98</span> <span class="tlaGNC">         865 :         mDataLen = N;</span></span>
+<span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC">         865 :         return (*this);</span></span>
+<span id="L100"><span class="lineNum">     100</span>              :     }</span>
+<span id="L101"><span class="lineNum">     101</span>              : </span>
+<span id="L102"><span class="lineNum">     102</span>              :     // Allow implicit construction from a Span over a type that matches our</span>
+<span id="L103"><span class="lineNum">     103</span>              :     // type's size, if a pointer to the other type can be treated as a pointer</span>
+<span id="L104"><span class="lineNum">     104</span>              :     // to our type (e.g. other type is same as ours, or is a same-size</span>
+<span id="L105"><span class="lineNum">     105</span>              :     // subclass).  The size check is really important to make sure we don't get</span>
+<span id="L106"><span class="lineNum">     106</span>              :     // confused about where our object boundaries are.</span>
+<span id="L107"><span class="lineNum">     107</span>              :     template &lt;class U, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L108"><span class="lineNum">     108</span> <span class="tlaGNC">        5775 :     constexpr Span(const Span&lt;U&gt; &amp; other) : Span(other.data(), other.size())</span></span>
+<span id="L109"><span class="lineNum">     109</span> <span class="tlaGNC">        5775 :     {}</span></span>
+<span id="L110"><span class="lineNum">     110</span>              : </span>
+<span id="L111"><span class="lineNum">     111</span>              :     // Allow implicit construction from a FixedSpan over a type that matches our</span>
+<span id="L112"><span class="lineNum">     112</span>              :     // type's size, if a pointer to the other type can be treated as a pointer</span>
+<span id="L113"><span class="lineNum">     113</span>              :     // to our type (e.g. other type is same as ours, or is a same-size</span>
+<span id="L114"><span class="lineNum">     114</span>              :     // subclass).  The size check is really important to make sure we don't get</span>
+<span id="L115"><span class="lineNum">     115</span>              :     // confused about where our object boundaries are.</span>
+<span id="L116"><span class="lineNum">     116</span>              :     template &lt;class U, size_t N, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L117"><span class="lineNum">     117</span>              :     constexpr inline Span(const FixedSpan&lt;U, N&gt; &amp; other);</span>
+<span id="L118"><span class="lineNum">     118</span>              : </span>
+<span id="L119"><span class="lineNum">     119</span> <span class="tlaGNC">     3734038 :     constexpr pointer data() const { return mDataBuf; }</span></span>
+<span id="L120"><span class="lineNum">     120</span> <span class="tlaGNC">     2078330 :     constexpr size_t size() const { return mDataLen; }</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">       32870 :     constexpr bool empty() const { return size() == 0; }</span></span>
+<span id="L122"><span class="lineNum">     122</span> <span class="tlaGNC">     1795710 :     constexpr pointer begin() const { return data(); }</span></span>
+<span id="L123"><span class="lineNum">     123</span> <span class="tlaGNC">     1789126 :     constexpr pointer end() const { return data() + size(); }</span></span>
+<span id="L124"><span class="lineNum">     124</span>              : </span>
+<span id="L125"><span class="lineNum">     125</span>              :     // Element accessors, matching the std::span API.</span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">       29173 :     reference operator[](size_t index) const</span></span>
+<span id="L127"><span class="lineNum">     127</span>              :     {</span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">       29173 :         VerifyOrDie(index &lt; size()); // not constexpr on some platforms</span></span>
+<span id="L129"><span class="lineNum">     129</span> <span class="tlaGNC">       29173 :         return data()[index];</span></span>
+<span id="L130"><span class="lineNum">     130</span>              :     }</span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">        2157 :     reference front() const { return (*this)[0]; }</span></span>
+<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">           1 :     reference back() const { return (*this)[size() - 1]; }</span></span>
+<span id="L133"><span class="lineNum">     133</span>              : </span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">        2059 :     bool data_equal(const Span&lt;const T&gt; &amp; other) const</span></span>
+<span id="L135"><span class="lineNum">     135</span>              :     {</span>
+<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">        2059 :         return (size() == other.size()) &amp;&amp; (empty() || (memcmp(data(), other.data(), size() * sizeof(T)) == 0));</span></span>
+<span id="L137"><span class="lineNum">     137</span>              :     }</span>
+<span id="L138"><span class="lineNum">     138</span>              : </span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaGNC">        6158 :     Span SubSpan(size_t offset, size_t length) const</span></span>
+<span id="L140"><span class="lineNum">     140</span>              :     {</span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">        6158 :         VerifyOrDie(offset &lt;= mDataLen);</span></span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaGNC">        6158 :         VerifyOrDie(length &lt;= mDataLen - offset);</span></span>
+<span id="L143"><span class="lineNum">     143</span> <span class="tlaGNC">        6158 :         return Span(mDataBuf + offset, length);</span></span>
+<span id="L144"><span class="lineNum">     144</span>              :     }</span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaGNC">        5096 :     Span SubSpan(size_t offset) const</span></span>
+<span id="L147"><span class="lineNum">     147</span>              :     {</span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">        5096 :         VerifyOrDie(offset &lt;= mDataLen);</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaGNC">        5096 :         return Span(mDataBuf + offset, mDataLen - offset);</span></span>
+<span id="L150"><span class="lineNum">     150</span>              :     }</span>
+<span id="L151"><span class="lineNum">     151</span>              : </span>
+<span id="L152"><span class="lineNum">     152</span>              :     // Allow reducing the size of a span.</span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">        8624 :     void reduce_size(size_t new_size)</span></span>
+<span id="L154"><span class="lineNum">     154</span>              :     {</span>
+<span id="L155"><span class="lineNum">     155</span> <span class="tlaGNC">        8624 :         VerifyOrDie(new_size &lt;= size());</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">        8624 :         mDataLen = new_size;</span></span>
+<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">        8624 :     }</span></span>
+<span id="L158"><span class="lineNum">     158</span>              : </span>
+<span id="L159"><span class="lineNum">     159</span>              :     // Allow creating ByteSpans and CharSpans from ZCL octet strings, so we</span>
+<span id="L160"><span class="lineNum">     160</span>              :     // don't have to reinvent it various places.</span>
+<span id="L161"><span class="lineNum">     161</span>              :     template &lt;class U,</span>
+<span id="L162"><span class="lineNum">     162</span>              :               typename = std::enable_if_t&lt;std::is_same&lt;uint8_t, std::remove_const_t&lt;U&gt;&gt;::value &amp;&amp;</span>
+<span id="L163"><span class="lineNum">     163</span>              :                                           (std::is_same&lt;const uint8_t, T&gt;::value || std::is_same&lt;const char, T&gt;::value)&gt;&gt;</span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">           2 :     static Span fromZclString(U * bytes)</span></span>
+<span id="L165"><span class="lineNum">     165</span>              :     {</span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC">           2 :         size_t length = bytes[0];</span></span>
+<span id="L167"><span class="lineNum">     167</span>              :         // Treat 0xFF (aka &quot;null string&quot;) as zero-length.</span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">           2 :         if (length == 0xFF)</span></span>
+<span id="L169"><span class="lineNum">     169</span>              :         {</span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaUNC tlaBgUNC">           0 :             length = 0;</span></span>
+<span id="L171"><span class="lineNum">     171</span>              :         }</span>
+<span id="L172"><span class="lineNum">     172</span>              :         // Need reinterpret_cast if we're a CharSpan.</span>
+<span id="L173"><span class="lineNum">     173</span> <span class="tlaGNC tlaBgGNC">           2 :         return Span(reinterpret_cast&lt;T *&gt;(&amp;bytes[1]), length);</span></span>
+<span id="L174"><span class="lineNum">     174</span>              :     }</span>
+<span id="L175"><span class="lineNum">     175</span>              : </span>
+<span id="L176"><span class="lineNum">     176</span>              :     // Creates a CharSpan from a null-terminated C character string.</span>
+<span id="L177"><span class="lineNum">     177</span>              :     //</span>
+<span id="L178"><span class="lineNum">     178</span>              :     // Note that for string literals, the user-defined `_span` string</span>
+<span id="L179"><span class="lineNum">     179</span>              :     // literal operator should be used instead, e.g. `&quot;Hello&quot;_span`.</span>
+<span id="L180"><span class="lineNum">     180</span>              :     template &lt;class U, typename = std::enable_if_t&lt;std::is_same&lt;T, const U&gt;::value &amp;&amp; std::is_same&lt;const char, T&gt;::value&gt;&gt;</span>
+<span id="L181"><span class="lineNum">     181</span> <span class="tlaGNC">        1597 :     static Span fromCharString(U * chars)</span></span>
+<span id="L182"><span class="lineNum">     182</span>              :     {</span>
+<span id="L183"><span class="lineNum">     183</span> <span class="tlaGNC">        1597 :         return Span(chars, strlen(chars));</span></span>
+<span id="L184"><span class="lineNum">     184</span>              :     }</span>
+<span id="L185"><span class="lineNum">     185</span>              : </span>
+<span id="L186"><span class="lineNum">     186</span>              :     // operator== explicitly not implemented on Span, because its meaning</span>
+<span id="L187"><span class="lineNum">     187</span>              :     // (equality of data, or pointing to the same buffer and same length) is</span>
+<span id="L188"><span class="lineNum">     188</span>              :     // ambiguous.  Use data_equal if testing for equality of data.</span>
+<span id="L189"><span class="lineNum">     189</span>              :     template &lt;typename U&gt;</span>
+<span id="L190"><span class="lineNum">     190</span>              :     bool operator==(const Span&lt;U&gt; &amp; other) const = delete;</span>
+<span id="L191"><span class="lineNum">     191</span>              : </span>
+<span id="L192"><span class="lineNum">     192</span>              :     // Creates a Span without checking whether databuf is a null pointer.</span>
+<span id="L193"><span class="lineNum">     193</span>              :     //</span>
+<span id="L194"><span class="lineNum">     194</span>              :     // Note: The normal (checked) constructor should be used for general use;</span>
+<span id="L195"><span class="lineNum">     195</span>              :     // this overload exists for special use cases where databuf is guaranteed</span>
+<span id="L196"><span class="lineNum">     196</span>              :     // to be valid (not null) and a constexpr constructor is required.</span>
+<span id="L197"><span class="lineNum">     197</span>              :     //</span>
+<span id="L198"><span class="lineNum">     198</span>              :     // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61648 prevents making</span>
+<span id="L199"><span class="lineNum">     199</span>              :     // operator&quot;&quot;_span a friend (and this constructor private).</span>
+<span id="L200"><span class="lineNum">     200</span>              : </span>
+<span id="L201"><span class="lineNum">     201</span> <span class="tlaGNC">         193 :     constexpr Span(UncheckedType tag, pointer databuf, size_t datalen) : mDataBuf(databuf), mDataLen(datalen) {}</span></span>
+<span id="L202"><span class="lineNum">     202</span>              : </span>
+<span id="L203"><span class="lineNum">     203</span>              : private:</span>
+<span id="L204"><span class="lineNum">     204</span>              :     pointer mDataBuf;</span>
+<span id="L205"><span class="lineNum">     205</span>              :     size_t mDataLen;</span>
+<span id="L206"><span class="lineNum">     206</span>              : };</span>
+<span id="L207"><span class="lineNum">     207</span>              : </span>
+<span id="L208"><span class="lineNum">     208</span>              : // Template deduction guides to allow construction of Span from a pointer or</span>
+<span id="L209"><span class="lineNum">     209</span>              : // array without having to specify the type of the entries explicitly.</span>
+<span id="L210"><span class="lineNum">     210</span>              : template &lt;class T&gt;</span>
+<span id="L211"><span class="lineNum">     211</span>              : Span(T * data, size_t size) -&gt; Span&lt;T&gt;;</span>
+<span id="L212"><span class="lineNum">     212</span>              : template &lt;class T, size_t N&gt;</span>
+<span id="L213"><span class="lineNum">     213</span>              : Span(T (&amp;databuf)[N]) -&gt; Span&lt;T&gt;;</span>
+<span id="L214"><span class="lineNum">     214</span>              : template &lt;class T, size_t N&gt;</span>
+<span id="L215"><span class="lineNum">     215</span>              : Span(std::array&lt;T, N&gt; &amp; data) -&gt; Span&lt;T&gt;;</span>
+<span id="L216"><span class="lineNum">     216</span>              : template &lt;class T, size_t N&gt;</span>
+<span id="L217"><span class="lineNum">     217</span>              : Span(const std::array&lt;T, N&gt; &amp; data) -&gt; Span&lt;const T&gt;;</span>
+<span id="L218"><span class="lineNum">     218</span>              : </span>
+<span id="L219"><span class="lineNum">     219</span>              : inline namespace literals {</span>
+<span id="L220"><span class="lineNum">     220</span>              : </span>
+<span id="L221"><span class="lineNum">     221</span> <span class="tlaGNC">         193 : inline constexpr Span&lt;const char&gt; operator&quot;&quot;_span(const char * literal, size_t size)</span></span>
+<span id="L222"><span class="lineNum">     222</span>              : {</span>
+<span id="L223"><span class="lineNum">     223</span> <span class="tlaGNC">         193 :     return Span&lt;const char&gt;(Unchecked, literal, size);</span></span>
+<span id="L224"><span class="lineNum">     224</span>              : }</span>
+<span id="L225"><span class="lineNum">     225</span>              : </span>
+<span id="L226"><span class="lineNum">     226</span>              : } // namespace literals</span>
+<span id="L227"><span class="lineNum">     227</span>              : </span>
+<span id="L228"><span class="lineNum">     228</span>              : namespace detail {</span>
+<span id="L229"><span class="lineNum">     229</span>              : </span>
+<span id="L230"><span class="lineNum">     230</span>              : // To make FixedSpan (specifically various FixedByteSpan types) default constructible</span>
+<span id="L231"><span class="lineNum">     231</span>              : // without creating a weird &quot;empty() == true but size() != 0&quot; state, we need an</span>
+<span id="L232"><span class="lineNum">     232</span>              : // appropriate sized array of zeroes. With a naive definition like</span>
+<span id="L233"><span class="lineNum">     233</span>              : //      template &lt;class T, size_t N&gt; constexpr T kZero[N] {};</span>
+<span id="L234"><span class="lineNum">     234</span>              : // we would end up with separate zero arrays for each size, and might also accidentally</span>
+<span id="L235"><span class="lineNum">     235</span>              : // increase the read-only data size of the binary by a large amount. Instead, we define</span>
+<span id="L236"><span class="lineNum">     236</span>              : // a per-type limit for the zero array, FixedSpan won't be default constructible for</span>
+<span id="L237"><span class="lineNum">     237</span>              : // T / N combinations that exceed the limit. The default limit is 0.</span>
+<span id="L238"><span class="lineNum">     238</span>              : template &lt;class T&gt;</span>
+<span id="L239"><span class="lineNum">     239</span>              : struct zero_limit : std::integral_constant&lt;size_t, 0&gt;</span>
+<span id="L240"><span class="lineNum">     240</span>              : {</span>
+<span id="L241"><span class="lineNum">     241</span>              : };</span>
+<span id="L242"><span class="lineNum">     242</span>              : </span>
+<span id="L243"><span class="lineNum">     243</span>              : // FixedByteSpan types up to N=65 currently need to be default-constructible.</span>
+<span id="L244"><span class="lineNum">     244</span>              : template &lt;&gt;</span>
+<span id="L245"><span class="lineNum">     245</span>              : struct zero_limit&lt;uint8_t&gt; : std::integral_constant&lt;size_t, 65&gt;</span>
+<span id="L246"><span class="lineNum">     246</span>              : {</span>
+<span id="L247"><span class="lineNum">     247</span>              : };</span>
+<span id="L248"><span class="lineNum">     248</span>              : </span>
+<span id="L249"><span class="lineNum">     249</span>              : template &lt;class T&gt;</span>
+<span id="L250"><span class="lineNum">     250</span>              : inline constexpr T kZeroes[zero_limit&lt;T&gt;::value]{};</span>
+<span id="L251"><span class="lineNum">     251</span>              : </span>
+<span id="L252"><span class="lineNum">     252</span>              : template &lt;class T, size_t N&gt;</span>
+<span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC">       48868 : constexpr T const * shared_zeroes()</span></span>
+<span id="L254"><span class="lineNum">     254</span>              : {</span>
+<span id="L255"><span class="lineNum">     255</span>              :     static_assert(N &lt;= zero_limit&lt;typename std::remove_const&lt;T&gt;::type&gt;::value, &quot;N exceeds zero_limit&lt;T&gt;&quot;);</span>
+<span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">       48868 :     return kZeroes&lt;typename std::remove_const&lt;T&gt;::type&gt;;</span></span>
+<span id="L257"><span class="lineNum">     257</span>              : }</span>
+<span id="L258"><span class="lineNum">     258</span>              : </span>
+<span id="L259"><span class="lineNum">     259</span>              : } // namespace detail</span>
+<span id="L260"><span class="lineNum">     260</span>              : </span>
+<span id="L261"><span class="lineNum">     261</span>              : /**</span>
+<span id="L262"><span class="lineNum">     262</span>              :  * Similar to a Span but with a fixed size.</span>
+<span id="L263"><span class="lineNum">     263</span>              :  */</span>
+<span id="L264"><span class="lineNum">     264</span>              : template &lt;class T, size_t N&gt;</span>
+<span id="L265"><span class="lineNum">     265</span>              : class FixedSpan</span>
+<span id="L266"><span class="lineNum">     266</span>              : {</span>
+<span id="L267"><span class="lineNum">     267</span>              : public:</span>
+<span id="L268"><span class="lineNum">     268</span>              :     using pointer   = T *;</span>
+<span id="L269"><span class="lineNum">     269</span>              :     using reference = T &amp;;</span>
+<span id="L270"><span class="lineNum">     270</span>              : </span>
+<span id="L271"><span class="lineNum">     271</span>              :     // Creates a FixedSpan pointing to a sequence of zeroes.</span>
+<span id="L272"><span class="lineNum">     272</span> <span class="tlaGNC">       48868 :     constexpr FixedSpan() : mDataBuf(detail::shared_zeroes&lt;T, N&gt;()) {}</span></span>
+<span id="L273"><span class="lineNum">     273</span>              : </span>
+<span id="L274"><span class="lineNum">     274</span>              :     // We want to allow construction from things that look like T*, but we want</span>
+<span id="L275"><span class="lineNum">     275</span>              :     // to make construction from an array use the constructor that asserts the</span>
+<span id="L276"><span class="lineNum">     276</span>              :     // array is big enough.  This requires that both constructors be templates</span>
+<span id="L277"><span class="lineNum">     277</span>              :     // (because otherwise the non-template would be favored by overload</span>
+<span id="L278"><span class="lineNum">     278</span>              :     // resolution, since due to decay to pointer it matches just as well as the</span>
+<span id="L279"><span class="lineNum">     279</span>              :     // template).</span>
+<span id="L280"><span class="lineNum">     280</span>              :     //</span>
+<span id="L281"><span class="lineNum">     281</span>              :     // To do that we have a template constructor enabled only when the type</span>
+<span id="L282"><span class="lineNum">     282</span>              :     // passed to it is a pointer type, and that pointer is to a type that</span>
+<span id="L283"><span class="lineNum">     283</span>              :     // matches T's size and can convert to T*.</span>
+<span id="L284"><span class="lineNum">     284</span>              :     template &lt;class U,</span>
+<span id="L285"><span class="lineNum">     285</span>              :               typename = std::enable_if_t&lt;std::is_pointer&lt;U&gt;::value &amp;&amp; sizeof(std::remove_pointer_t&lt;U&gt;) == sizeof(T) &amp;&amp;</span>
+<span id="L286"><span class="lineNum">     286</span>              :                                           std::is_convertible&lt;U, T *&gt;::value&gt;&gt;</span>
+<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">       12562 :     explicit FixedSpan(U databuf) : mDataBuf(databuf)</span></span>
+<span id="L288"><span class="lineNum">     288</span>              :     {</span>
+<span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC">       12562 :         VerifyOrDie(databuf != nullptr || N == 0); // not constexpr on some platforms</span></span>
+<span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">       12562 :     }</span></span>
+<span id="L291"><span class="lineNum">     291</span>              : </span>
+<span id="L292"><span class="lineNum">     292</span>              :     // FixedSpan does not support an empty / null state.</span>
+<span id="L293"><span class="lineNum">     293</span>              :     FixedSpan(std::nullptr_t null) = delete;</span>
+<span id="L294"><span class="lineNum">     294</span>              : </span>
+<span id="L295"><span class="lineNum">     295</span>              :     template &lt;class U, size_t M, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC">          78 :     constexpr explicit FixedSpan(U (&amp;databuf)[M]) : mDataBuf(databuf)</span></span>
+<span id="L297"><span class="lineNum">     297</span>              :     {</span>
+<span id="L298"><span class="lineNum">     298</span>              :         static_assert(M &gt;= N, &quot;Passed-in buffer too small for FixedSpan&quot;);</span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">          78 :     }</span></span>
+<span id="L300"><span class="lineNum">     300</span>              : </span>
+<span id="L301"><span class="lineNum">     301</span>              :     // Creates a (potentially mutable) FixedSpan view of an std::array</span>
+<span id="L302"><span class="lineNum">     302</span>              :     template &lt;class U, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">       60465 :     constexpr FixedSpan(std::array&lt;U, N&gt; &amp; arr) : mDataBuf(arr.data())</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">       60465 :     {}</span></span>
+<span id="L305"><span class="lineNum">     305</span>              : </span>
+<span id="L306"><span class="lineNum">     306</span>              :     template &lt;class U, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L307"><span class="lineNum">     307</span>              :     constexpr FixedSpan(std::array&lt;U, N&gt; &amp;&amp; arr) = delete; // would be a view of an rvalue</span>
+<span id="L308"><span class="lineNum">     308</span>              : </span>
+<span id="L309"><span class="lineNum">     309</span>              :     // Creates a FixedSpan view of an std::array</span>
+<span id="L310"><span class="lineNum">     310</span>              :     template &lt;class U, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;const U *, T *&gt;::value&gt;&gt;</span>
+<span id="L311"><span class="lineNum">     311</span> <span class="tlaGNC">           5 :     constexpr FixedSpan(const std::array&lt;U, N&gt; &amp; arr) : mDataBuf(arr.data())</span></span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaGNC">           5 :     {}</span></span>
+<span id="L313"><span class="lineNum">     313</span>              : </span>
+<span id="L314"><span class="lineNum">     314</span>              :     // Allow implicit construction from a FixedSpan of sufficient size over a</span>
+<span id="L315"><span class="lineNum">     315</span>              :     // type that has the same size as ours, as long as the pointers are convertible.</span>
+<span id="L316"><span class="lineNum">     316</span>              :     template &lt;class U, size_t M, typename = std::enable_if_t&lt;sizeof(U) == sizeof(T) &amp;&amp; std::is_convertible&lt;U *, T *&gt;::value&gt;&gt;</span>
+<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC">           3 :     constexpr FixedSpan(FixedSpan&lt;U, M&gt; const &amp; other) : mDataBuf(other.data())</span></span>
+<span id="L318"><span class="lineNum">     318</span>              :     {</span>
+<span id="L319"><span class="lineNum">     319</span>              :         static_assert(M &gt;= N, &quot;Passed-in FixedSpan is smaller than we are&quot;);</span>
+<span id="L320"><span class="lineNum">     320</span> <span class="tlaGNC">           3 :     }</span></span>
+<span id="L321"><span class="lineNum">     321</span>              : </span>
+<span id="L322"><span class="lineNum">     322</span> <span class="tlaGNC">       81164 :     constexpr pointer data() const { return mDataBuf; }</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">          79 :     constexpr pointer begin() const { return mDataBuf; }</span></span>
+<span id="L324"><span class="lineNum">     324</span> <span class="tlaGNC">          79 :     constexpr pointer end() const { return mDataBuf + N; }</span></span>
+<span id="L325"><span class="lineNum">     325</span>              : </span>
+<span id="L326"><span class="lineNum">     326</span>              :     // The size of a FixedSpan is always N. There is intentially no empty() method.</span>
+<span id="L327"><span class="lineNum">     327</span> <span class="tlaGNC">       78063 :     static constexpr size_t size() { return N; }</span></span>
+<span id="L328"><span class="lineNum">     328</span>              : </span>
+<span id="L329"><span class="lineNum">     329</span>              :     // Element accessors, matching the std::span API.</span>
+<span id="L330"><span class="lineNum">     330</span>              :     // VerifyOrDie cannot be used inside a constexpr function, because it uses</span>
+<span id="L331"><span class="lineNum">     331</span>              :     // &quot;static&quot; on some platforms (e.g. when CHIP_PW_TOKENIZER_LOGGING is true)</span>
+<span id="L332"><span class="lineNum">     332</span>              :     // and that's not allowed in constexpr functions.</span>
+<span id="L333"><span class="lineNum">     333</span> <span class="tlaGNC">          10 :     reference operator[](size_t index) const</span></span>
+<span id="L334"><span class="lineNum">     334</span>              :     {</span>
+<span id="L335"><span class="lineNum">     335</span> <span class="tlaGNC">          10 :         VerifyOrDie(index &lt; N);</span></span>
+<span id="L336"><span class="lineNum">     336</span> <span class="tlaGNC">          10 :         return data()[index];</span></span>
+<span id="L337"><span class="lineNum">     337</span>              :     }</span>
+<span id="L338"><span class="lineNum">     338</span> <span class="tlaGNC">           1 :     reference front() const { return (*this)[0]; }</span></span>
+<span id="L339"><span class="lineNum">     339</span> <span class="tlaGNC">           1 :     reference back() const { return (*this)[size() - 1]; }</span></span>
+<span id="L340"><span class="lineNum">     340</span>              : </span>
+<span id="L341"><span class="lineNum">     341</span> <span class="tlaGNC">        2679 :     bool data_equal(const Span&lt;const T&gt; &amp; other) const</span></span>
+<span id="L342"><span class="lineNum">     342</span>              :     {</span>
+<span id="L343"><span class="lineNum">     343</span> <span class="tlaGNC">        2679 :         return (N == other.size() &amp;&amp; memcmp(data(), other.data(), N * sizeof(T)) == 0);</span></span>
+<span id="L344"><span class="lineNum">     344</span>              :     }</span>
+<span id="L345"><span class="lineNum">     345</span>              : </span>
+<span id="L346"><span class="lineNum">     346</span>              :     // operator== explicitly not implemented on FixedSpan, because its meaning</span>
+<span id="L347"><span class="lineNum">     347</span>              :     // (equality of data, or pointing to the same buffer and same length) is</span>
+<span id="L348"><span class="lineNum">     348</span>              :     // ambiguous.  Use data_equal if testing for equality of data.</span>
+<span id="L349"><span class="lineNum">     349</span>              :     template &lt;typename U&gt;</span>
+<span id="L350"><span class="lineNum">     350</span>              :     bool operator==(const Span&lt;U&gt; &amp; other) const = delete;</span>
+<span id="L351"><span class="lineNum">     351</span>              :     template &lt;typename U, size_t M&gt;</span>
+<span id="L352"><span class="lineNum">     352</span>              :     bool operator==(const FixedSpan&lt;U, M&gt; &amp; other) const = delete;</span>
+<span id="L353"><span class="lineNum">     353</span>              : </span>
+<span id="L354"><span class="lineNum">     354</span>              : private:</span>
+<span id="L355"><span class="lineNum">     355</span>              :     pointer mDataBuf;</span>
+<span id="L356"><span class="lineNum">     356</span>              : };</span>
+<span id="L357"><span class="lineNum">     357</span>              : </span>
+<span id="L358"><span class="lineNum">     358</span>              : template &lt;class T&gt;</span>
+<span id="L359"><span class="lineNum">     359</span>              : template &lt;class U, size_t N, typename&gt;</span>
+<span id="L360"><span class="lineNum">     360</span> <span class="tlaGNC">        3251 : constexpr Span&lt;T&gt;::Span(const FixedSpan&lt;U, N&gt; &amp; other) : mDataBuf(other.data()), mDataLen(other.size())</span></span>
+<span id="L361"><span class="lineNum">     361</span> <span class="tlaGNC">        3251 : {}</span></span>
+<span id="L362"><span class="lineNum">     362</span>              : </span>
+<span id="L363"><span class="lineNum">     363</span>              : template &lt;typename T&gt;</span>
+<span id="L364"><span class="lineNum">     364</span> <span class="tlaUNC tlaBgUNC">           0 : [[deprecated(&quot;Use !empty()&quot;)]] inline bool IsSpanUsable(const Span&lt;T&gt; &amp; span)</span></span>
+<span id="L365"><span class="lineNum">     365</span>              : {</span>
+<span id="L366"><span class="lineNum">     366</span> <span class="tlaUNC">           0 :     return !span.empty();</span></span>
+<span id="L367"><span class="lineNum">     367</span>              : }</span>
+<span id="L368"><span class="lineNum">     368</span>              : </span>
+<span id="L369"><span class="lineNum">     369</span>              : template &lt;typename T, size_t N&gt;</span>
+<span id="L370"><span class="lineNum">     370</span>              : [[deprecated(&quot;FixedSpan is always usable / non-empty if N &gt; 0&quot;)]] inline bool IsSpanUsable(const FixedSpan&lt;T, N&gt; &amp; span)</span>
+<span id="L371"><span class="lineNum">     371</span>              : {</span>
+<span id="L372"><span class="lineNum">     372</span>              :     return N &gt; 0;</span>
+<span id="L373"><span class="lineNum">     373</span>              : }</span>
+<span id="L374"><span class="lineNum">     374</span>              : </span>
+<span id="L375"><span class="lineNum">     375</span>              : using ByteSpan        = Span&lt;const uint8_t&gt;;</span>
+<span id="L376"><span class="lineNum">     376</span>              : using MutableByteSpan = Span&lt;uint8_t&gt;;</span>
+<span id="L377"><span class="lineNum">     377</span>              : template &lt;size_t N&gt;</span>
+<span id="L378"><span class="lineNum">     378</span>              : using FixedByteSpan = FixedSpan&lt;const uint8_t, N&gt;;</span>
+<span id="L379"><span class="lineNum">     379</span>              : template &lt;size_t N&gt;</span>
+<span id="L380"><span class="lineNum">     380</span>              : using MutableFixedByteSpan = FixedSpan&lt;uint8_t, N&gt;;</span>
+<span id="L381"><span class="lineNum">     381</span>              : </span>
+<span id="L382"><span class="lineNum">     382</span>              : using CharSpan        = Span&lt;const char&gt;;</span>
+<span id="L383"><span class="lineNum">     383</span>              : using MutableCharSpan = Span&lt;char&gt;;</span>
+<span id="L384"><span class="lineNum">     384</span>              : </span>
+<span id="L385"><span class="lineNum">     385</span> <span class="tlaGNC tlaBgGNC">        3258 : inline CHIP_ERROR CopySpanToMutableSpan(ByteSpan span_to_copy, MutableByteSpan &amp; out_buf)</span></span>
+<span id="L386"><span class="lineNum">     386</span>              : {</span>
+<span id="L387"><span class="lineNum">     387</span> <span class="tlaGNC">        3258 :     VerifyOrReturnError(out_buf.size() &gt;= span_to_copy.size(), CHIP_ERROR_BUFFER_TOO_SMALL);</span></span>
+<span id="L388"><span class="lineNum">     388</span>              : </span>
+<span id="L389"><span class="lineNum">     389</span>              :     // There is no guarantee that span_to_copy and out_buf don't overlap, so use memmove()</span>
+<span id="L390"><span class="lineNum">     390</span> <span class="tlaGNC">        3257 :     memmove(out_buf.data(), span_to_copy.data(), span_to_copy.size());</span></span>
+<span id="L391"><span class="lineNum">     391</span> <span class="tlaGNC">        3257 :     out_buf.reduce_size(span_to_copy.size());</span></span>
+<span id="L392"><span class="lineNum">     392</span>              : </span>
+<span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC">        3257 :     return CHIP_NO_ERROR;</span></span>
+<span id="L394"><span class="lineNum">     394</span>              : }</span>
+<span id="L395"><span class="lineNum">     395</span>              : </span>
+<span id="L396"><span class="lineNum">     396</span> <span class="tlaGNC">          16 : inline CHIP_ERROR CopyCharSpanToMutableCharSpan(CharSpan cspan_to_copy, MutableCharSpan &amp; out_buf)</span></span>
+<span id="L397"><span class="lineNum">     397</span>              : {</span>
+<span id="L398"><span class="lineNum">     398</span> <span class="tlaGNC">          16 :     VerifyOrReturnError(out_buf.size() &gt;= cspan_to_copy.size(), CHIP_ERROR_BUFFER_TOO_SMALL);</span></span>
+<span id="L399"><span class="lineNum">     399</span>              : </span>
+<span id="L400"><span class="lineNum">     400</span>              :     // There is no guarantee that cspan_to_copy and out_buf don't overlap, so use memmove()</span>
+<span id="L401"><span class="lineNum">     401</span> <span class="tlaGNC">          13 :     memmove(out_buf.data(), cspan_to_copy.data(), cspan_to_copy.size());</span></span>
+<span id="L402"><span class="lineNum">     402</span> <span class="tlaGNC">          13 :     out_buf.reduce_size(cspan_to_copy.size());</span></span>
+<span id="L403"><span class="lineNum">     403</span>              : </span>
+<span id="L404"><span class="lineNum">     404</span> <span class="tlaGNC">          13 :     return CHIP_NO_ERROR;</span></span>
+<span id="L405"><span class="lineNum">     405</span>              : }</span>
+<span id="L406"><span class="lineNum">     406</span>              : </span>
+<span id="L407"><span class="lineNum">     407</span>              : /**</span>
+<span id="L408"><span class="lineNum">     408</span>              :  * Copies a CharSpan into a MutableCharSpan.</span>
+<span id="L409"><span class="lineNum">     409</span>              :  * If the span_to_copy does not fit in out_span, span_to_copy is truncated to fit in out_span.</span>
+<span id="L410"><span class="lineNum">     410</span>              :  * @param span_to_copy The CharSpan to copy.</span>
+<span id="L411"><span class="lineNum">     411</span>              :  * @param out_span The MutableCharSpan in which span_to_copy is to be copied.</span>
+<span id="L412"><span class="lineNum">     412</span>              :  */</span>
+<span id="L413"><span class="lineNum">     413</span> <span class="tlaGNC">          57 : inline void CopyCharSpanToMutableCharSpanWithTruncation(CharSpan span_to_copy, MutableCharSpan &amp; out_span)</span></span>
+<span id="L414"><span class="lineNum">     414</span>              : {</span>
+<span id="L415"><span class="lineNum">     415</span> <span class="tlaGNC">          57 :     size_t size_to_copy = std::min(span_to_copy.size(), out_span.size());</span></span>
+<span id="L416"><span class="lineNum">     416</span>              : </span>
+<span id="L417"><span class="lineNum">     417</span>              :     // There is no guarantee that span_to_copy and out_buf don't overlap, so use memmove()</span>
+<span id="L418"><span class="lineNum">     418</span> <span class="tlaGNC">          57 :     memmove(out_span.data(), span_to_copy.data(), size_to_copy);</span></span>
+<span id="L419"><span class="lineNum">     419</span> <span class="tlaGNC">          57 :     out_span.reduce_size(size_to_copy);</span></span>
+<span id="L420"><span class="lineNum">     420</span> <span class="tlaGNC">          57 : }</span></span>
+<span id="L421"><span class="lineNum">     421</span>              : </span>
+<span id="L422"><span class="lineNum">     422</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

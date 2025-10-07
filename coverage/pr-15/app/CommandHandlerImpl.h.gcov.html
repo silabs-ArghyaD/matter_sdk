@@ -1,0 +1,570 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - SHA:6b07f002df5716f8198f7aba6567ff6ea7686293 - app/CommandHandlerImpl.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">Matter SDK Coverage Report</td></tr>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">app</a> - CommandHandlerImpl.h<span style="font-size: 80%;"> (source / <a href="CommandHandlerImpl.h.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">SHA:6b07f002df5716f8198f7aba6567ff6ea7686293</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryMed">88.5&nbsp;%</td>
+            <td class="headerCovTableEntry">26</td>
+            <td class="headerCovTableEntry">23</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-10-07 12:54:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryMed">84.6&nbsp;%</td>
+            <td class="headerCovTableEntry">13</td>
+            <td class="headerCovTableEntry">11</td>
+          </tr>
+                  <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : /*</span>
+<span id="L2"><span class="lineNum">       2</span>              :  *    Copyright (c) 2020-2024 Project CHIP Authors</span>
+<span id="L3"><span class="lineNum">       3</span>              :  *    All rights reserved.</span>
+<span id="L4"><span class="lineNum">       4</span>              :  *</span>
+<span id="L5"><span class="lineNum">       5</span>              :  *    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span id="L6"><span class="lineNum">       6</span>              :  *    you may not use this file except in compliance with the License.</span>
+<span id="L7"><span class="lineNum">       7</span>              :  *    You may obtain a copy of the License at</span>
+<span id="L8"><span class="lineNum">       8</span>              :  *</span>
+<span id="L9"><span class="lineNum">       9</span>              :  *        http://www.apache.org/licenses/LICENSE-2.0</span>
+<span id="L10"><span class="lineNum">      10</span>              :  *</span>
+<span id="L11"><span class="lineNum">      11</span>              :  *    Unless required by applicable law or agreed to in writing, software</span>
+<span id="L12"><span class="lineNum">      12</span>              :  *    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span id="L13"><span class="lineNum">      13</span>              :  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span id="L14"><span class="lineNum">      14</span>              :  *    See the License for the specific language governing permissions and</span>
+<span id="L15"><span class="lineNum">      15</span>              :  *    limitations under the License.</span>
+<span id="L16"><span class="lineNum">      16</span>              :  */</span>
+<span id="L17"><span class="lineNum">      17</span>              : #pragma once</span>
+<span id="L18"><span class="lineNum">      18</span>              : </span>
+<span id="L19"><span class="lineNum">      19</span>              : #include &lt;app/CommandHandler.h&gt;</span>
+<span id="L20"><span class="lineNum">      20</span>              : </span>
+<span id="L21"><span class="lineNum">      21</span>              : #include &lt;app/CommandHandlerExchangeInterface.h&gt;</span>
+<span id="L22"><span class="lineNum">      22</span>              : #include &lt;app/CommandHandlerInterface.h&gt;</span>
+<span id="L23"><span class="lineNum">      23</span>              : #include &lt;app/CommandPathRegistry.h&gt;</span>
+<span id="L24"><span class="lineNum">      24</span>              : #include &lt;app/MessageDef/InvokeRequestMessage.h&gt;</span>
+<span id="L25"><span class="lineNum">      25</span>              : #include &lt;app/MessageDef/InvokeResponseMessage.h&gt;</span>
+<span id="L26"><span class="lineNum">      26</span>              : #include &lt;app/data-model-provider/OperationTypes.h&gt;</span>
+<span id="L27"><span class="lineNum">      27</span>              : #include &lt;lib/core/TLV.h&gt;</span>
+<span id="L28"><span class="lineNum">      28</span>              : #include &lt;lib/core/TLVDebug.h&gt;</span>
+<span id="L29"><span class="lineNum">      29</span>              : #include &lt;lib/support/BitFlags.h&gt;</span>
+<span id="L30"><span class="lineNum">      30</span>              : #include &lt;lib/support/Scoped.h&gt;</span>
+<span id="L31"><span class="lineNum">      31</span>              : #include &lt;messaging/ExchangeHolder.h&gt;</span>
+<span id="L32"><span class="lineNum">      32</span>              : #include &lt;messaging/Flags.h&gt;</span>
+<span id="L33"><span class="lineNum">      33</span>              : #include &lt;protocols/Protocols.h&gt;</span>
+<span id="L34"><span class="lineNum">      34</span>              : #include &lt;protocols/interaction_model/Constants.h&gt;</span>
+<span id="L35"><span class="lineNum">      35</span>              : #include &lt;protocols/interaction_model/StatusCode.h&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              : #include &lt;system/SystemPacketBuffer.h&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : #include &lt;system/TLVPacketBufferBackingStore.h&gt;</span>
+<span id="L38"><span class="lineNum">      38</span>              : </span>
+<span id="L39"><span class="lineNum">      39</span>              : namespace chip {</span>
+<span id="L40"><span class="lineNum">      40</span>              : namespace app {</span>
+<span id="L41"><span class="lineNum">      41</span>              : </span>
+<span id="L42"><span class="lineNum">      42</span>              : class CommandHandlerImpl : public CommandHandler</span>
+<span id="L43"><span class="lineNum">      43</span>              : {</span>
+<span id="L44"><span class="lineNum">      44</span>              : public:</span>
+<span id="L45"><span class="lineNum">      45</span>              :     class Callback</span>
+<span id="L46"><span class="lineNum">      46</span>              :     {</span>
+<span id="L47"><span class="lineNum">      47</span>              :     public:</span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC tlaBgGNC">         138 :         virtual ~Callback() = default;</span></span>
+<span id="L49"><span class="lineNum">      49</span>              : </span>
+<span id="L50"><span class="lineNum">      50</span>              :         /*</span>
+<span id="L51"><span class="lineNum">      51</span>              :          * Method that signals to a registered callback that this object</span>
+<span id="L52"><span class="lineNum">      52</span>              :          * has completed doing useful work and is now safe for release/destruction.</span>
+<span id="L53"><span class="lineNum">      53</span>              :          */</span>
+<span id="L54"><span class="lineNum">      54</span>              :         virtual void OnDone(CommandHandlerImpl &amp; apCommandObj) = 0;</span>
+<span id="L55"><span class="lineNum">      55</span>              : </span>
+<span id="L56"><span class="lineNum">      56</span>              :         /**</span>
+<span id="L57"><span class="lineNum">      57</span>              :          * Perform pre-validation that the command dispatch can be performed. In particular:</span>
+<span id="L58"><span class="lineNum">      58</span>              :          *   - check command existence/validity</span>
+<span id="L59"><span class="lineNum">      59</span>              :          *   - validate ACL</span>
+<span id="L60"><span class="lineNum">      60</span>              :          *   - validate timed-invoke and fabric-scoped requirements</span>
+<span id="L61"><span class="lineNum">      61</span>              :          *</span>
+<span id="L62"><span class="lineNum">      62</span>              :          * Returns Status::Success if the command can be dispatched, otherwise it will</span>
+<span id="L63"><span class="lineNum">      63</span>              :          * return the status to be forwarded to the client on failure.</span>
+<span id="L64"><span class="lineNum">      64</span>              :          *</span>
+<span id="L65"><span class="lineNum">      65</span>              :          * Possible error return codes:</span>
+<span id="L66"><span class="lineNum">      66</span>              :          *   - UnsupportedEndpoint/UnsupportedCluster/UnsupportedCommand if the command path is invalid</span>
+<span id="L67"><span class="lineNum">      67</span>              :          *   - NeedsTimedInteraction</span>
+<span id="L68"><span class="lineNum">      68</span>              :          *   - UnsupportedAccess  (ACL failure or fabric scoped without a valid fabric index)</span>
+<span id="L69"><span class="lineNum">      69</span>              :          *   - AccessRestricted</span>
+<span id="L70"><span class="lineNum">      70</span>              :          */</span>
+<span id="L71"><span class="lineNum">      71</span>              :         virtual Protocols::InteractionModel::Status ValidateCommandCanBeDispatched(const DataModel::InvokeRequest &amp; request) = 0;</span>
+<span id="L72"><span class="lineNum">      72</span>              : </span>
+<span id="L73"><span class="lineNum">      73</span>              :         /*</span>
+<span id="L74"><span class="lineNum">      74</span>              :          * Upon processing of a CommandDataIB, this method is invoked to dispatch the command</span>
+<span id="L75"><span class="lineNum">      75</span>              :          * to the right server-side handler provided by the application.</span>
+<span id="L76"><span class="lineNum">      76</span>              :          */</span>
+<span id="L77"><span class="lineNum">      77</span>              :         virtual void DispatchCommand(CommandHandlerImpl &amp; apCommandObj, const ConcreteCommandPath &amp; aCommandPath,</span>
+<span id="L78"><span class="lineNum">      78</span>              :                                      TLV::TLVReader &amp; apPayload) = 0;</span>
+<span id="L79"><span class="lineNum">      79</span>              :     };</span>
+<span id="L80"><span class="lineNum">      80</span>              : </span>
+<span id="L81"><span class="lineNum">      81</span>              :     struct InvokeResponseParameters</span>
+<span id="L82"><span class="lineNum">      82</span>              :     {</span>
+<span id="L83"><span class="lineNum">      83</span> <span class="tlaGNC">          33 :         InvokeResponseParameters(const ConcreteCommandPath &amp; aRequestCommandPath) : mRequestCommandPath(aRequestCommandPath) {}</span></span>
+<span id="L84"><span class="lineNum">      84</span>              : </span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">          30 :         InvokeResponseParameters &amp; SetStartOrEndDataStruct(bool aStartOrEndDataStruct)</span></span>
+<span id="L86"><span class="lineNum">      86</span>              :         {</span>
+<span id="L87"><span class="lineNum">      87</span> <span class="tlaGNC">          30 :             mStartOrEndDataStruct = aStartOrEndDataStruct;</span></span>
+<span id="L88"><span class="lineNum">      88</span> <span class="tlaGNC">          30 :             return *this;</span></span>
+<span id="L89"><span class="lineNum">      89</span>              :         }</span>
+<span id="L90"><span class="lineNum">      90</span>              : </span>
+<span id="L91"><span class="lineNum">      91</span>              :         ConcreteCommandPath mRequestCommandPath;</span>
+<span id="L92"><span class="lineNum">      92</span>              :         /**</span>
+<span id="L93"><span class="lineNum">      93</span>              :          * Whether the method this is being provided to should start/end the TLV container for the CommandFields element</span>
+<span id="L94"><span class="lineNum">      94</span>              :          * within CommandDataIB.</span>
+<span id="L95"><span class="lineNum">      95</span>              :          */</span>
+<span id="L96"><span class="lineNum">      96</span>              :         bool mStartOrEndDataStruct = true;</span>
+<span id="L97"><span class="lineNum">      97</span>              :     };</span>
+<span id="L98"><span class="lineNum">      98</span>              : </span>
+<span id="L99"><span class="lineNum">      99</span>              :     struct TestOnlyOverrides</span>
+<span id="L100"><span class="lineNum">     100</span>              :     {</span>
+<span id="L101"><span class="lineNum">     101</span>              :     public:</span>
+<span id="L102"><span class="lineNum">     102</span>              :         CommandPathRegistry * commandPathRegistry          = nullptr;</span>
+<span id="L103"><span class="lineNum">     103</span>              :         CommandHandlerExchangeInterface * commandResponder = nullptr;</span>
+<span id="L104"><span class="lineNum">     104</span>              :     };</span>
+<span id="L105"><span class="lineNum">     105</span>              : </span>
+<span id="L106"><span class="lineNum">     106</span>              :     /*</span>
+<span id="L107"><span class="lineNum">     107</span>              :      * The callback passed in has to outlive this CommandHandler object.</span>
+<span id="L108"><span class="lineNum">     108</span>              :      */</span>
+<span id="L109"><span class="lineNum">     109</span>              :     CommandHandlerImpl(Callback * apCallback);</span>
+<span id="L110"><span class="lineNum">     110</span>              : </span>
+<span id="L111"><span class="lineNum">     111</span>              :     /*</span>
+<span id="L112"><span class="lineNum">     112</span>              :      * The destructor will also invalidate all Handles created for this CommandHandlerImpl.</span>
+<span id="L113"><span class="lineNum">     113</span>              :      */</span>
+<span id="L114"><span class="lineNum">     114</span>              :     virtual ~CommandHandlerImpl();</span>
+<span id="L115"><span class="lineNum">     115</span>              : </span>
+<span id="L116"><span class="lineNum">     116</span>              :     /*</span>
+<span id="L117"><span class="lineNum">     117</span>              :      * Constructor to override the number of supported paths per invoke and command responder.</span>
+<span id="L118"><span class="lineNum">     118</span>              :      *</span>
+<span id="L119"><span class="lineNum">     119</span>              :      * The callback and any pointers passed via TestOnlyOverrides must outlive this</span>
+<span id="L120"><span class="lineNum">     120</span>              :      * CommandHandlerImpl object.</span>
+<span id="L121"><span class="lineNum">     121</span>              :      *</span>
+<span id="L122"><span class="lineNum">     122</span>              :      * For testing purposes.</span>
+<span id="L123"><span class="lineNum">     123</span>              :      */</span>
+<span id="L124"><span class="lineNum">     124</span>              :     CommandHandlerImpl(TestOnlyOverrides &amp; aTestOverride, Callback * apCallback);</span>
+<span id="L125"><span class="lineNum">     125</span>              : </span>
+<span id="L126"><span class="lineNum">     126</span>              :     /**************** CommandHandler interface implementation ***********************/</span>
+<span id="L127"><span class="lineNum">     127</span>              : </span>
+<span id="L128"><span class="lineNum">     128</span>              :     using CommandHandler::AddResponseData;</span>
+<span id="L129"><span class="lineNum">     129</span>              :     using CommandHandler::AddStatus;</span>
+<span id="L130"><span class="lineNum">     130</span>              :     using CommandHandler::FallibleAddStatus;</span>
+<span id="L131"><span class="lineNum">     131</span>              : </span>
+<span id="L132"><span class="lineNum">     132</span>              :     void FlushAcksRightAwayOnSlowCommand() override;</span>
+<span id="L133"><span class="lineNum">     133</span>              : </span>
+<span id="L134"><span class="lineNum">     134</span>              :     CHIP_ERROR FallibleAddStatus(const ConcreteCommandPath &amp; aRequestCommandPath,</span>
+<span id="L135"><span class="lineNum">     135</span>              :                                  const Protocols::InteractionModel::ClusterStatusCode &amp; aStatus,</span>
+<span id="L136"><span class="lineNum">     136</span>              :                                  const char * context = nullptr) override;</span>
+<span id="L137"><span class="lineNum">     137</span>              :     void AddStatus(const ConcreteCommandPath &amp; aCommandPath, const Protocols::InteractionModel::ClusterStatusCode &amp; aStatus,</span>
+<span id="L138"><span class="lineNum">     138</span>              :                    const char * context = nullptr) override;</span>
+<span id="L139"><span class="lineNum">     139</span>              : </span>
+<span id="L140"><span class="lineNum">     140</span>              :     CHIP_ERROR AddResponseData(const ConcreteCommandPath &amp; aRequestCommandPath, CommandId aResponseCommandId,</span>
+<span id="L141"><span class="lineNum">     141</span>              :                                const DataModel::EncodableToTLV &amp; aEncodable) override;</span>
+<span id="L142"><span class="lineNum">     142</span>              :     void AddResponse(const ConcreteCommandPath &amp; aRequestCommandPath, CommandId aResponseCommandId,</span>
+<span id="L143"><span class="lineNum">     143</span>              :                      const DataModel::EncodableToTLV &amp; aEncodable) override;</span>
+<span id="L144"><span class="lineNum">     144</span>              : </span>
+<span id="L145"><span class="lineNum">     145</span>              :     Access::SubjectDescriptor GetSubjectDescriptor() const override;</span>
+<span id="L146"><span class="lineNum">     146</span>              :     FabricIndex GetAccessingFabricIndex() const override;</span>
+<span id="L147"><span class="lineNum">     147</span>              :     bool IsTimedInvoke() const override;</span>
+<span id="L148"><span class="lineNum">     148</span>              :     Messaging::ExchangeContext * GetExchangeContext() const override;</span>
+<span id="L149"><span class="lineNum">     149</span>              : </span>
+<span id="L150"><span class="lineNum">     150</span>              :     /**************** Implementation-specific logic ***********************/</span>
+<span id="L151"><span class="lineNum">     151</span>              : </span>
+<span id="L152"><span class="lineNum">     152</span>              :     /*</span>
+<span id="L153"><span class="lineNum">     153</span>              :      * Main entrypoint for this class to handle an InvokeRequestMessage.</span>
+<span id="L154"><span class="lineNum">     154</span>              :      *</span>
+<span id="L155"><span class="lineNum">     155</span>              :      * This function MAY call the registered OnDone callback before returning.</span>
+<span id="L156"><span class="lineNum">     156</span>              :      * To prevent immediate OnDone invocation, callers can wrap their CommandHandlerImpl instance</span>
+<span id="L157"><span class="lineNum">     157</span>              :      * within a CommandHandler::Handle.</span>
+<span id="L158"><span class="lineNum">     158</span>              :      *</span>
+<span id="L159"><span class="lineNum">     159</span>              :      * isTimedInvoke is true if and only if this is part of a Timed Invoke</span>
+<span id="L160"><span class="lineNum">     160</span>              :      * transaction (i.e. was preceded by a Timed Request).  If we reach here,</span>
+<span id="L161"><span class="lineNum">     161</span>              :      * the timer verification has already been done.</span>
+<span id="L162"><span class="lineNum">     162</span>              :      *</span>
+<span id="L163"><span class="lineNum">     163</span>              :      * commandResponder handles sending InvokeResponses, added by clusters, to the client. The</span>
+<span id="L164"><span class="lineNum">     164</span>              :      * command responder object must outlive this CommandHandler object. It is only safe to</span>
+<span id="L165"><span class="lineNum">     165</span>              :      * release after the caller of OnInvokeCommandRequest receives the OnDone callback.</span>
+<span id="L166"><span class="lineNum">     166</span>              :      */</span>
+<span id="L167"><span class="lineNum">     167</span>              :     Protocols::InteractionModel::Status OnInvokeCommandRequest(CommandHandlerExchangeInterface &amp; commandResponder,</span>
+<span id="L168"><span class="lineNum">     168</span>              :                                                                System::PacketBufferHandle &amp;&amp; payload, bool isTimedInvoke);</span>
+<span id="L169"><span class="lineNum">     169</span>              : </span>
+<span id="L170"><span class="lineNum">     170</span>              :     /**</span>
+<span id="L171"><span class="lineNum">     171</span>              :      * Checks that all CommandDataIB within InvokeRequests satisfy the spec's general</span>
+<span id="L172"><span class="lineNum">     172</span>              :      * constraints for CommandDataIB. Additionally checks that InvokeRequestMessage is</span>
+<span id="L173"><span class="lineNum">     173</span>              :      * properly formatted.</span>
+<span id="L174"><span class="lineNum">     174</span>              :      *</span>
+<span id="L175"><span class="lineNum">     175</span>              :      * This also builds a registry to ensure that all commands can be responded</span>
+<span id="L176"><span class="lineNum">     176</span>              :      * to with the data required as per spec.</span>
+<span id="L177"><span class="lineNum">     177</span>              :      */</span>
+<span id="L178"><span class="lineNum">     178</span>              :     CHIP_ERROR ValidateInvokeRequestMessageAndBuildRegistry(InvokeRequestMessage::Parser &amp; invokeRequestMessage);</span>
+<span id="L179"><span class="lineNum">     179</span>              : </span>
+<span id="L180"><span class="lineNum">     180</span>              :     /**</span>
+<span id="L181"><span class="lineNum">     181</span>              :      * This adds a new CommandDataIB element into InvokeResponses for the associated</span>
+<span id="L182"><span class="lineNum">     182</span>              :      * aRequestCommandPath. This adds up until the `CommandFields` element within</span>
+<span id="L183"><span class="lineNum">     183</span>              :      * `CommandDataIB`.</span>
+<span id="L184"><span class="lineNum">     184</span>              :      *</span>
+<span id="L185"><span class="lineNum">     185</span>              :      * This call will fail if CommandHandler is already in the middle of building a</span>
+<span id="L186"><span class="lineNum">     186</span>              :      * CommandStatusIB or CommandDataIB (i.e. something has called Prepare*, without</span>
+<span id="L187"><span class="lineNum">     187</span>              :      * calling Finish*), or is already sending InvokeResponseMessage.</span>
+<span id="L188"><span class="lineNum">     188</span>              :      *</span>
+<span id="L189"><span class="lineNum">     189</span>              :      * Upon success, the caller is expected to call `FinishCommand` once they have added</span>
+<span id="L190"><span class="lineNum">     190</span>              :      * all the fields into the CommandFields element of CommandDataIB.</span>
+<span id="L191"><span class="lineNum">     191</span>              :      *</span>
+<span id="L192"><span class="lineNum">     192</span>              :      * @param [in] aResponseCommandPath the concrete response path that we are sending to Requester.</span>
+<span id="L193"><span class="lineNum">     193</span>              :      * @param [in] aPrepareParameters struct containing paramters needs for preparing a command. Data</span>
+<span id="L194"><span class="lineNum">     194</span>              :      *             such as request path, and whether this method should start the CommandFields element within</span>
+<span id="L195"><span class="lineNum">     195</span>              :      *             CommandDataIB.</span>
+<span id="L196"><span class="lineNum">     196</span>              :      */</span>
+<span id="L197"><span class="lineNum">     197</span>              :     CHIP_ERROR PrepareInvokeResponseCommand(const ConcreteCommandPath &amp; aResponseCommandPath,</span>
+<span id="L198"><span class="lineNum">     198</span>              :                                             const InvokeResponseParameters &amp; aPrepareParameters);</span>
+<span id="L199"><span class="lineNum">     199</span>              : </span>
+<span id="L200"><span class="lineNum">     200</span>              :     /**</span>
+<span id="L201"><span class="lineNum">     201</span>              :      * Finishes the CommandDataIB element within the InvokeResponses.</span>
+<span id="L202"><span class="lineNum">     202</span>              :      *</span>
+<span id="L203"><span class="lineNum">     203</span>              :      * Caller must have first successfully called `PrepareInvokeResponseCommand`.</span>
+<span id="L204"><span class="lineNum">     204</span>              :      *</span>
+<span id="L205"><span class="lineNum">     205</span>              :      * @param [in] aEndDataStruct end the TLV container for the CommandFields element within</span>
+<span id="L206"><span class="lineNum">     206</span>              :      *             CommandDataIB. This should match the boolean passed into Prepare*.</span>
+<span id="L207"><span class="lineNum">     207</span>              :      *</span>
+<span id="L208"><span class="lineNum">     208</span>              :      * @return CHIP_ERROR_INCORRECT_STATE</span>
+<span id="L209"><span class="lineNum">     209</span>              :      *                      If device has not previously successfully called</span>
+<span id="L210"><span class="lineNum">     210</span>              :      *                      `PrepareInvokeResponseCommand`.</span>
+<span id="L211"><span class="lineNum">     211</span>              :      * @return CHIP_ERROR_BUFFER_TOO_SMALL</span>
+<span id="L212"><span class="lineNum">     212</span>              :      *                      If writing the values needed to finish the InvokeReponseIB</span>
+<span id="L213"><span class="lineNum">     213</span>              :      *                      with the current contents of the InvokeResponseMessage</span>
+<span id="L214"><span class="lineNum">     214</span>              :      *                      would exceed the limit. When this error occurs, it is possible</span>
+<span id="L215"><span class="lineNum">     215</span>              :      *                      we have already closed some of the IB Builders that were</span>
+<span id="L216"><span class="lineNum">     216</span>              :      *                      previously started in `PrepareInvokeResponseCommand`.</span>
+<span id="L217"><span class="lineNum">     217</span>              :      * @return CHIP_ERROR_NO_MEMORY</span>
+<span id="L218"><span class="lineNum">     218</span>              :      *                      If TLVWriter attempted to allocate an output buffer failed due to</span>
+<span id="L219"><span class="lineNum">     219</span>              :      *                      lack of memory.</span>
+<span id="L220"><span class="lineNum">     220</span>              :      * @return other        Other TLVWriter related errors. Typically occurs if</span>
+<span id="L221"><span class="lineNum">     221</span>              :      *                      `GetCommandDataIBTLVWriter()` was called and used incorrectly.</span>
+<span id="L222"><span class="lineNum">     222</span>              :      */</span>
+<span id="L223"><span class="lineNum">     223</span>              :     // TODO(#30453): We should be able to eliminate the chances of OOM issues with reserve.</span>
+<span id="L224"><span class="lineNum">     224</span>              :     // This will be completed in a follow up PR.</span>
+<span id="L225"><span class="lineNum">     225</span>              :     CHIP_ERROR FinishCommand(bool aEndDataStruct = true);</span>
+<span id="L226"><span class="lineNum">     226</span>              : </span>
+<span id="L227"><span class="lineNum">     227</span>              :     TLV::TLVWriter * GetCommandDataIBTLVWriter();</span>
+<span id="L228"><span class="lineNum">     228</span>              : </span>
+<span id="L229"><span class="lineNum">     229</span>              : #if CHIP_WITH_NLFAULTINJECTION</span>
+<span id="L230"><span class="lineNum">     230</span>              : </span>
+<span id="L231"><span class="lineNum">     231</span>              :     enum class NlFaultInjectionType : uint8_t</span>
+<span id="L232"><span class="lineNum">     232</span>              :     {</span>
+<span id="L233"><span class="lineNum">     233</span>              :         SeparateResponseMessages,</span>
+<span id="L234"><span class="lineNum">     234</span>              :         SeparateResponseMessagesAndInvertedResponseOrder,</span>
+<span id="L235"><span class="lineNum">     235</span>              :         SkipSecondResponse</span>
+<span id="L236"><span class="lineNum">     236</span>              :     };</span>
+<span id="L237"><span class="lineNum">     237</span>              : </span>
+<span id="L238"><span class="lineNum">     238</span>              :     /**</span>
+<span id="L239"><span class="lineNum">     239</span>              :      * @brief Sends InvokeResponseMessages with injected faults for certification testing.</span>
+<span id="L240"><span class="lineNum">     240</span>              :      *</span>
+<span id="L241"><span class="lineNum">     241</span>              :      * The Test Harness (TH) uses this to simulate various server response behaviors,</span>
+<span id="L242"><span class="lineNum">     242</span>              :      * ensuring the Device Under Test (DUT) handles responses per specification.</span>
+<span id="L243"><span class="lineNum">     243</span>              :      *</span>
+<span id="L244"><span class="lineNum">     244</span>              :      * This function strictly validates the DUT's InvokeRequestMessage against the test plan.</span>
+<span id="L245"><span class="lineNum">     245</span>              :      * If deviations occur, the TH terminates with a detailed error message.</span>
+<span id="L246"><span class="lineNum">     246</span>              :      *</span>
+<span id="L247"><span class="lineNum">     247</span>              :      * @param commandResponder commandResponder that will send the InvokeResponseMessages to the client.</span>
+<span id="L248"><span class="lineNum">     248</span>              :      * @param payload Payload of the incoming InvokeRequestMessage from the client.</span>
+<span id="L249"><span class="lineNum">     249</span>              :      * @param isTimedInvoke Indicates whether the interaction is timed.</span>
+<span id="L250"><span class="lineNum">     250</span>              :      * @param faultType The specific type of fault to inject into the response.</span>
+<span id="L251"><span class="lineNum">     251</span>              :      */</span>
+<span id="L252"><span class="lineNum">     252</span>              :     // TODO(#30453): After refactoring CommandHandler for better unit testability, create a</span>
+<span id="L253"><span class="lineNum">     253</span>              :     // unit test specifically for the fault injection behavior.</span>
+<span id="L254"><span class="lineNum">     254</span>              :     void TestOnlyInvokeCommandRequestWithFaultsInjected(CommandHandlerExchangeInterface &amp; commandResponder,</span>
+<span id="L255"><span class="lineNum">     255</span>              :                                                         System::PacketBufferHandle &amp;&amp; payload, bool isTimedInvoke,</span>
+<span id="L256"><span class="lineNum">     256</span>              :                                                         NlFaultInjectionType faultType);</span>
+<span id="L257"><span class="lineNum">     257</span>              : #endif // CHIP_WITH_NLFAULTINJECTION</span>
+<span id="L258"><span class="lineNum">     258</span>              : </span>
+<span id="L259"><span class="lineNum">     259</span>              : protected:</span>
+<span id="L260"><span class="lineNum">     260</span>              :     // Lifetime management for CommandHandler::Handle</span>
+<span id="L261"><span class="lineNum">     261</span>              : </span>
+<span id="L262"><span class="lineNum">     262</span>              :     void IncrementHoldOff(Handle * apHandle) override;</span>
+<span id="L263"><span class="lineNum">     263</span>              :     void DecrementHoldOff(Handle * apHandle) override;</span>
+<span id="L264"><span class="lineNum">     264</span>              : </span>
+<span id="L265"><span class="lineNum">     265</span>              : private:</span>
+<span id="L266"><span class="lineNum">     266</span>              :     friend class TestCommandInteraction;</span>
+<span id="L267"><span class="lineNum">     267</span>              :     friend class CommandHandler::Handle;</span>
+<span id="L268"><span class="lineNum">     268</span>              : </span>
+<span id="L269"><span class="lineNum">     269</span>              :     enum class State : uint8_t</span>
+<span id="L270"><span class="lineNum">     270</span>              :     {</span>
+<span id="L271"><span class="lineNum">     271</span>              :         Idle,                ///&lt; Default state that the object starts out in, where no work has commenced</span>
+<span id="L272"><span class="lineNum">     272</span>              :         NewResponseMessage,  ///&lt; mInvokeResponseBuilder is ready, with no responses added.</span>
+<span id="L273"><span class="lineNum">     273</span>              :         Preparing,           ///&lt; We are prepaing the command or status header.</span>
+<span id="L274"><span class="lineNum">     274</span>              :         AddingCommand,       ///&lt; In the process of adding a command.</span>
+<span id="L275"><span class="lineNum">     275</span>              :         AddedCommand,        ///&lt; A command has been completely encoded and is awaiting transmission.</span>
+<span id="L276"><span class="lineNum">     276</span>              :         DispatchResponses,   ///&lt; The command response(s) are being dispatched.</span>
+<span id="L277"><span class="lineNum">     277</span>              :         AwaitingDestruction, ///&lt; The object has completed its work and is awaiting destruction by the application.</span>
+<span id="L278"><span class="lineNum">     278</span>              :     };</span>
+<span id="L279"><span class="lineNum">     279</span>              : </span>
+<span id="L280"><span class="lineNum">     280</span>              :     /**</span>
+<span id="L281"><span class="lineNum">     281</span>              :      * @brief Best effort to add InvokeResponse to InvokeResponseMessage.</span>
+<span id="L282"><span class="lineNum">     282</span>              :      *</span>
+<span id="L283"><span class="lineNum">     283</span>              :      * Tries to add response using lambda. Upon failure to add response, attempts</span>
+<span id="L284"><span class="lineNum">     284</span>              :      * to rollback the InvokeResponseMessage to a known good state. If failure is due</span>
+<span id="L285"><span class="lineNum">     285</span>              :      * to insufficient space in the current InvokeResponseMessage:</span>
+<span id="L286"><span class="lineNum">     286</span>              :      *  - Finalizes the current InvokeResponseMessage.</span>
+<span id="L287"><span class="lineNum">     287</span>              :      *  - Allocates a new InvokeResponseMessage.</span>
+<span id="L288"><span class="lineNum">     288</span>              :      *  - Reattempts to add the InvokeResponse to the new InvokeResponseMessage.</span>
+<span id="L289"><span class="lineNum">     289</span>              :      *</span>
+<span id="L290"><span class="lineNum">     290</span>              :      * @param [in] addResponseFunction A lambda function responsible for adding the</span>
+<span id="L291"><span class="lineNum">     291</span>              :      *             response to the current InvokeResponseMessage.</span>
+<span id="L292"><span class="lineNum">     292</span>              :      */</span>
+<span id="L293"><span class="lineNum">     293</span>              :     template &lt;typename Function&gt;</span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">          75 :     CHIP_ERROR TryAddingResponse(Function &amp;&amp; addResponseFunction)</span></span>
+<span id="L295"><span class="lineNum">     295</span>              :     {</span>
+<span id="L296"><span class="lineNum">     296</span>              :         // Invalidate any existing rollback backups. The addResponseFunction is</span>
+<span id="L297"><span class="lineNum">     297</span>              :         // expected to create a new backup during either PrepareInvokeResponseCommand</span>
+<span id="L298"><span class="lineNum">     298</span>              :         // or PrepareStatus execution. Direct invocation of</span>
+<span id="L299"><span class="lineNum">     299</span>              :         // CreateBackupForResponseRollback is avoided since the buffer used by</span>
+<span id="L300"><span class="lineNum">     300</span>              :         // InvokeResponseMessage might not be allocated until a Prepare* function</span>
+<span id="L301"><span class="lineNum">     301</span>              :         // is called.</span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">          75 :         mRollbackBackupValid = false;</span></span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">          75 :         CHIP_ERROR err       = addResponseFunction();</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">          75 :         if (err == CHIP_NO_ERROR)</span></span>
+<span id="L305"><span class="lineNum">     305</span>              :         {</span>
+<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">          70 :             return CHIP_NO_ERROR;</span></span>
+<span id="L307"><span class="lineNum">     307</span>              :         }</span>
+<span id="L308"><span class="lineNum">     308</span>              :         // The error value of RollbackResponse is not important if it fails, we prioritize</span>
+<span id="L309"><span class="lineNum">     309</span>              :         // conveying the error generated by addResponseFunction to the caller.</span>
+<span id="L310"><span class="lineNum">     310</span> <span class="tlaGNC">           5 :         if (RollbackResponse() != CHIP_NO_ERROR)</span></span>
+<span id="L311"><span class="lineNum">     311</span>              :         {</span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaUNC tlaBgUNC">           0 :             return err;</span></span>
+<span id="L313"><span class="lineNum">     313</span>              :         }</span>
+<span id="L314"><span class="lineNum">     314</span>              :         // If we failed to add a command due to lack of space in the</span>
+<span id="L315"><span class="lineNum">     315</span>              :         // packet, we will make another attempt to add the response using</span>
+<span id="L316"><span class="lineNum">     316</span>              :         // an additional InvokeResponseMessage.</span>
+<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC tlaBgGNC">           5 :         if (mState != State::AddedCommand || err != CHIP_ERROR_NO_MEMORY)</span></span>
+<span id="L318"><span class="lineNum">     318</span>              :         {</span>
+<span id="L319"><span class="lineNum">     319</span> <span class="tlaGNC">           2 :             return err;</span></span>
+<span id="L320"><span class="lineNum">     320</span>              :         }</span>
+<span id="L321"><span class="lineNum">     321</span> <span class="tlaGNC">           3 :         ReturnErrorOnFailure(FinalizeInvokeResponseMessageAndPrepareNext());</span></span>
+<span id="L322"><span class="lineNum">     322</span> <span class="tlaGNC">           3 :         err = addResponseFunction();</span></span>
+<span id="L323"><span class="lineNum">     323</span> <span class="tlaGNC">           3 :         if (err != CHIP_NO_ERROR)</span></span>
+<span id="L324"><span class="lineNum">     324</span>              :         {</span>
+<span id="L325"><span class="lineNum">     325</span>              :             // The return value of RollbackResponse is ignored, as we prioritize</span>
+<span id="L326"><span class="lineNum">     326</span>              :             // conveying the error generated by addResponseFunction to the</span>
+<span id="L327"><span class="lineNum">     327</span>              :             // caller.</span>
+<span id="L328"><span class="lineNum">     328</span> <span class="tlaUNC tlaBgUNC">           0 :             RollbackResponse();</span></span>
+<span id="L329"><span class="lineNum">     329</span>              :         }</span>
+<span id="L330"><span class="lineNum">     330</span> <span class="tlaGNC tlaBgGNC">           3 :         return err;</span></span>
+<span id="L331"><span class="lineNum">     331</span>              :     }</span>
+<span id="L332"><span class="lineNum">     332</span>              : </span>
+<span id="L333"><span class="lineNum">     333</span>              :     void MoveToState(const State aTargetState);</span>
+<span id="L334"><span class="lineNum">     334</span>              :     const char * GetStateStr() const;</span>
+<span id="L335"><span class="lineNum">     335</span>              : </span>
+<span id="L336"><span class="lineNum">     336</span>              :     /**</span>
+<span id="L337"><span class="lineNum">     337</span>              :      * Create a backup to enable rolling back to the state prior to ResponseData encoding in the event of failure.</span>
+<span id="L338"><span class="lineNum">     338</span>              :      */</span>
+<span id="L339"><span class="lineNum">     339</span>              :     void CreateBackupForResponseRollback();</span>
+<span id="L340"><span class="lineNum">     340</span>              : </span>
+<span id="L341"><span class="lineNum">     341</span>              :     /**</span>
+<span id="L342"><span class="lineNum">     342</span>              :      * Rollback the state to before encoding the current ResponseData (before calling PrepareInvokeResponseCommand / PrepareStatus)</span>
+<span id="L343"><span class="lineNum">     343</span>              :      *</span>
+<span id="L344"><span class="lineNum">     344</span>              :      * Requires CreateBackupForResponseRollback to be called at the start of PrepareInvokeResponseCommand / PrepareStatus</span>
+<span id="L345"><span class="lineNum">     345</span>              :      */</span>
+<span id="L346"><span class="lineNum">     346</span>              :     CHIP_ERROR RollbackResponse();</span>
+<span id="L347"><span class="lineNum">     347</span>              : </span>
+<span id="L348"><span class="lineNum">     348</span>              :     /*</span>
+<span id="L349"><span class="lineNum">     349</span>              :      * This forcibly closes the exchange context if a valid one is pointed to. Such a situation does</span>
+<span id="L350"><span class="lineNum">     350</span>              :      * not arise during normal message processing flows that all normally call Close() above. This can only</span>
+<span id="L351"><span class="lineNum">     351</span>              :      * arise due to application-initiated destruction of the object when this object is handling receiving/sending</span>
+<span id="L352"><span class="lineNum">     352</span>              :      * message payloads.</span>
+<span id="L353"><span class="lineNum">     353</span>              :      */</span>
+<span id="L354"><span class="lineNum">     354</span>              :     void Abort();</span>
+<span id="L355"><span class="lineNum">     355</span>              : </span>
+<span id="L356"><span class="lineNum">     356</span>              :     /*</span>
+<span id="L357"><span class="lineNum">     357</span>              :      * Allocates a packet buffer used for encoding an invoke response payload.</span>
+<span id="L358"><span class="lineNum">     358</span>              :      *</span>
+<span id="L359"><span class="lineNum">     359</span>              :      * This can be called multiple times safely, as it will only allocate the buffer once for the lifetime</span>
+<span id="L360"><span class="lineNum">     360</span>              :      * of this object.</span>
+<span id="L361"><span class="lineNum">     361</span>              :      */</span>
+<span id="L362"><span class="lineNum">     362</span>              :     CHIP_ERROR AllocateBuffer();</span>
+<span id="L363"><span class="lineNum">     363</span>              : </span>
+<span id="L364"><span class="lineNum">     364</span>              :     /**</span>
+<span id="L365"><span class="lineNum">     365</span>              :      * This will add a new CommandStatusIB element into InvokeResponses. It will put the</span>
+<span id="L366"><span class="lineNum">     366</span>              :      * aCommandPath into the CommandPath element within CommandStatusIB.</span>
+<span id="L367"><span class="lineNum">     367</span>              :      *</span>
+<span id="L368"><span class="lineNum">     368</span>              :      * This call will fail if CommandHandler is already in the middle of building a</span>
+<span id="L369"><span class="lineNum">     369</span>              :      * CommandStatusIB or CommandDataIB (i.e. something has called Prepare*, without</span>
+<span id="L370"><span class="lineNum">     370</span>              :      * calling Finish*), or is already sending InvokeResponseMessage.</span>
+<span id="L371"><span class="lineNum">     371</span>              :      *</span>
+<span id="L372"><span class="lineNum">     372</span>              :      * Upon success, the caller is expected to call `FinishStatus` once they have encoded</span>
+<span id="L373"><span class="lineNum">     373</span>              :      * StatusIB.</span>
+<span id="L374"><span class="lineNum">     374</span>              :      *</span>
+<span id="L375"><span class="lineNum">     375</span>              :      * @param [in] aCommandPath the concrete path of the command we are responding to.</span>
+<span id="L376"><span class="lineNum">     376</span>              :      */</span>
+<span id="L377"><span class="lineNum">     377</span>              :     CHIP_ERROR PrepareStatus(const ConcreteCommandPath &amp; aCommandPath);</span>
+<span id="L378"><span class="lineNum">     378</span>              : </span>
+<span id="L379"><span class="lineNum">     379</span>              :     /**</span>
+<span id="L380"><span class="lineNum">     380</span>              :      * Finishes the CommandStatusIB element within the InvokeResponses.</span>
+<span id="L381"><span class="lineNum">     381</span>              :      *</span>
+<span id="L382"><span class="lineNum">     382</span>              :      * Caller must have first successfully called `PrepareStatus`.</span>
+<span id="L383"><span class="lineNum">     383</span>              :      */</span>
+<span id="L384"><span class="lineNum">     384</span>              :     CHIP_ERROR FinishStatus();</span>
+<span id="L385"><span class="lineNum">     385</span>              : </span>
+<span id="L386"><span class="lineNum">     386</span>              :     CHIP_ERROR PrepareInvokeResponseCommand(const CommandPathRegistryEntry &amp; apCommandPathRegistryEntry,</span>
+<span id="L387"><span class="lineNum">     387</span>              :                                             const ConcreteCommandPath &amp; aCommandPath, bool aStartDataStruct);</span>
+<span id="L388"><span class="lineNum">     388</span>              : </span>
+<span id="L389"><span class="lineNum">     389</span> <span class="tlaGNC">          64 :     CHIP_ERROR FinalizeLastInvokeResponseMessage() { return FinalizeInvokeResponseMessage(/* aHasMoreChunks = */ false); }</span></span>
+<span id="L390"><span class="lineNum">     390</span>              : </span>
+<span id="L391"><span class="lineNum">     391</span>              :     CHIP_ERROR FinalizeInvokeResponseMessageAndPrepareNext();</span>
+<span id="L392"><span class="lineNum">     392</span>              : </span>
+<span id="L393"><span class="lineNum">     393</span>              :     CHIP_ERROR FinalizeInvokeResponseMessage(bool aHasMoreChunks);</span>
+<span id="L394"><span class="lineNum">     394</span>              : </span>
+<span id="L395"><span class="lineNum">     395</span>              :     Protocols::InteractionModel::Status ProcessInvokeRequest(System::PacketBufferHandle &amp;&amp; payload, bool isTimedInvoke);</span>
+<span id="L396"><span class="lineNum">     396</span>              : </span>
+<span id="L397"><span class="lineNum">     397</span>              :     /**</span>
+<span id="L398"><span class="lineNum">     398</span>              :      * Called internally to signal the completion of all work on this object, gracefully close the</span>
+<span id="L399"><span class="lineNum">     399</span>              :      * exchange (by calling into the base class) and finally, signal to a registerd callback that it's</span>
+<span id="L400"><span class="lineNum">     400</span>              :      * safe to release this object.</span>
+<span id="L401"><span class="lineNum">     401</span>              :      */</span>
+<span id="L402"><span class="lineNum">     402</span>              :     void Close();</span>
+<span id="L403"><span class="lineNum">     403</span>              : </span>
+<span id="L404"><span class="lineNum">     404</span>              :     /**</span>
+<span id="L405"><span class="lineNum">     405</span>              :      * ProcessCommandDataIB is only called when a unicast invoke command request is received</span>
+<span id="L406"><span class="lineNum">     406</span>              :      * It requires the endpointId in its command path to be able to dispatch the command</span>
+<span id="L407"><span class="lineNum">     407</span>              :      */</span>
+<span id="L408"><span class="lineNum">     408</span>              :     Protocols::InteractionModel::Status ProcessCommandDataIB(CommandDataIB::Parser &amp; aCommandElement);</span>
+<span id="L409"><span class="lineNum">     409</span>              : </span>
+<span id="L410"><span class="lineNum">     410</span>              :     /**</span>
+<span id="L411"><span class="lineNum">     411</span>              :      * ProcessGroupCommandDataIB is only called when a group invoke command request is received</span>
+<span id="L412"><span class="lineNum">     412</span>              :      * It doesn't need the endpointId in it's command path since it uses the GroupId in message metadata to find it</span>
+<span id="L413"><span class="lineNum">     413</span>              :      */</span>
+<span id="L414"><span class="lineNum">     414</span>              :     Protocols::InteractionModel::Status ProcessGroupCommandDataIB(CommandDataIB::Parser &amp; aCommandElement);</span>
+<span id="L415"><span class="lineNum">     415</span>              : </span>
+<span id="L416"><span class="lineNum">     416</span>              :     CHIP_ERROR TryAddStatusInternal(const ConcreteCommandPath &amp; aCommandPath, const StatusIB &amp; aStatus);</span>
+<span id="L417"><span class="lineNum">     417</span>              : </span>
+<span id="L418"><span class="lineNum">     418</span>              :     CHIP_ERROR AddStatusInternal(const ConcreteCommandPath &amp; aCommandPath, const StatusIB &amp; aStatus);</span>
+<span id="L419"><span class="lineNum">     419</span>              : </span>
+<span id="L420"><span class="lineNum">     420</span>              :     /**</span>
+<span id="L421"><span class="lineNum">     421</span>              :      * If this function fails, it may leave our TLV buffer in an inconsistent state.</span>
+<span id="L422"><span class="lineNum">     422</span>              :      * Callers should snapshot as needed before calling this function, and roll back</span>
+<span id="L423"><span class="lineNum">     423</span>              :      * as needed afterward.</span>
+<span id="L424"><span class="lineNum">     424</span>              :      *</span>
+<span id="L425"><span class="lineNum">     425</span>              :      * @param [in] aRequestCommandPath the concrete path of the command we are responding to</span>
+<span id="L426"><span class="lineNum">     426</span>              :      * @param [in] aResponseCommandId the id of the command to encode</span>
+<span id="L427"><span class="lineNum">     427</span>              :      * @param [in] aEncodable the data to encode for the given aResponseCommandId</span>
+<span id="L428"><span class="lineNum">     428</span>              :      */</span>
+<span id="L429"><span class="lineNum">     429</span>              :     CHIP_ERROR TryAddResponseData(const ConcreteCommandPath &amp; aRequestCommandPath, CommandId aResponseCommandId,</span>
+<span id="L430"><span class="lineNum">     430</span>              :                                   const DataModel::EncodableToTLV &amp; aEncodable);</span>
+<span id="L431"><span class="lineNum">     431</span>              : </span>
+<span id="L432"><span class="lineNum">     432</span>              :     void SetExchangeInterface(CommandHandlerExchangeInterface * commandResponder);</span>
+<span id="L433"><span class="lineNum">     433</span>              : </span>
+<span id="L434"><span class="lineNum">     434</span>              :     /**</span>
+<span id="L435"><span class="lineNum">     435</span>              :      * Check whether the InvokeRequest we are handling is targeted to a group.</span>
+<span id="L436"><span class="lineNum">     436</span>              :      */</span>
+<span id="L437"><span class="lineNum">     437</span> <span class="tlaGNC">         172 :     bool IsGroupRequest() { return mGroupRequest; }</span></span>
+<span id="L438"><span class="lineNum">     438</span>              : </span>
+<span id="L439"><span class="lineNum">     439</span> <span class="tlaGNC">         165 :     bool ResponsesAccepted() { return mpResponder != nullptr &amp;&amp; !mGroupRequest; }</span></span>
+<span id="L440"><span class="lineNum">     440</span>              : </span>
+<span id="L441"><span class="lineNum">     441</span>              :     /**</span>
+<span id="L442"><span class="lineNum">     442</span>              :      * Sets the state flag to keep the information that request we are handling is targeted to a group.</span>
+<span id="L443"><span class="lineNum">     443</span>              :      */</span>
+<span id="L444"><span class="lineNum">     444</span> <span class="tlaUNC tlaBgUNC">           0 :     void SetGroupRequest(bool isGroupRequest) { mGroupRequest = isGroupRequest; }</span></span>
+<span id="L445"><span class="lineNum">     445</span>              : </span>
+<span id="L446"><span class="lineNum">     446</span> <span class="tlaGNC tlaBgGNC">         142 :     CommandPathRegistry &amp; GetCommandPathRegistry() const { return *mCommandPathRegistry; }</span></span>
+<span id="L447"><span class="lineNum">     447</span>              : </span>
+<span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">          56 :     size_t MaxPathsPerInvoke() const { return mMaxPathsPerInvoke; }</span></span>
+<span id="L449"><span class="lineNum">     449</span>              : </span>
+<span id="L450"><span class="lineNum">     450</span>              :     void AddToHandleList(Handle * handle);</span>
+<span id="L451"><span class="lineNum">     451</span>              : </span>
+<span id="L452"><span class="lineNum">     452</span>              :     void RemoveFromHandleList(Handle * handle);</span>
+<span id="L453"><span class="lineNum">     453</span>              : </span>
+<span id="L454"><span class="lineNum">     454</span>              :     void InvalidateHandles();</span>
+<span id="L455"><span class="lineNum">     455</span>              : </span>
+<span id="L456"><span class="lineNum">     456</span> <span class="tlaGNC">           3 :     bool TestOnlyIsInIdleState() const { return mState == State::Idle; }</span></span>
+<span id="L457"><span class="lineNum">     457</span>              : </span>
+<span id="L458"><span class="lineNum">     458</span>              :     Callback * mpCallback = nullptr;</span>
+<span id="L459"><span class="lineNum">     459</span>              :     InvokeResponseMessage::Builder mInvokeResponseBuilder;</span>
+<span id="L460"><span class="lineNum">     460</span>              :     TLV::TLVType mDataElementContainerType = TLV::kTLVType_NotSpecified;</span>
+<span id="L461"><span class="lineNum">     461</span>              :     size_t mPendingWork                    = 0;</span>
+<span id="L462"><span class="lineNum">     462</span>              :     /* List to store all currently-outstanding Handles for this Command Handler.*/</span>
+<span id="L463"><span class="lineNum">     463</span>              :     IntrusiveList&lt;Handle&gt; mpHandleList;</span>
+<span id="L464"><span class="lineNum">     464</span>              : </span>
+<span id="L465"><span class="lineNum">     465</span>              :     chip::System::PacketBufferTLVWriter mCommandMessageWriter;</span>
+<span id="L466"><span class="lineNum">     466</span>              :     TLV::TLVWriter mBackupWriter;</span>
+<span id="L467"><span class="lineNum">     467</span>              :     size_t mMaxPathsPerInvoke = CHIP_CONFIG_MAX_PATHS_PER_INVOKE;</span>
+<span id="L468"><span class="lineNum">     468</span>              :     // TODO(#30453): See if we can reduce this size for the default cases</span>
+<span id="L469"><span class="lineNum">     469</span>              :     // TODO Allow flexibility in registration.</span>
+<span id="L470"><span class="lineNum">     470</span>              :     BasicCommandPathRegistry&lt;CHIP_CONFIG_MAX_PATHS_PER_INVOKE&gt; mBasicCommandPathRegistry;</span>
+<span id="L471"><span class="lineNum">     471</span>              :     CommandPathRegistry * mCommandPathRegistry = &amp;mBasicCommandPathRegistry;</span>
+<span id="L472"><span class="lineNum">     472</span>              :     std::optional&lt;uint16_t&gt; mRefForResponse;</span>
+<span id="L473"><span class="lineNum">     473</span>              : </span>
+<span id="L474"><span class="lineNum">     474</span>              :     CommandHandlerExchangeInterface * mpResponder = nullptr;</span>
+<span id="L475"><span class="lineNum">     475</span>              : </span>
+<span id="L476"><span class="lineNum">     476</span>              :     State mState = State::Idle;</span>
+<span id="L477"><span class="lineNum">     477</span>              :     State mBackupState;</span>
+<span id="L478"><span class="lineNum">     478</span>              :     ScopedChangeOnly&lt;bool&gt; mInternalCallToAddResponseData{ false };</span>
+<span id="L479"><span class="lineNum">     479</span>              :     bool mSuppressResponse                 = false;</span>
+<span id="L480"><span class="lineNum">     480</span>              :     bool mTimedRequest                     = false;</span>
+<span id="L481"><span class="lineNum">     481</span>              :     bool mGroupRequest                     = false;</span>
+<span id="L482"><span class="lineNum">     482</span>              :     bool mBufferAllocated                  = false;</span>
+<span id="L483"><span class="lineNum">     483</span>              :     bool mReserveSpaceForMoreChunkMessages = false;</span>
+<span id="L484"><span class="lineNum">     484</span>              :     // TODO(#32486): We should introduce breaking change where calls to add CommandData</span>
+<span id="L485"><span class="lineNum">     485</span>              :     // need to use AddResponse, and not CommandHandler primitives directly using</span>
+<span id="L486"><span class="lineNum">     486</span>              :     // GetCommandDataIBTLVWriter.</span>
+<span id="L487"><span class="lineNum">     487</span>              :     bool mRollbackBackupValid = false;</span>
+<span id="L488"><span class="lineNum">     488</span>              :     // If mGoneAsync is true, we have finished out initial processing of the</span>
+<span id="L489"><span class="lineNum">     489</span>              :     // incoming invoke.  After this point, our session could go away at any</span>
+<span id="L490"><span class="lineNum">     490</span>              :     // time.</span>
+<span id="L491"><span class="lineNum">     491</span>              :     bool mGoneAsync = false;</span>
+<span id="L492"><span class="lineNum">     492</span>              : };</span>
+<span id="L493"><span class="lineNum">     493</span>              : } // namespace app</span>
+<span id="L494"><span class="lineNum">     494</span>              : } // namespace chip</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>
