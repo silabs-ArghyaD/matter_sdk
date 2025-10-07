@@ -169,7 +169,7 @@ if [ "$skip_gn" == false ]; then
     fi
 
     # Generate ninja files
-    EXTRA_GN_ARGS="sl_build_unit_tests=true"
+    EXTRA_GN_ARGS=""
 
     # We only need 'chip_build_all_clusters_app' if we run YAML tests
     if [ "$ENABLE_YAML" == true ]; then
