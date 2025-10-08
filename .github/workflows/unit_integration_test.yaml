@@ -92,6 +92,15 @@ jobs:
             # - name: Upload Code Coverage
             #   if: ${{ contains('main', env.BUILD_TYPE) }}
             #   run: bash <(curl -s https://codecov.io/bash)
+            - name: Run Build Coverage
+              if: ${{ contains('coverage', env.BUILD_TYPE) }}
+              run: ./scripts/build_coverage.sh --yaml --xml
+
+            - name: Install gpg
+              if: ${{ contains('coverage', env.BUILD_TYPE) }}
+              run: |
+                apt-get update
+                apt-get install -y --no-install-recommends gnupg
 
             - name: Upload Coverage
               if: ${{ contains('coverage', env.BUILD_TYPE) }}
