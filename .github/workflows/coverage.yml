@@ -15,8 +15,8 @@ permissions:
   contents: read  
   pull-requests: write
 
-env:
-  CHIP_NO_LOG_TIMESTAMPS: true
+# env:
+#   CHIP_NO_LOG_TIMESTAMPS: true
 
 jobs:
   linux-coverage:
