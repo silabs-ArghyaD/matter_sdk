@@ -128,89 +128,94 @@ TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid)
     conformance.FeatureMap().Set(Feature::kMotionLatching);
     EXPECT_TRUE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
-}
 
-TEST_F(TestClosureDimensionClusterLogic, TestConformanceInvalidFeatureDependencies)
-{
-    // Unit without Positioning
-    conformance.FeatureMap().Set(Feature::kUnit);
+    // Validating If Unit, Limitation or speed is enabled, Positioning must be enabled. Return false otherwise.
+
+    // Speed is enabled, Positioning is not enabled. Return false.
+    conformance.FeatureMap().Set(Feature::kSpeed);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Limitation without Positioning
+    // Limitation is enabled, Positioning is not enabled. Return false.
     conformance.FeatureMap().Set(Feature::kLimitation);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Speed without Positioning
-    conformance.FeatureMap().Set(Feature::kSpeed);
+    // Unit is enabled, Positioning is not enabled. Return false.
+    conformance.FeatureMap().Set(Feature::kUnit);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
-}
 
-TEST_F(TestClosureDimensionClusterLogic, TestConformanceInvalidDimensionalFeatureWithoutPositioning)
-{
-    // Translation without Positioning
+    // Speed is enabled, Positioning is also enabled. Return true.
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kSpeed);
+    EXPECT_TRUE(conformance.Valid());
+    conformance.FeatureMap().ClearAll();
+
+    // Limitation is enabled, Positioning is also enabled. Return true.
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kLimitation);
+    EXPECT_TRUE(conformance.Valid());
+    conformance.FeatureMap().ClearAll();
+
+    // Unit is enabled, Positioning is also enabled. Return true.
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kUnit);
+    EXPECT_TRUE(conformance.Valid());
+    conformance.FeatureMap().ClearAll();
+
+    // Validating If Translation, Rotation or Modulation is enabled, Positioning must be enabled. Return false otherwise.
+
+    // Translation is enabled, Positioning is not enabled. Return false
     conformance.FeatureMap().Set(Feature::kTranslation);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Rotation without Positioning
+    // Rotation is enabled, Positioning is not enabled. Return false
     conformance.FeatureMap().Set(Feature::kRotation);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Modulation without Positioning
+    // Modulation is enabled, Positioning is not enabled. Return false
     conformance.FeatureMap().Set(Feature::kModulation);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
-}
 
-TEST_F(TestClosureDimensionClusterLogic, TestConformanceInvalidMultipleDimensionalFeatures)
-{
-    // Positioning + Translation + Rotation
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation).Set(Feature::kRotation);
-    EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // Positioning + Rotation + Modulation
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation).Set(Feature::kModulation);
-    EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // Positioning + Modulation + Translation
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kModulation).Set(Feature::kTranslation);
-    EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-}
-
-TEST_F(TestClosureDimensionClusterLogic, TestConformanceValidSingleDimensionalFeatures)
-{
-    // Positioning + Translation
+    // Translation is enabled, Positioning is enabled. Return true
     conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation);
     EXPECT_TRUE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Positioning + Rotation
+    // Rotation is enabled, Positioning is enabled. Return true
     conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation);
     EXPECT_TRUE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Positioning + Modulation
+    // Modulation is enabled, Positioning is enabled. Return true
     conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kModulation);
     EXPECT_TRUE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
-}
 
-TEST_F(TestClosureDimensionClusterLogic, TestConformanceValidWithMotionLatchingAndSingleDimensionalFeature)
-{
-    // MotionLatching + Positioning + Translation (allowed)
-    conformance.FeatureMap().Set(Feature::kMotionLatching).Set(Feature::kPositioning).Set(Feature::kTranslation);
-    EXPECT_TRUE(conformance.Valid());
+    // Validating Only one of Translation, Rotation or Modulation must be enabled. Return false otherwise.
+
+    // If Positioning is enabled, all 3 Translation, Rotation and  Modulation are enabled. Return false
+    conformance.FeatureMap()
+        .Set(Feature::kPositioning)
+        .Set(Feature::kTranslation)
+        .Set(Feature::kRotation)
+        .Set(Feature::kModulation);
+    EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // MotionLatching + Positioning + Translation + Rotation (should still fail due to multiple dimensional features)
-    conformance.FeatureMap().Set(Feature::kMotionLatching).Set(Feature::kPositioning).Set(Feature::kTranslation).Set(Feature::kRotation);
+    // If Positioning is enabled, both Rotation and  Modulation are enabled. Return false
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation).Set(Feature::kModulation);
+    EXPECT_FALSE(conformance.Valid());
+    conformance.FeatureMap().ClearAll();
+
+    // If Positioning is enabled, both Translation and Rotation are enabled. Return false
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation).Set(Feature::kRotation);
+    EXPECT_FALSE(conformance.Valid());
+    conformance.FeatureMap().ClearAll();
+
+    // If Positioning is enabled, both Translation and  Modulation are enabled. Return false
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation).Set(Feature::kModulation);
     EXPECT_FALSE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 }
@@ -657,8 +662,8 @@ TEST_F(TestClosureDimensionClusterLogic, TestTargetWithNoSpeedFeature)
 }
 
 // This test ensures that the Setter and getter for currentstate
-// - sets/gets the value properly
-// - error for constraints checks
+// - sets/gets value.
+// - return CHIP_ERROR_INVALID_ARGUMENT constraints checks
 TEST_F(TestClosureDimensionClusterLogic, TestTarget)
 {
     conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kMotionLatching).Set(Feature::kSpeed);
@@ -722,7 +727,7 @@ TEST_F(TestClosureDimensionClusterLogic, TestTarget)
     // Invalid position
     GenericDimensionStateStruct InvalidTarget{ Optional<Percent100ths>(10001), Optional<bool>(false),
                                                Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kLow) };
-    DataModel::Nullable<Structs::UnitRangeStruct::Type> testInvalid(InvalidTarget);
+    DataModel::Nullable<GenericDimensionStateStruct> testInvalid(InvalidTarget);
     EXPECT_EQ(logic->SetTargetState(testInvalid), CHIP_ERROR_INVALID_ARGUMENT);
 
     // Ensure the value wasn't changed
@@ -1048,14 +1053,10 @@ TEST_F(TestClosureDimensionClusterLogic, TestUnitRange)
     DataModel::Nullable<Structs::UnitRangeStruct::Type> UnitRange;
 
     // Default Value
-    EXPECT_EQ(logic->GetUnitRange(LimitRange), CHIP_NO_ERROR);
-    EXPECT_EQ(LimitRange.min, 0);
-    EXPECT_EQ(LimitRange.max, 0);
+    EXPECT_EQ(logic->GetUnitRange(UnitRange), CHIP_NO_ERROR);
+    EXPECT_EQ(UnitRange.IsNull(), true);
 
-    mockContext.ClearDirtyList();
     // set Values
-    Percent100ths resolution = 1;
-    EXPECT_EQ(logic->SetResolution(resolution), CHIP_NO_ERROR);
     EXPECT_EQ(logic->SetUnitRange(testUnitRange), CHIP_NO_ERROR);
 
     // Ensure the value is accessible via the API
@@ -1890,6 +1891,100 @@ TEST_F(TestClosureDimensionClusterLogic, TestHandleStepCommand)
                                        Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto)),
               Protocols::InteractionModel::Status::Success);
     EXPECT_EQ(logic->GetTargetState(target), CHIP_NO_ERROR);
+    EXPECT_EQ(target.Value().position.Value(), static_cast<unsigned short>(0));
+    EXPECT_EQ(target.Value().latch.HasValue(), true);
+    EXPECT_EQ(target.Value().speed.Value(), Globals::ThreeLevelAutoEnum::kAuto);
+    EXPECT_TRUE(HasAttributeChanges(mockContext.GetDirtyList(), Attributes::TargetState::Id));
+    // As delegate is not implemented, we are updating current state here
+    setCurrentStateStruct.Set(Optional<Percent100ths>(0), Optional<bool>(false),
+                              Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto));
+    currentState.SetNonNull(setCurrentStateStruct);
+    EXPECT_EQ(logic->SetCurrentState(currentState), CHIP_NO_ERROR);
+}
+
+// This test ensures Handle Step command executes as expected. Tests:
+// - Return InvalidInState if CurrentState is unknown.
+// - Return constrainError if arguments value are out of bounds
+TEST_F(TestClosureDimensionClusterLogic, TestHandleStepCommandWithLimitation)
+{
+    conformance.FeatureMap()
+        .Set(Feature::kPositioning)
+        .Set(Feature::kMotionLatching)
+        .Set(Feature::kSpeed)
+        .Set(Feature::kLimitation);
+
+    EXPECT_EQ(logic->Init(conformance, initParams), CHIP_NO_ERROR);
+    mockContext.ClearDirtyList();
+
+    DataModel::Nullable<GenericDimensionStateStruct> currentState;
+    DataModel::Nullable<GenericDimensionStateStruct> target;
+    GenericDimensionStateStruct testTargetStruct{ Optional<Percent100ths>(0), Optional<bool>(false),
+                                                  Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto) };
+    DataModel::Nullable<GenericDimensionStateStruct> testTarget(testTargetStruct);
+
+    EXPECT_EQ(logic->SetTargetState(testTarget), CHIP_NO_ERROR);
+
+    Percent100ths stepValue = 10;
+    EXPECT_EQ(logic->SetStepValue(stepValue), CHIP_NO_ERROR);
+
+    // Validating Step with proper arguments
+    GenericDimensionStateStruct setCurrentStateStruct(Optional<Percent100ths>(1000), Optional<bool>(false),
+                                                      Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto));
+    currentState.SetNonNull(setCurrentStateStruct);
+    EXPECT_EQ(logic->SetCurrentState(currentState), CHIP_NO_ERROR);
+    Structs::RangePercent100thsStruct::Type limitRange = { .min = 1000, .max = 9000 };
+    EXPECT_EQ(logic->SetLimitRange(limitRange), CHIP_NO_ERROR);
+
+    mockContext.ClearDirtyList();
+    EXPECT_EQ(logic->HandleStepCommand(StepDirectionEnum::kIncrease, 10,
+                                       Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kLow)),
+              Protocols::InteractionModel::Status::Success);
+    EXPECT_EQ(logic->GetTargetState(target), CHIP_NO_ERROR);
+    EXPECT_EQ(target.Value().position.Value(), static_cast<unsigned short>(1100));
+    EXPECT_EQ(target.Value().latch.HasValue(), true);
+    EXPECT_EQ(target.Value().speed.Value(), Globals::ThreeLevelAutoEnum::kLow);
+    EXPECT_TRUE(HasAttributeChanges(mockContext.GetDirtyList(), Attributes::TargetState::Id));
+    // As delegate is not implemented, we are updating current state here
+    setCurrentStateStruct.Set(Optional<Percent100ths>(1100), Optional<bool>(false),
+                              Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto));
+    currentState.SetNonNull(setCurrentStateStruct);
+    EXPECT_EQ(logic->SetCurrentState(currentState), CHIP_NO_ERROR);
+
+    mockContext.ClearDirtyList();
+    EXPECT_EQ(logic->HandleStepCommand(StepDirectionEnum::kIncrease, 65535,
+                                       Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kMedium)),
+              Protocols::InteractionModel::Status::Success);
+    EXPECT_EQ(logic->GetTargetState(target), CHIP_NO_ERROR);
+    EXPECT_EQ(target.Value().position.Value(), static_cast<unsigned short>(9000));
+    EXPECT_EQ(target.Value().latch.HasValue(), true);
+    EXPECT_EQ(target.Value().speed.Value(), Globals::ThreeLevelAutoEnum::kMedium);
+    EXPECT_TRUE(HasAttributeChanges(mockContext.GetDirtyList(), Attributes::TargetState::Id));
+    // As delegate is not implemented, we are updating current state here
+    setCurrentStateStruct.Set(Optional<Percent100ths>(9000), Optional<bool>(false),
+                              Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto));
+    currentState.SetNonNull(setCurrentStateStruct);
+    EXPECT_EQ(logic->SetCurrentState(currentState), CHIP_NO_ERROR);
+
+    mockContext.ClearDirtyList();
+    EXPECT_EQ(logic->HandleStepCommand(StepDirectionEnum::kDecrease, 10,
+                                       Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kLow)),
+              Protocols::InteractionModel::Status::Success);
+    EXPECT_EQ(logic->GetTargetState(target), CHIP_NO_ERROR);
+    EXPECT_EQ(target.Value().position.Value(), static_cast<unsigned short>(8900));
+    EXPECT_EQ(target.Value().latch.HasValue(), true);
+    EXPECT_EQ(target.Value().speed.Value(), Globals::ThreeLevelAutoEnum::kLow);
+    EXPECT_TRUE(HasAttributeChanges(mockContext.GetDirtyList(), Attributes::TargetState::Id));
+    // As delegate is not implemented, we are updating current state here
+    setCurrentStateStruct.Set(Optional<Percent100ths>(8900), Optional<bool>(false),
+                              Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto));
+    currentState.SetNonNull(setCurrentStateStruct);
+    EXPECT_EQ(logic->SetCurrentState(currentState), CHIP_NO_ERROR);
+
+    mockContext.ClearDirtyList();
+    EXPECT_EQ(logic->HandleStepCommand(StepDirectionEnum::kDecrease, 65535,
+                                       Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kAuto)),
+              Protocols::InteractionModel::Status::Success);
+    EXPECT_EQ(logic->GetTargetState(target), CHIP_NO_ERROR);
     EXPECT_EQ(target.Value().position.Value(), static_cast<unsigned short>(1000));
     EXPECT_EQ(target.Value().latch.HasValue(), true);
     EXPECT_EQ(target.Value().speed.Value(), Globals::ThreeLevelAutoEnum::kAuto);
@@ -2035,6 +2130,43 @@ TEST_F(TestClosureDimensionClusterLogic, TestCurrentStateQuietReportingPositionC
 
     mockContext.ClearDirtyList();
 
+    // set position to 2000
+    testCurrentState.Value().position.SetValue(DataModel::MakeNullable<chip::Percent100ths>(chip::Percent100ths(2000)));
+    EXPECT_EQ(logic->SetCurrentState(testCurrentState), CHIP_NO_ERROR);
+    EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
+    EXPECT_EQ(currentState, testCurrentState);
+    EXPECT_FALSE(HasAttributeChanges(mockContext.GetDirtyList(), Attributes::CurrentState::Id));
+
+    mockContext.ClearDirtyList();
+}
+
+TEST_F(TestClosureDimensionClusterLogic, TestCurrentStateQuietReportingPositionChangeValueWithDelay)
+{
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kMotionLatching).Set(Feature::kSpeed);
+
+    EXPECT_EQ(logic->Init(conformance, initParams), CHIP_NO_ERROR);
+    mockContext.ClearDirtyList();
+
+    GenericDimensionStateStruct testCurrentStateStruct;
+    testCurrentStateStruct.position = Optional<DataModel::Nullable<chip::Percent100ths>>(1000);
+    testCurrentStateStruct.latch    = Optional<DataModel::Nullable<bool>>(false);
+    testCurrentStateStruct.speed    = Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kLow);
+
+    DataModel::Nullable<GenericDimensionStateStruct> testCurrentState(testCurrentStateStruct);
+    DataModel::Nullable<GenericDimensionStateStruct> currentState;
+
+    EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
+    EXPECT_EQ(currentState, DataModel::NullNullable);
+
+    mockContext.ClearDirtyList();
+
+    // set position as 1000
+    EXPECT_EQ(logic->SetCurrentState(testCurrentState), CHIP_NO_ERROR);
+    EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
+    EXPECT_EQ(currentState, testCurrentState);
+
+    mockContext.ClearDirtyList();
+
     chip::test_utils::SleepMillis(2000); // Sleep for 2 seconds
 
     // set position to 2000
@@ -2143,6 +2275,43 @@ TEST_F(TestClosureDimensionClusterLogic, TestCurrentStateQuietReportingLatchValu
     mockContext.ClearDirtyList();
 }
 
+TEST_F(TestClosureDimensionClusterLogic, TestCurrentStateQuietReportingLatchValueChange)
+{
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kMotionLatching).Set(Feature::kSpeed);
+
+    EXPECT_EQ(logic->Init(conformance, initParams), CHIP_NO_ERROR);
+    mockContext.ClearDirtyList();
+
+    GenericDimensionStateStruct testCurrentStateStruct;
+    testCurrentStateStruct.position = Optional<DataModel::Nullable<chip::Percent100ths>>(1000);
+    testCurrentStateStruct.latch    = Optional<DataModel::Nullable<bool>>(false);
+    testCurrentStateStruct.speed    = Optional<Globals::ThreeLevelAutoEnum>(Globals::ThreeLevelAutoEnum::kLow);
+
+    DataModel::Nullable<GenericDimensionStateStruct> testCurrentState(testCurrentStateStruct);
+    DataModel::Nullable<GenericDimensionStateStruct> currentState;
+
+    EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
+    EXPECT_EQ(currentState, DataModel::NullNullable);
+
+    mockContext.ClearDirtyList();
+
+    // set latch as false
+    EXPECT_EQ(logic->SetCurrentState(testCurrentState), CHIP_NO_ERROR);
+    EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
+    EXPECT_EQ(currentState, testCurrentState);
+
+    mockContext.ClearDirtyList();
+
+    // set latch to true
+    testCurrentState.Value().latch.Value().SetNonNull(true);
+    EXPECT_EQ(logic->SetCurrentState(testCurrentState), CHIP_NO_ERROR);
+    EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
+    EXPECT_EQ(currentState, testCurrentState);
+    EXPECT_TRUE(HasAttributeChanges(mockContext.GetDirtyList(), Attributes::CurrentState::Id));
+
+    mockContext.ClearDirtyList();
+}
+
 TEST_F(TestClosureDimensionClusterLogic, TestCurrentStateQuietReportingSpeedNullOptionaltoValue)
 {
     conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kMotionLatching).Set(Feature::kSpeed);
@@ -2207,8 +2376,8 @@ TEST_F(TestClosureDimensionClusterLogic, TestCurrentStateQuietReportingSpeedValu
 
     mockContext.ClearDirtyList();
 
-    // set speed to null
-    testCurrentState.Value().speed.Value().SetNull();
+    // set latch to NullOptional
+    testCurrentState.Value().speed.ClearValue();
     EXPECT_EQ(logic->SetCurrentState(testCurrentState), CHIP_NO_ERROR);
     EXPECT_EQ(logic->GetCurrentState(currentState), CHIP_NO_ERROR);
     EXPECT_EQ(currentState, testCurrentState);
