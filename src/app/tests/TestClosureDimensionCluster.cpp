@@ -131,7 +131,7 @@ TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid)
 
 }
 
-EST_F(TestClosureDimensionClusterLogic, TestConformanceValid_UnitWithoutPositioningInvalid)
+TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_UnitWithoutPositioningInvalid)
 {
     conformance.FeatureMap().ClearAll();
     conformance.FeatureMap().Set(Feature::kUnit);
@@ -164,7 +164,7 @@ TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_SpeedWithoutPositi
     EXPECT_TRUE(conformance.Valid());
 }
 
-EST_F(TestClosureDimensionClusterLogic, TestConformanceValid_MovementFeatureWithoutPositioningInvalid)
+TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_MovementFeatureWithoutPositioningInvalid)
 {
     // Translation alone invalid
     conformance.FeatureMap().ClearAll();
@@ -200,7 +200,7 @@ TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_MultipleMovementFe
     EXPECT_FALSE(conformance.Valid());
 }
 
-EST_F(TestClosureDimensionClusterLogic, TestConformanceValid_PositioningWithSingleMovementFeatureValid)
+TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_PositioningWithSingleMovementFeatureValid)
 {
     // Positioning + Translation
     conformance.FeatureMap().ClearAll();
