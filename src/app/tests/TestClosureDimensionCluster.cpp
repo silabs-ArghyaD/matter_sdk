@@ -129,95 +129,93 @@ TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid)
     EXPECT_TRUE(conformance.Valid());
     conformance.FeatureMap().ClearAll();
 
-    // Validating If Unit, Limitation or speed is enabled, Positioning must be enabled. Return false otherwise.
+}
 
-    // Speed is enabled, Positioning is not enabled. Return false.
-    conformance.FeatureMap().Set(Feature::kSpeed);
-    EXPECT_FALSE(conformance.Valid());
+EST_F(TestClosureDimensionClusterLogic, TestConformanceValid_UnitWithoutPositioningInvalid)
+{
     conformance.FeatureMap().ClearAll();
-
-    // Limitation is enabled, Positioning is not enabled. Return false.
-    conformance.FeatureMap().Set(Feature::kLimitation);
-    EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // Unit is enabled, Positioning is not enabled. Return false.
     conformance.FeatureMap().Set(Feature::kUnit);
     EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
 
-    // Speed is enabled, Positioning is also enabled. Return true.
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kSpeed);
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kUnit).Set(Feature::kPositioning);
     EXPECT_TRUE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
+}
 
-    // Limitation is enabled, Positioning is also enabled. Return true.
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kLimitation);
+TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_LimitationWithoutPositioningInvalid)
+{
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kLimitation);
+    EXPECT_FALSE(conformance.Valid());
+
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kLimitation).Set(Feature::kPositioning);
     EXPECT_TRUE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
+}
 
-    // Unit is enabled, Positioning is also enabled. Return true.
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kUnit);
+TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_SpeedWithoutPositioningInvalid)
+{
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kSpeed);
+    EXPECT_FALSE(conformance.Valid());
+
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kSpeed).Set(Feature::kPositioning);
     EXPECT_TRUE(conformance.Valid());
+}
+
+EST_F(TestClosureDimensionClusterLogic, TestConformanceValid_MovementFeatureWithoutPositioningInvalid)
+{
+    // Translation alone invalid
     conformance.FeatureMap().ClearAll();
-
-    // Validating If Translation, Rotation or Modulation is enabled, Positioning must be enabled. Return false otherwise.
-
-    // Translation is enabled, Positioning is not enabled. Return false
     conformance.FeatureMap().Set(Feature::kTranslation);
     EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
 
-    // Rotation is enabled, Positioning is not enabled. Return false
+    // Rotation alone invalid
+    conformance.FeatureMap().ClearAll();
     conformance.FeatureMap().Set(Feature::kRotation);
     EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
 
-    // Modulation is enabled, Positioning is not enabled. Return false
+    // Modulation alone invalid
+    conformance.FeatureMap().ClearAll();
     conformance.FeatureMap().Set(Feature::kModulation);
     EXPECT_FALSE(conformance.Valid());
+}
+
+TEST_F(TestClosureDimensionClusterLogic, TestConformanceValid_MultipleMovementFeaturesInvalid)
+{
+    // Positioning plus Translation + Rotation -> invalid
     conformance.FeatureMap().ClearAll();
-
-    // Translation is enabled, Positioning is enabled. Return true
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation);
-    EXPECT_TRUE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // Rotation is enabled, Positioning is enabled. Return true
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation);
-    EXPECT_TRUE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // Modulation is enabled, Positioning is enabled. Return true
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kModulation);
-    EXPECT_TRUE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // Validating Only one of Translation, Rotation or Modulation must be enabled. Return false otherwise.
-
-    // If Positioning is enabled, all 3 Translation, Rotation and  Modulation are enabled. Return false
-    conformance.FeatureMap()
-        .Set(Feature::kPositioning)
-        .Set(Feature::kTranslation)
-        .Set(Feature::kRotation)
-        .Set(Feature::kModulation);
-    EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // If Positioning is enabled, both Rotation and  Modulation are enabled. Return false
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation).Set(Feature::kModulation);
-    EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
-
-    // If Positioning is enabled, both Translation and Rotation are enabled. Return false
     conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation).Set(Feature::kRotation);
     EXPECT_FALSE(conformance.Valid());
-    conformance.FeatureMap().ClearAll();
 
-    // If Positioning is enabled, both Translation and  Modulation are enabled. Return false
-    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation).Set(Feature::kModulation);
-    EXPECT_FALSE(conformance.Valid());
+    // Positioning plus Rotation + Modulation -> invalid
     conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation).Set(Feature::kModulation);
+    EXPECT_FALSE(conformance.Valid());
+
+    // Positioning plus Modulation + Translation -> invalid
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kModulation).Set(Feature::kTranslation);
+    EXPECT_FALSE(conformance.Valid());
+}
+
+EST_F(TestClosureDimensionClusterLogic, TestConformanceValid_PositioningWithSingleMovementFeatureValid)
+{
+    // Positioning + Translation
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kTranslation);
+    EXPECT_TRUE(conformance.Valid());
+
+    // Positioning + Rotation
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kRotation);
+    EXPECT_TRUE(conformance.Valid());
+
+    // Positioning + Modulation
+    conformance.FeatureMap().ClearAll();
+    conformance.FeatureMap().Set(Feature::kPositioning).Set(Feature::kModulation);
+    EXPECT_TRUE(conformance.Valid());
 }
 
 // This test ensures the Init function with proper parameters should pass and reintilization should fail.
