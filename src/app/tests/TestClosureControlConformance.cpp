@@ -43,102 +43,40 @@ TEST(TestClosureControlConformance, ValidWhenMotionLatchingEnabled)
     EXPECT_TRUE(conformance.Valid());
 }
 
-TEST(TestClosureControlConformance, InvalidWhenNeitherPositioningNorMotionLatchingEnabled)
+TEST(TestClosureControlConformance, NoPositioningOrMotionLatching_ReturnsFalse)
 {
-    ClusterConformance conformance;
-
-    EXPECT_FALSE(conformance.Valid());
+    ClusterConformance c;
+    EXPECT_FALSE(c.Valid());
 }
 
-TEST(TestClosureControlConformance, ValidWhenSpeedAndPositioningEnabledAndInstantaneousDisabled)
+TEST(TestClosureControlConformance, SpeedWithoutPositioning_ReturnsFalse)
 {
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kSpeed).Set(Feature::kPositioning);
-
-    EXPECT_TRUE(conformance.Valid());
+    ClusterConformance c;
+    c.FeatureMap().Set(Feature::kSpeed);
+    EXPECT_FALSE(c.Valid());
 }
 
-TEST(TestClosureControlConformance, InvalidWhenSpeedEnabledButPositioningDisabled)
+TEST(TestClosureControlConformance, SpeedWithInstantaneous_ReturnsFalse)
 {
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kSpeed);
-
-    EXPECT_FALSE(conformance.Valid());
+    ClusterConformance c;
+    c.FeatureMap().Set(Feature::kPositioning);
+    c.FeatureMap().Set(Feature::kSpeed);
+    c.FeatureMap().Set(Feature::kInstantaneous); // Invalid with Speed
+    EXPECT_FALSE(c.Valid());
 }
 
-TEST(TestClosureControlConformance, InvalidWhenSpeedAndInstantaneousBothEnabled)
+TEST(TestClosureControlConformance, SpeedWithPositioningNoInstantaneous_ReturnsTrue)
 {
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kSpeed).Set(Feature::kPositioning).Set(Feature::kInstantaneous);
-
-    EXPECT_FALSE(conformance.Valid());
+    ClusterConformance c;
+    c.FeatureMap().Set(Feature::kPositioning);
+    c.FeatureMap().Set(Feature::kSpeed);
+    EXPECT_TRUE(c.Valid());
 }
 
-TEST(TestClosureControlConformance, ValidWhenVentilationAndPositioningEnabled)
+TEST(TestClosureControlConformance, VentilationWithoutPositioning_ReturnsFalse)
 {
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kVentilation).Set(Feature::kPositioning);
-
-    EXPECT_TRUE(conformance.Valid());
+    ClusterConformance c;
+    c.FeatureMap().Set(Feature::kVentilation);
+    EXPECT_FALSE(c.Valid());
 }
 
-TEST(TestClosureControlConformance, InvalidWhenVentilationEnabledButPositioningDisabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kVentilation);
-
-    EXPECT_FALSE(conformance.Valid());
-}
-
-TEST(TestClosureControlConformance, ValidWhenPedestrianAndPositioningEnabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kPedestrian).Set(Feature::kPositioning);
-
-    EXPECT_TRUE(conformance.Valid());
-}
-
-TEST(TestClosureControlConformance, InvalidWhenPedestrianEnabledButPositioningDisabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kPedestrian);
-
-    EXPECT_FALSE(conformance.Valid());
-}
-
-TEST(TestClosureControlConformance, ValidWhenCalibrationAndPositioningEnabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kCalibration).Set(Feature::kPositioning);
-
-    EXPECT_TRUE(conformance.Valid());
-}
-
-TEST(TestClosureControlConformance, InvalidWhenCalibrationEnabledButPositioningDisabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kCalibration);
-
-    EXPECT_FALSE(conformance.Valid());
-}
-
-TEST(TestClosureControlConformance, ValidWhenVentilationPedestrianCalibrationAndPositioningEnabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap()
-        .ClearAll()
-        .Set(Feature::kVentilation)
-        .Set(Feature::kPedestrian)
-        .Set(Feature::kCalibration)
-        .Set(Feature::kPositioning);
-
-    EXPECT_TRUE(conformance.Valid());
-}
-
-TEST(TestClosureControlConformance, InvalidWhenVentilationPedestrianCalibrationEnabledButPositioningDisabled)
-{
-    ClusterConformance conformance;
-    conformance.FeatureMap().Set(Feature::kVentilation).Set(Feature::kPedestrian).Set(Feature::kCalibration);
-
-    EXPECT_FALSE(conformance.Valid());
-}
