@@ -250,6 +250,7 @@ chip_test_suite("tests") {
     "TestClosureControlConformance.cpp",
     "TestClosureDimensionCluster.cpp",
     "TestClosureDimensionClusterObjects.cpp",
+    "TestClosureCursor.cpp",
     "TestCommandHandlerInterfaceRegistry.cpp",
     "TestCommandInteraction.cpp",
     "TestCommandPathParams.cpp",
