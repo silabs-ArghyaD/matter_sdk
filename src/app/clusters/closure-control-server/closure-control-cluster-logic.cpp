@@ -534,7 +534,32 @@ Protocols::InteractionModel::Status ClusterLogic::HandleStop()
 Protocols::InteractionModel::Status ClusterLogic::HandleMoveTo(Optional<TargetPositionEnum> position, Optional<bool> latch,
                                                                Optional<Globals::ThreeLevelAutoEnum> speed)
 {
+    ChipLogProgress(AppServer, "Demo function started - line 1");
+    ChipLogProgress(AppServer, "Demo function - line 2");
+    ChipLogProgress(AppServer, "Demo function - line 3");
+    ChipLogProgress(AppServer, "Demo function - line 4");
+    ChipLogProgress(AppServer, "Demo function - line 5");
+    ChipLogProgress(AppServer, "Demo function - line 6");
+    ChipLogProgress(AppServer, "Demo function - line 7");
+    ChipLogProgress(AppServer, "Demo function - line 8");
+    ChipLogProgress(AppServer, "Demo function - line 9");
+    ChipLogProgress(AppServer, "Demo function - line 10");
     VerifyOrDieWithMsg(mIsInitialized, AppServer, "MoveTo Command called before Initialization of closure");
+
+    if(latch.HasValue()){
+        ChipLogProgress(AppServer, "Demo function - line 1");
+        ChipLogProgress(AppServer, "Demo function - line 2");
+        ChipLogProgress(AppServer, "Demo function - line 3");
+        ChipLogProgress(AppServer, "Demo function - line 4");
+        ChipLogProgress(AppServer, "Demo function - line 5");
+    }
+    else{
+        ChipLogProgress(AppServer, " ELSE Demo function - line 1");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 2");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 3");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 4");
+        ChipLogProgress(AppServer, " ELSE Demo function - line 5");
+    }
 
     VerifyOrReturnError(position.HasValue() || latch.HasValue() || speed.HasValue(), Status::InvalidCommand);
 
@@ -687,6 +712,22 @@ CHIP_ERROR ClusterLogic::GenerateSecureStateChangedEvent(const bool secureValue)
     ReturnErrorOnFailure(mMatterContext.GenerateEvent(event));
 
     return CHIP_NO_ERROR;
+}
+
+void DemoFunction()
+{
+    // Demo function for testing coverage - basic print statements
+    ChipLogProgress(AppServer, "Demo function started - line 1");
+    ChipLogProgress(AppServer, "Demo function - line 2");
+    ChipLogProgress(AppServer, "Demo function - line 3");
+    ChipLogProgress(AppServer, "Demo function - line 4");
+    ChipLogProgress(AppServer, "Demo function - line 5");
+    ChipLogProgress(AppServer, "Demo function - line 6");
+    ChipLogProgress(AppServer, "Demo function - line 7");
+    ChipLogProgress(AppServer, "Demo function - line 8");
+    ChipLogProgress(AppServer, "Demo function - line 9");
+    ChipLogProgress(AppServer, "Demo function - line 10");
+    ChipLogProgress(AppServer, "Demo function completed - final line");
 }
 
 } // namespace ClosureControl

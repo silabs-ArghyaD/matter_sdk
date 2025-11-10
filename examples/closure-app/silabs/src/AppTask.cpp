@@ -85,6 +85,8 @@ CHIP_ERROR AppTask::AppInit()
     // Initialization of Closure Manager and endpoints of closure and closurepanel.
     ClosureManager::GetInstance().Init();
 
+    SILABS_LOG("Testing the Closure App!");
+
 // Update the LCD with the Stored value. Show QR Code if not provisioned
 #ifdef DISPLAY_ENABLED
     GetLCD().WriteDemoUI(false);
