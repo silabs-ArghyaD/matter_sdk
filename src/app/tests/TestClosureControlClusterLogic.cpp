@@ -1861,3 +1861,25 @@ TEST_F(TestClosureControlClusterLogic, ReadCurrentErrorList_InvalidBufferSize)
     Span<ClosureErrorEnum> currentErrorListSpan2(list2);
     EXPECT_NE(logic->GetCurrentErrorList(currentErrorListSpan2), CHIP_NO_ERROR);
 }
+
+TEST_F(TestClosureControlClusterLogic, HasTests_TrueCondition)
+{
+    conformance.FeatureMap().Set(Feature::kPositioning);
+    EXPECT_EQ(logic->Init(conformance, initParams), CHIP_NO_ERROR);
+
+    // Test the if condition (testCondition is true)
+    bool result = logic->HasTests(true);
+    
+    EXPECT_TRUE(result);
+}
+
+TEST_F(TestClosureControlClusterLogic, HasTests_FalseCondition)
+{
+    conformance.FeatureMap().Set(Feature::kPositioning);
+    EXPECT_EQ(logic->Init(conformance, initParams), CHIP_NO_ERROR);
+
+    // Test the if condition (testCondition is false)
+    bool result = logic->HasTests(false);
+
+    EXPECT_TRUE(result);
+}
