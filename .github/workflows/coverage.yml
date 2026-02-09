@@ -3,7 +3,7 @@ name: LCOV-Code-Coverage-IOTREQ
 on:
   pull_request:
   push:
-    branches: [ master, 'v*-branch' ]
+    branches: [ main, 'release_*' ]
   merge_group:
   workflow_dispatch:
 
