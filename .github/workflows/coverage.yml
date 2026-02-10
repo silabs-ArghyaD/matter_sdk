@@ -54,7 +54,7 @@ jobs:
         uses: ./.github/actions/checkout-submodules-and-bootstrap
         with:
           platform: linux
-          bootstrap-log-name: bootstrap-logs-codecov-${{ matrix.type }}
+          bootstrap-log-name: bootstrap-logs-${{ matrix.type }}
 
       - name: Run Build Coverage
         run: ./scripts/build_coverage.sh --yaml --xml
@@ -86,7 +86,7 @@ jobs:
           LCOV_FUNCS_TOTAL="$(echo "$LCOV_SUMMARY" | awk -F'[()]' '/functions\.*:/{print $2}' | awk '{print $3}' | head -n1)"
 
           # --- Cobertura XML (gcovr) ---
-          python3 - <<'PY'
+          python3 - <<'PY' > cobertura_vars.txt
           import xml.etree.ElementTree as ET
           p="out/coverage/coverage/coverage.xml"
           root=ET.parse(p).getroot()
@@ -100,7 +100,7 @@ jobs:
           print(f"COB_BRANCH_PCT={br:.1f}")
           print(f"COB_LINES={lc}/{lv}")
           print(f"COB_BRANCHES={bc}/{bv}")
-          PY > cobertura_vars.txt
+          PY
 
           source cobertura_vars.txt
 
