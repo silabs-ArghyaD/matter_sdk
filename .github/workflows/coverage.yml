@@ -1,0 +1,138 @@
+name: LCOV-Code-Coverage-IOTREQ
+
+on:
+  pull_request:
+  push:
+    branches: [ main, 'release_*' ]
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-coverage-${{ (github.event_name == 'pull_request' && github.event.number) || (github.event_name == 'workflow_dispatch' && github.run_number) || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read  
+  pull-requests: write
+
+env:
+  CHIP_NO_LOG_TIMESTAMPS: true
+
+jobs:
+  lcov-coverage:
+    name: Coverage using LCOV
+    if: github.actor != 'restyled-io[bot]'
+
+    strategy:
+      matrix:
+        type: [code-coverage-lcov]
+
+    env:
+      BUILD_TYPE: ${{ matrix.type }}
+      CC_SLUG: SiliconLabsSoftware/matter_sdk
+    
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/project-chip/chip-build:174
+      volumes:
+        - "/:/runner-root-volume"
+        - "/tmp/log_output:/tmp/test_logs"      
+      options: --privileged --sysctl "net.ipv6.conf.all.disable_ipv6=0 net.ipv4.conf.all.forwarding=1 net.ipv6.conf.all.forwarding=1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y jq lcov
+          apt-get install -y libglib2.0-dev libdbus-1-dev
+
+      - name: Checkout submodules & Bootstrap
+        uses: ./.github/actions/checkout-submodules-and-bootstrap
+        with:
+          platform: linux
+          bootstrap-log-name: bootstrap-logs-${{ matrix.type }}
+
+      - name: Run Build Coverage
+        run: ./scripts/build_coverage.sh --yaml --xml
+
+      - name: Upload coverage to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-lcov
+          path: |
+            out/coverage/coverage/coverage.xml
+            out/coverage/coverage/html
+          retention-days: 30
+      
+      - name: Extract coverage summaries
+        id: cov
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # --- LCOV summary ---
+          LCOV_SUMMARY="$(lcov --summary out/coverage/coverage/lcov_final.info 2>/dev/null || true)"
+
+          LCOV_LINES_PCT="$(echo "$LCOV_SUMMARY" | awk -F'[:()%]' '/lines\.*:/{gsub(/ /,"",$0); print $3}' | head -n1)"
+          LCOV_LINES_COVERED="$(echo "$LCOV_SUMMARY" | awk -F'[()]' '/lines\.*:/{print $2}' | awk '{print $1}' | head -n1)"
+          LCOV_LINES_TOTAL="$(echo "$LCOV_SUMMARY" | awk -F'[()]' '/lines\.*:/{print $2}' | awk '{print $3}' | head -n1)"
+
+          LCOV_FUNCS_PCT="$(echo "$LCOV_SUMMARY" | awk -F'[:()%]' '/functions\.*:/{gsub(/ /,"",$0); print $3}' | head -n1)"
+          LCOV_FUNCS_COVERED="$(echo "$LCOV_SUMMARY" | awk -F'[()]' '/functions\.*:/{print $2}' | awk '{print $1}' | head -n1)"
+          LCOV_FUNCS_TOTAL="$(echo "$LCOV_SUMMARY" | awk -F'[()]' '/functions\.*:/{print $2}' | awk '{print $3}' | head -n1)"
+
+          # --- Cobertura XML (gcovr) ---
+          python3 - <<'PY' > cobertura_vars.txt
+          import xml.etree.ElementTree as ET
+          p="out/coverage/coverage/coverage.xml"
+          root=ET.parse(p).getroot()
+          lr=float(root.attrib.get("line-rate","0"))*100
+          br=float(root.attrib.get("branch-rate","0"))*100
+          lc=int(root.attrib.get("lines-covered","0"))
+          lv=int(root.attrib.get("lines-valid","0"))
+          bc=int(root.attrib.get("branches-covered","0"))
+          bv=int(root.attrib.get("branches-valid","0"))
+          print(f"COB_LINES_PCT={lr:.1f}")
+          print(f"COB_BRANCH_PCT={br:.1f}")
+          print(f"COB_LINES={lc}/{lv}")
+          print(f"COB_BRANCHES={bc}/{bv}")
+          PY
+
+          source cobertura_vars.txt
+
+          # Expose outputs to later steps
+          {
+            echo "lcov_lines_pct=${LCOV_LINES_PCT:-N/A}"
+            echo "lcov_lines=${LCOV_LINES_COVERED:-?}/${LCOV_LINES_TOTAL:-?}"
+            echo "lcov_funcs_pct=${LCOV_FUNCS_PCT:-N/A}"
+            echo "lcov_funcs=${LCOV_FUNCS_COVERED:-?}/${LCOV_FUNCS_TOTAL:-?}"
+            echo "cob_lines_pct=${COB_LINES_PCT}"
+            echo "cob_lines=${COB_LINES}"
+            echo "cob_branch_pct=${COB_BRANCH_PCT}"
+            echo "cob_branches=${COB_BRANCHES}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create/update PR comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## ✅ Coverage Summary
+
+            **LCOV (summary):**
+            - Lines: **${{ steps.cov.outputs.lcov_lines_pct }}%** ( ${{ steps.cov.outputs.lcov_lines }} )
+            - Functions: **${{ steps.cov.outputs.lcov_funcs_pct }}%** ( ${{ steps.cov.outputs.lcov_funcs }} )
+
+            **Cobertura XML (gcovr):**
+            - Lines: **${{ steps.cov.outputs.cob_lines_pct }}%** ( ${{ steps.cov.outputs.cob_lines }} )
+            - Branches: **${{ steps.cov.outputs.cob_branch_pct }}%** ( ${{ steps.cov.outputs.cob_branches }} )
+
+            **Artifacts:** [Download coverage report (XML + HTML)](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})**
+
+            <sub>Note: LCOV and Cobertura often differ due to file filters and line-counting rules.</sub>
+          edit-mode: replace
+          
