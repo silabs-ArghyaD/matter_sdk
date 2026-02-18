@@ -167,7 +167,7 @@ protobuf==5.28.3
     # via
     #   -r requirements.all.txt
     #   mypy-protobuf
-psutil==5.9.4
+psutil==5.9.6
     # via portpicker
 ptyprocess==0.7.0
     # via pexpect
