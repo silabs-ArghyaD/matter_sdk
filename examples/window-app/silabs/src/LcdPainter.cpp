@@ -17,8 +17,8 @@
  *    limitations under the License.
  */
 
-#include <LcdPainter.h>
 #include "demo-ui-bitmaps.h"
+#include <LcdPainter.h>
 
 #include <cstdint>
 #include <cstdio>
@@ -65,7 +65,7 @@ void LcdPainter::Paint(SilabsLCD & lcd, Type type, uint16_t lift, uint16_t tilt,
     const unsigned tiltPct = RawToWholePercent(tilt, TILT_OPEN_LIMIT, TILT_CLOSED_LIMIT);
 
     GLIB_Context_t * glibContext = static_cast<GLIB_Context_t *>(lcd.Context());
-    const int32_t xSize = glibContext->pDisplayGeometry->xSize;
+    const int32_t xSize          = glibContext->pDisplayGeometry->xSize;
 
     char buf[32];
     if (drawStaticChrome)

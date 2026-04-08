@@ -37,6 +37,7 @@ class LcdPainter
 {
 public:
     static void Paint(SilabsLCD & lcd, chip::app::Clusters::WindowCovering::Type type, uint16_t lift, uint16_t tilt, LcdIcon icon);
+
 private:
     static void ClearScreen(SilabsLCD & lcd);
 };
