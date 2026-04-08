@@ -286,7 +286,7 @@ void WindowManager::Cover::Init(chip::EndpointId endpoint)
     ModeSet(endpoint, mode);
 
     // Attribute: Id 27 SafetyStatus (Optional)
-    chip::BitFlags<SafetyStatus> safetyStatus(0x00); // 0 is no issues;
+    chip::BitFlags<SafetyStatus> safetyStatus(0x00); // 0 is no issues;    
 }
 
 void WindowManager::Cover::ScheduleControlAction(ControlAction action, bool setNewTarget)
@@ -676,7 +676,7 @@ void WindowManager::UpdateLCD()
         Cover & cover = GetCover();
         chip::app::DataModel::Nullable<uint16_t> lift;
         chip::app::DataModel::Nullable<uint16_t> tilt;
-
+        
         chip::DeviceLayer::PlatformMgr().LockChipStack();
         Type type = TypeGet(cover.mEndpoint);
 
