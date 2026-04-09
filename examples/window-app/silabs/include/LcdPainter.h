@@ -40,17 +40,10 @@ class LcdPainter
 public:
     /** Binds the display used by static Paint(); call once after GetLCD().Init() (e.g. from WindowManager::Init). */
     explicit LcdPainter(SilabsLCD & lcd);
-
     static void Paint(Type type, uint16_t lift, uint16_t tilt, LcdIcon icon);
-
-    LcdPainter(const LcdPainter &)             = delete;
-    LcdPainter & operator=(const LcdPainter &) = delete;
-    LcdPainter(LcdPainter &&)                  = delete;
-    LcdPainter & operator=(LcdPainter &&)     = delete;
 
 private:
     static void ClearScreen();
-
     static SilabsLCD * sLcd;
     static bool mLcdCleared;
 };
