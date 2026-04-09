@@ -33,11 +33,24 @@ enum class LcdIcon
     Tilt
 };
 
+using chip::app::Clusters::WindowCovering::Type;
+
 class LcdPainter
 {
 public:
-    static void Paint(SilabsLCD & lcd, chip::app::Clusters::WindowCovering::Type type, uint16_t lift, uint16_t tilt, LcdIcon icon);
+    /** Binds the display used by static Paint(); call once after GetLCD().Init() (e.g. from WindowManager::Init). */
+    explicit LcdPainter(SilabsLCD & lcd);
+
+    static void Paint(Type type, uint16_t lift, uint16_t tilt, LcdIcon icon);
+
+    LcdPainter(const LcdPainter &)             = delete;
+    LcdPainter & operator=(const LcdPainter &) = delete;
+    LcdPainter(LcdPainter &&)                  = delete;
+    LcdPainter & operator=(LcdPainter &&)     = delete;
 
 private:
-    static void ClearScreen(SilabsLCD & lcd);
+    static void ClearScreen();
+
+    static SilabsLCD * sLcd;
+    static bool mLcdCleared;
 };
