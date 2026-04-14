@@ -24,9 +24,26 @@
 
 #include <stdint.h>
 
+enum class LcdIcon
+{
+    None = 0,
+    One,
+    Two,
+    Lift,
+    Tilt
+};
+
+using chip::app::Clusters::WindowCovering::Type;
+
 class LcdPainter
 {
 public:
-    static void Paint(SilabsLCD & lcd, chip::app::Clusters::WindowCovering::Type type, uint16_t lift, uint16_t tilt, LcdIcon icon);
-    static void ClearScreen(SilabsLCD & lcd);
+    /** Binds the display used by static Paint(); call once after GetLCD().Init() (e.g. from WindowManager::Init). */
+    explicit LcdPainter(SilabsLCD & lcd);
+    static void Paint(Type type, uint16_t lift, uint16_t tilt, LcdIcon icon);
+
+private:
+    static void ClearScreen();
+    static SilabsLCD * sLcd;
+    static bool mLcdCleared;
 };

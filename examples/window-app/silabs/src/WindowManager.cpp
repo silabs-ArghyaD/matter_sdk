@@ -41,10 +41,6 @@
 #include <platform/silabs/wifi/WifiInterface.h>
 #endif
 
-#ifdef DISPLAY_ENABLED
-#include <LcdPainter.h>
-#endif
-
 #include <platform/silabs/platformAbstraction/SilabsPlatform.h>
 
 #define LCD_ICON_TIMEOUT 1000
@@ -286,7 +282,7 @@ void WindowManager::Cover::Init(chip::EndpointId endpoint)
     ModeSet(endpoint, mode);
 
     // Attribute: Id 27 SafetyStatus (Optional)
-    chip::BitFlags<SafetyStatus> safetyStatus(0x00); // 0 is no issues;    
+    chip::BitFlags<SafetyStatus> safetyStatus(0x00); // 0 is no issues;
 }
 
 void WindowManager::Cover::ScheduleControlAction(ControlAction action, bool setNewTarget)
@@ -606,6 +602,11 @@ CHIP_ERROR WindowManager::Init()
     mActionLED.Init(APP_ACTION_LED);
     AppTask::GetAppTask().LinkAppLed(&mActionLED);
 
+#ifdef DISPLAY_ENABLED
+    // Binds SilabsLCD for LcdPainter::Paint; runs once after GetLCD().Init() in BaseInit().
+    static LcdPainter sLcdRegistration(AppTask::GetAppTask().GetLCD());
+#endif
+
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
 
     return CHIP_NO_ERROR;
@@ -676,6 +677,7 @@ void WindowManager::UpdateLCD()
         Cover & cover = GetCover();
         chip::app::DataModel::Nullable<uint16_t> lift;
         chip::app::DataModel::Nullable<uint16_t> tilt;
+
         chip::DeviceLayer::PlatformMgr().LockChipStack();
         Type type = TypeGet(cover.mEndpoint);
 
@@ -685,7 +687,7 @@ void WindowManager::UpdateLCD()
 
         if (!tilt.IsNull() && !lift.IsNull())
         {
-            LcdPainter::Paint(AppTask::GetAppTask().GetLCD(), type, lift.Value(), tilt.Value());
+            LcdPainter::Paint(type, lift.Value(), tilt.Value(), mIcon);
         }
     }
 }

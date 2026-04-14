@@ -17,22 +17,21 @@
  *    limitations under the License.
  */
 
-#include <LcdPainter.h>
 #include "demo-ui-bitmaps.h"
-
+#include <LcdPainter.h>
+#include <AppConfig.h>
 #include <cstdint>
 #include <cstdio>
 
 using namespace chip::app::Clusters::WindowCovering;
 
+SilabsLCD * LcdPainter::sLcd       = nullptr;
+bool LcdPainter::mLcdCleared      = false;
+
 namespace {
 static const uint8_t sSilabsLogoSmall[] = { SILABS_LOGO_SMALL };
 static const uint8_t sMatterLogo[]      = { MATTER_LOGO_BITMAP };
 
-// Shared with ClearScreen: first Paint draws logos, title, and Lift/Tilt labels; percent row updates every Paint.
-static bool sLcdCleared = false;
-
-// Maps raw lift/tilt (InstalledOpen..Closed limits) to 0..100% for display.
 static unsigned RawToWholePercent(uint16_t raw, int openLimit, int closedLimit)
 {
     const int denom = closedLimit - openLimit;
@@ -44,41 +43,52 @@ static unsigned RawToWholePercent(uint16_t raw, int openLimit, int closedLimit)
 }
 } // namespace
 
-void LcdPainter::ClearScreen(SilabsLCD & lcd)
+LcdPainter::LcdPainter(SilabsLCD & lcd)
 {
-    if (sLcdCleared)
+    sLcd = &lcd;
+}
+
+void LcdPainter::ClearScreen()
+{
+    if (mLcdCleared || sLcd == nullptr)
     {
         return;
     }
-    lcd.Clear();
-    lcd.Update();
-    sLcdCleared = true;
+    sLcd->Clear();
+    sLcd->Update();
+    mLcdCleared = true;
 }
 
-void LcdPainter::Paint(SilabsLCD & lcd, Type type, uint16_t lift, uint16_t tilt)
+void LcdPainter::Paint(Type type, uint16_t lift, uint16_t tilt, LcdIcon icon)
 {
     (void) type;
+    (void) icon;
 
-    const bool drawStaticChrome = !sLcdCleared;
-    ClearScreen(lcd);
+    if (sLcd == nullptr)
+    {
+        return;
+    }
+
+    const bool drawStaticChrome = !mLcdCleared;
+    ClearScreen();
 
     const unsigned liftPct = RawToWholePercent(lift, LIFT_OPEN_LIMIT, LIFT_CLOSED_LIMIT);
     const unsigned tiltPct = RawToWholePercent(tilt, TILT_OPEN_LIMIT, TILT_CLOSED_LIMIT);
 
-    GLIB_Context_t * glibContext = static_cast<GLIB_Context_t *>(lcd.Context());
-    const int32_t xSize = glibContext->pDisplayGeometry->xSize;
+    GLIB_Context_t * glibContext = static_cast<GLIB_Context_t *>(sLcd->Context());
+    const int32_t xSize          = glibContext->pDisplayGeometry->xSize;
 
     char buf[32];
     if (drawStaticChrome)
     {
         const int32_t silabsX = (xSize - SILABS_LOGO_WIDTH) / 2;
-        (void) GLIB_drawBitmap(glibContext, silabsX, 0, SILABS_LOGO_WIDTH, SILABS_LOGO_HEIGHT, sSilabsLogoSmall);
-        (void) GLIB_drawBitmap(glibContext, MATTER_ICON_POSITION_X, 4, MATTER_LOGO_WIDTH, MATTER_LOGO_HEIGHT, sMatterLogo);
-        // Text lines below the 18px small SiLabs logo.
-        (void) GLIB_drawStringOnLine(glibContext, "Window App", 4, GLIB_ALIGN_CENTER, 0, 0, true);
-        (void) GLIB_drawStringOnLine(glibContext, "Lift Tilt", 6, GLIB_ALIGN_CENTER, 0, 0, true);
+        GLIB_drawBitmap(glibContext, silabsX, 0, SILABS_LOGO_WIDTH, SILABS_LOGO_HEIGHT, sSilabsLogoSmall);
+        GLIB_drawBitmap(glibContext, MATTER_ICON_POSITION_X, 4, MATTER_LOGO_WIDTH, MATTER_LOGO_HEIGHT, sMatterLogo);
+
+        GLIB_drawStringOnLine(glibContext, "Window App", 4, GLIB_ALIGN_CENTER, 0, 0, true);
+        GLIB_drawStringOnLine(glibContext, "Lift Tilt", 6, GLIB_ALIGN_CENTER, 0, 0, true);
     }
     snprintf(buf, sizeof(buf), "%3u%% %3u%%", liftPct, tiltPct);
-    (void) GLIB_drawStringOnLine(glibContext, buf, 8, GLIB_ALIGN_CENTER, 0, 0, true);
-    lcd.Update();
+    GLIB_drawStringOnLine(glibContext, buf, 8, GLIB_ALIGN_CENTER, 0, 0, true);
+    sLcd->Update();
 }
