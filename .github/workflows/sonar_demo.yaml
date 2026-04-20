@@ -1,0 +1,35 @@
+# This workflows performs static code analysis using SonarQube.
+
+name: Sonarqube static code analysis
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarqube:
+    name: 'SonarQube Analysis'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Corretto Java ${{ vars.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: ${{ vars.JAVA_VERSION }}
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        with:
+          projectBaseDir: ${{ github.workspace }}/
+          args: >
+            -Dsonar.branch.name=${{ github.head_ref || github.ref_name }}
+            -Dproject.settings=${{ github.workspace }}/sonar-project.properties
+            -Dsonar.projectVersion=latest
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
