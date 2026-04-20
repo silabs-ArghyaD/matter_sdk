@@ -26,6 +26,10 @@ concurrency:
     group: ${{ github.ref }}-${{ github.workflow }}-${{ (github.event_name == 'pull_request' && github.event.number) || (github.event_name == 'workflow_dispatch' && github.run_number) || github.sha }}
     cancel-in-progress: true
 
+permissions:
+  contents: read  
+  pull-requests: write
+
 jobs:
     unit_tests:
         name: Unit / Integration Tests
@@ -33,7 +37,7 @@ jobs:
 
         strategy:
             matrix:
-                type: [main, clang, mbedtls, rotating_device_id, icd]
+                type: [main, clang, mbedtls, rotating_device_id, icd, coverage]
         env:
             BUILD_TYPE: ${{ matrix.type }}
 
@@ -71,6 +75,7 @@ jobs:
                      "mbedtls") GN_ARGS='chip_crypto="mbedtls" chip_build_all_platform_tests=true';;
                      "rotating_device_id") GN_ARGS='chip_crypto="boringssl" chip_enable_rotating_device_id=true chip_build_all_platform_tests=true';;
                      "icd") GN_ARGS='chip_enable_icd_server=true chip_enable_icd_lit=true chip_build_all_platform_tests=true';;
+                     "coverage") GN_ARGS='use_coverage=true';;
                      *) ;;
                   esac
 
@@ -87,3 +92,21 @@ jobs:
             # - name: Upload Code Coverage
             #   if: ${{ contains('main', env.BUILD_TYPE) }}
             #   run: bash <(curl -s https://codecov.io/bash)
+            - name: Run Build Coverage
+              if: ${{ contains('coverage', env.BUILD_TYPE) }}
+              run: ./scripts/build_coverage.sh --yaml --xml
+
+            - name: Install gpg
+              if: ${{ contains('coverage', env.BUILD_TYPE) }}
+              run: |
+                apt-get update
+                apt-get install -y --no-install-recommends gnupg
+
+            - name: Upload Coverage
+              if: ${{ contains('coverage', env.BUILD_TYPE) }}
+              uses: codecov/codecov-action@v5
+              with:
+                token: ${{ secrets.CODECOV_TOKEN }}
+                files: out/coverage/coverage/coverage.xml
+                fail_ci_if_error: false
+                verbose: true
