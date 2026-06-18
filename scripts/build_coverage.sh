@@ -243,7 +243,7 @@ if [[ "$skip_gn" == false ]]; then
         --exclude "$CHIP_ROOT/src/lib/dnssd/platform/**"
         --exclude "$CHIP_ROOT/src/lib/shell/**"
         --exclude "$CHIP_ROOT/src/lwip/**"
-        --exclude "$CHIP_ROOT/src/platform/**"
+        --exclude "$CHIP_ROOT/src/app/clusters/**"
         --exclude "$CHIP_ROOT/src/tools/**"
         --exclude "**/tests/**"
     )
