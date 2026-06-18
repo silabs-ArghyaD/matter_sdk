@@ -21,12 +21,18 @@ import("${chip_root}/third_party/silabs/matter_support/provision/args.gni")
 
 config("ota_tlv_processor_test_config") {
   include_dirs = [ "${chip_root}/src/platform/silabs/multi-ota" ]
+  defines = [ "SL_MATTER_ENABLE_OTA_ENCRYPTION=0" ]
 }
 
 chip_test_suite("ota_tlv_processor_tests") {
   output_name = "libSilabsOTATlvProcessorTests"
 
+  sources = [ "${chip_root}/src/platform/silabs/multi-ota/OTATlvProcessor.cpp" ]
+
   test_sources = [ "TestOTATlvProcessor.cpp" ]
+
+  # Provision headers trigger -Wshorten-64-to-32 when pulled in by OTATlvProcessor.cpp.
+  cflags = [ "-Wno-shorten-64-to-32" ]
 
   public_deps = [
     "${chip_root}/src/app/clusters/ota-requestor:interface",
@@ -37,5 +43,5 @@ chip_test_suite("ota_tlv_processor_tests") {
     "${sl_provision_root}:headers",
   ]
 
-  configs += [ ":ota_tlv_processor_test_config" ]
+  configs = [ ":ota_tlv_processor_test_config" ]
 }
