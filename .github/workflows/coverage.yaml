@@ -58,7 +58,5 @@ jobs:
         with:
           name: coverage-html
           path: out/coverage/coverage/html/**
-          name: coverage-xml
-          path: out/coverage/coverage/coverage.xml
           retention-days: 30
           overwrite: true
