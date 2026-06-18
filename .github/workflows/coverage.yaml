@@ -51,7 +51,7 @@ jobs:
           bootstrap-log-name: bootstrap-logs-codecov-linux
 
       - name: Run Build Coverage
-        run: ./scripts/build_coverage.sh --yaml --xml          
+        run: ./scripts/build_coverage.sh --yaml --xml --platform-tests
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

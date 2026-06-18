@@ -64,6 +64,7 @@ TEST_TARGETS=(check)
 # By default, do not run YAML or Python tests
 ENABLE_YAML=false
 ENABLE_PYTHON=false
+ENABLE_PLATFORM_TESTS=false
 
 GENERATE_XML=false
 
@@ -89,6 +90,7 @@ help() {
     echo "    --yaml                  In addition to unit tests, run YAML-based tests."
     echo "    --python                In addition to unit tests, run Python-based tests."
     echo "                            Both can be combined if needed."
+    echo "    --platform-tests        Build and run all platform unit tests."
     echo
     echo "    --target=TARGET         Specify one or more test targets to run for unit tests (e.g. 'TestEmberAttributeBuffer.run' or 'TestBleLayer.run TestBtpEngine.run')."
     echo
@@ -126,6 +128,10 @@ for i in "$@"; do
             ;;
         --python)
             ENABLE_PYTHON=true
+            shift
+            ;;
+        --platform-tests)
+            ENABLE_PLATFORM_TESTS=true
             shift
             ;;
         --xml)
@@ -177,6 +183,10 @@ if [ "$skip_gn" == false ]; then
     else
         # Otherwise skip building tools
         EXTRA_GN_ARGS="$EXTRA_GN_ARGS chip_build_tools=false"
+    fi
+
+    if [ "$ENABLE_PLATFORM_TESTS" == true ]; then
+        EXTRA_GN_ARGS="$EXTRA_GN_ARGS chip_build_all_platform_tests=true"
     fi
 
     gn --root="$CHIP_ROOT" gen "$OUTPUT_ROOT" --args="use_coverage=true $EXTRA_GN_ARGS"
