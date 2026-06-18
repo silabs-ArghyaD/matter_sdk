@@ -47,7 +47,7 @@ jobs:
       - name: Checkout submodules & Bootstrap
         uses: ./.github/actions/checkout-submodules-and-bootstrap
         with:
-          platform: linux
+          platform: linux unit_tests
           bootstrap-log-name: bootstrap-logs-codecov-linux
 
       - name: Run Build Coverage
