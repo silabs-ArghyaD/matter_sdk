@@ -46,6 +46,7 @@ source_set("multi-ota-common") {
     "OTAFactoryDataProcessor.cpp",
     "OTAHooks.cpp",
     "OTAMultiImageProcessorImpl.cpp",
+    "OTAMultiImageProcessorRegistry.cpp",
     "OTATlvProcessor.cpp",
   ]
   deps = [ "${chip_root}/src/app/clusters/ota-requestor:interface" ]

@@ -45,3 +45,31 @@ chip_test_suite("ota_tlv_processor_tests") {
 
   configs = [ ":ota_tlv_processor_test_config" ]
 }
+
+config("ota_multi_image_processor_test_config") {
+  include_dirs = [ "${chip_root}/src/platform/silabs/multi-ota" ]
+  defines = [ "SL_MATTER_ENABLE_OTA_ENCRYPTION=0" ]
+}
+
+chip_test_suite("ota_multi_image_processor_tests") {
+  output_name = "libSilabsOTAMultiImageProcessorTests"
+
+  sources = [
+    "${chip_root}/src/platform/silabs/multi-ota/OTAMultiImageProcessorRegistry.cpp",
+    "${chip_root}/src/platform/silabs/multi-ota/OTATlvProcessor.cpp",
+    "OTAMultiImageProcessorHostStubs.cpp",
+  ]
+
+  test_sources = [ "TestOTAMultiImageProcessorImpl.cpp" ]
+
+  public_deps = [
+    "${chip_root}/src/app/clusters/ota-requestor:interface",
+    "${chip_root}/src/lib/core",
+    "${chip_root}/src/lib/support",
+    "${chip_root}/src/lib/support:testing",
+    "${chip_root}/src/platform:platform",
+    "${sl_provision_root}:headers",
+  ]
+
+  configs = [ ":ota_multi_image_processor_test_config" ]
+}

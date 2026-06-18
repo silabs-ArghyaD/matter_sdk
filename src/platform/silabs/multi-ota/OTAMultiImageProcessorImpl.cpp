@@ -52,16 +52,6 @@ CHIP_ERROR OTAMultiImageProcessorImpl::Init(OTADownloader * downloader)
     return OtaHookInit();
 }
 
-void OTAMultiImageProcessorImpl::Clear()
-{
-    mHeaderParser.Clear();
-    mAccumulator.Clear();
-    mParams.totalFileBytes  = 0;
-    mParams.downloadedBytes = 0;
-    mCurrentProcessor       = nullptr;
-    VerifyOrReturn(ReleaseBlock() == CHIP_NO_ERROR, ChipLogError(SoftwareUpdate, "Release block failed while Clearing"));
-}
-
 CHIP_ERROR OTAMultiImageProcessorImpl::PrepareDownload()
 {
     return DeviceLayer::PlatformMgr().ScheduleWork(HandlePrepareDownload, reinterpret_cast<intptr_t>(this));
@@ -172,45 +162,6 @@ CHIP_ERROR OTAMultiImageProcessorImpl::ProcessPayload(ByteSpan & block)
     }
 
     return status;
-}
-
-CHIP_ERROR OTAMultiImageProcessorImpl::SelectProcessor(ByteSpan & block)
-{
-    OTATlvHeader header;
-    Encoding::LittleEndian::Reader reader(block.data(), sizeof(header));
-
-    ReturnErrorOnFailure(reader.Read32(&header.tag).StatusCode());
-    ReturnErrorOnFailure(reader.Read32(&header.length).StatusCode());
-
-    auto pair = mProcessorMap.find(static_cast<OTAProcessorTag>(header.tag));
-    if (pair == mProcessorMap.end())
-    {
-        ChipLogError(SoftwareUpdate, "There is no registered processor for tag: %lu", header.tag);
-        return CHIP_OTA_PROCESSOR_NOT_REGISTERED;
-    }
-
-    ChipLogProgress(SoftwareUpdate, "Selected processor with tag: %lu", static_cast<uint32_t>(pair->first));
-    mCurrentProcessor = pair->second;
-    mCurrentProcessor->SetLength(header.length);
-    mCurrentProcessor->SetWasSelected(true);
-
-    return CHIP_NO_ERROR;
-}
-
-CHIP_ERROR OTAMultiImageProcessorImpl::RegisterProcessor(OTAProcessorTag tag, OTATlvProcessor * processor)
-{
-    VerifyOrReturnError(processor->IsValidTag(tag), CHIP_ERROR_INVALID_ARGUMENT,
-                        ChipLogError(SoftwareUpdate, "Invalid processor tag: %lu", static_cast<uint32_t>(tag)));
-    auto pair = mProcessorMap.find(tag);
-    if (pair != mProcessorMap.end())
-    {
-        ChipLogError(SoftwareUpdate, "A processor for tag %lu is already registered.", static_cast<uint32_t>(tag));
-        return CHIP_OTA_PROCESSOR_ALREADY_REGISTERED;
-    }
-
-    mProcessorMap.insert({ tag, processor });
-
-    return CHIP_NO_ERROR;
 }
 
 void OTAMultiImageProcessorImpl::HandleAbort(intptr_t context)
@@ -430,17 +381,6 @@ void OTAMultiImageProcessorImpl::HandleApply(intptr_t context)
 #else // EFR reboot
     CORE_CRITICAL_SECTION(bootloader_rebootAndInstall();)
 #endif
-}
-
-CHIP_ERROR OTAMultiImageProcessorImpl::ReleaseBlock()
-{
-    if (mBlock.data() != nullptr)
-    {
-        chip::Platform::MemoryFree(mBlock.data());
-    }
-
-    mBlock = MutableByteSpan();
-    return CHIP_NO_ERROR;
 }
 
 void OTAMultiImageProcessorImpl::FetchNextData(uint32_t context)
