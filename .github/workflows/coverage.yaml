@@ -41,7 +41,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y jq lcov
-          apt-get install -y libglib2.0-dev libdbus-1-dev
+          apt-get install -y libglib2.0-dev libdbus-1-dev libevent-dev
           apt-get install -y --no-install-recommends gnupg
           
       - name: Checkout submodules & Bootstrap
