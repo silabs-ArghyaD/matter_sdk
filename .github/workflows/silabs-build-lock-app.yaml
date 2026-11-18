@@ -12,16 +12,11 @@ concurrency:
 
 jobs:
     build-lock-app:
-        name: Build Lock-App (${{ matrix.platform }})
+        name: Build Lock-App (BRD4338A)
         runs-on: ubuntu-latest
 
         container:
             image: ghcr.io/project-chip/chip-build-efr32:206
-
-        strategy:
-            fail-fast: false
-            matrix:
-                platform: [siwx]
 
         steps:
             - name: Checkout
@@ -29,6 +24,7 @@ jobs:
 
             - name: Post commit info to workflow summary
               run: |
+                  git config --global --add safe.directory "$GITHUB_WORKSPACE"
                   {
                       echo "## Branch commit"
                       echo ""
@@ -41,16 +37,12 @@ jobs:
               uses: ./.github/actions/checkout-submodules-and-bootstrap
               with:
                   platform: silabs_docker
-                  bootstrap-log-name: bootstrap-logs-lock-app-${{ matrix.platform }}
+                  bootstrap-log-name: bootstrap-logs-lock-app-brd4338a
 
-            - name: Build lock-app configurations
+            - name: Build lock-app for BRD4338A
               uses: SiliconLabsSoftware/matter_build_action@v2
               with:
-                  json-file-path: >
-                      ${{ matrix.platform == 'mg24' && './.github/silabs-builds-mg24.json' ||
-                          matrix.platform == 'mgm24' && './.github/silabs-builds-mgm24.json' ||
-                          matrix.platform == 'mg26' && './.github/silabs-builds-mg26.json' ||
-                          matrix.platform == 'siwx' && './.github/silabs-builds-siwx.json' }}
+                  json-file-path: ./.github/silabs-builds-lock-brd4338a.json
                   example-app: lock-app
                   path-to-example-app: examples/lock-app/silabs
                   build-script: "./scripts/examples/gn_silabs_example.sh"
@@ -61,15 +53,15 @@ jobs:
               run: |
                   mkdir -p lock-app-binaries
                   found=0
-                  while IFS= read -r -d '' binary; do
+                  for binary in $(find ./out/lock-app -type f \( \
+                      -name 'matter-silabs-lock-example.s37' -o \
+                      -name 'matter-silabs-lock-example.rps' \
+                  \)); do
                       board_dir=$(basename "$(dirname "$binary")")
                       mkdir -p "lock-app-binaries/${board_dir}"
                       cp "$binary" "lock-app-binaries/${board_dir}/"
                       found=1
-                  done < <(find ./out/lock-app -type f \( \
-                      -name 'matter-silabs-lock-example.s37' -o \
-                      -name 'matter-silabs-lock-example.rps' \
-                  \) -print0)
+                  done
 
                   if [ "$found" -eq 0 ]; then
                       echo "No lock-app binaries (.s37/.rps) found under ./out/lock-app"
@@ -83,7 +75,7 @@ jobs:
             - name: Upload lock app binary
               uses: actions/upload-artifact@v7
               with:
-                  name: lock-app-binary-${{ matrix.platform }}
+                  name: lock-app-binary-brd4338a
                   path: lock-app-binaries/
                   if-no-files-found: error
                   retention-days: 14
