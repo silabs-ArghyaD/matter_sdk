@@ -40,7 +40,7 @@ jobs:
                   bootstrap-log-name: bootstrap-logs-lock-app-brd4338a
 
             - name: Build lock-app for BRD4338A
-              uses: SiliconLabsSoftware/matter_build_action@v2
+              uses: SiliconLabsSoftware/matter_build_action@feature/mbedtls4
               with:
                   json-file-path: ./.github/silabs-builds-lock-brd4338a.json
                   example-app: lock-app
