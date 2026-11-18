@@ -3,7 +3,7 @@
         "default": [
             {
                 "boards": ["BRD4338A"],
-                "arguments": ["--docker", "use_rps_extension=false"]
+                "arguments": ["--docker"]
             }
         ]
     }
