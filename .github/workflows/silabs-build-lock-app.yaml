@@ -1,0 +1,89 @@
+name: Build Silabs Lock App
+
+on:
+    push:
+        branches:
+            - test/lock-app-build
+    workflow_dispatch:
+
+concurrency:
+    group: silabs-build-lock-app-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build-lock-app:
+        name: Build Lock-App (${{ matrix.platform }})
+        runs-on: ubuntu-latest
+
+        container:
+            image: ghcr.io/project-chip/chip-build-efr32:206
+
+        strategy:
+            fail-fast: false
+            matrix:
+                platform: [siwx]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Post commit info to workflow summary
+              run: |
+                  {
+                      echo "## Branch commit"
+                      echo ""
+                      echo "- **Branch:** \`${{ github.ref_name }}\`"
+                      echo "- **Commit:** \`$(git rev-parse HEAD)\`"
+                      echo "- **Message:** $(git log -1 --pretty=%s)"
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+            - name: Checkout submodules & Bootstrap
+              uses: ./.github/actions/checkout-submodules-and-bootstrap
+              with:
+                  platform: silabs_docker
+                  bootstrap-log-name: bootstrap-logs-lock-app-${{ matrix.platform }}
+
+            - name: Build lock-app configurations
+              uses: SiliconLabsSoftware/matter_build_action@v2
+              with:
+                  json-file-path: >
+                      ${{ matrix.platform == 'mg24' && './.github/silabs-builds-mg24.json' ||
+                          matrix.platform == 'mgm24' && './.github/silabs-builds-mgm24.json' ||
+                          matrix.platform == 'mg26' && './.github/silabs-builds-mg26.json' ||
+                          matrix.platform == 'siwx' && './.github/silabs-builds-siwx.json' }}
+                  example-app: lock-app
+                  path-to-example-app: examples/lock-app/silabs
+                  build-script: "./scripts/examples/gn_silabs_example.sh"
+                  output-directory: ./out/lock-app
+                  build-type: standard
+
+            - name: Stage lock app binaries
+              run: |
+                  mkdir -p lock-app-binaries
+                  found=0
+                  while IFS= read -r -d '' binary; do
+                      board_dir=$(basename "$(dirname "$binary")")
+                      mkdir -p "lock-app-binaries/${board_dir}"
+                      cp "$binary" "lock-app-binaries/${board_dir}/"
+                      found=1
+                  done < <(find ./out/lock-app -type f \( \
+                      -name 'matter-silabs-lock-example.s37' -o \
+                      -name 'matter-silabs-lock-example.rps' \
+                  \) -print0)
+
+                  if [ "$found" -eq 0 ]; then
+                      echo "No lock-app binaries (.s37/.rps) found under ./out/lock-app"
+                      find ./out/lock-app -type f -name 'matter-silabs-lock-example*' || true
+                      exit 1
+                  fi
+
+                  echo "Staged binaries:"
+                  find lock-app-binaries -type f | sort
+
+            - name: Upload lock app binary
+              uses: actions/upload-artifact@v7
+              with:
+                  name: lock-app-binary-${{ matrix.platform }}
+                  path: lock-app-binaries/
+                  if-no-files-found: error
+                  retention-days: 14
